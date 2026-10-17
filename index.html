@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FoodShare – Surplus Food Distribution</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <h1>FoodShare</h1>
+    <p class="subtitle">Connecting donors with those in need – fast, safe, and waste‑free.</p>
+    <nav>
+      <button id="donorBtn" class="nav-btn">I’m a Donor</button>
+      <button id="recipientBtn" class="nav-btn">I Need Food</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="donorSection" class="card hidden">
+      <h2>Donate Surplus Food</h2>
+      <form id="donorForm" class="glass">
+        <input type="text" id="donorName" placeholder="Your Name" required />
+        <input type="text" id="donorLocation" placeholder="Location" required />
+        <textarea id="donorItem" placeholder="Food item description" rows="3" required></textarea>
+        <input type="date" id="donorDate" required />
+        <button type="submit" class="cta">Post Donation</button>
+      </form>
+    </section>
+
+    <section id="recipientSection" class="card hidden">
+      <h2>Request Food</h2>
+      <form id="recipientForm" class="glass">
+        <input type="text" id="recipientName" placeholder="Your Name" required />
+        <input type="text" id="recipientLocation" placeholder="Location" required />
+        <textarea id="recipientNeed" placeholder="What you need (e.g., baked goods, fresh produce)" rows="3" required></textarea>
+        <button type="submit" class="cta">Find Offers</button>
+      </form>
+      <div id="matches" class="matches"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 FoodShare – Built with ♥ by the community.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

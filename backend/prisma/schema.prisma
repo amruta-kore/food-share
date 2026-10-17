@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  DONOR
+  NGO
+  VOLUNTEER
+  ADMIN
+}
+
+enum DonationStatus {
+  AVAILABLE
+  REQUESTED
+  ACCEPTED
+  VOLUNTEER_ASSIGNED
+  PICKED_UP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  EXPIRED
+  REJECTED
+}
+
+model User {
+  id                   Int       @id @default(autoincrement())
+  name                 String
+  email                String    @unique
+  passwordHash         String
+  role                 Role
+  phone                String?
+  organization         String?
+  verified             Boolean   @default(false)
+  verificationToken    String?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  documentUrl          String?   @db.Text
+  documentType         String?
+  documentName         String?
+  verifiedAt           DateTime?
+  rejectionReason      String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  donations            Donation[] @relation("DonorDonations")
+  requests             Request[]
+  deliveries           Donation[] @relation("VolunteerDeliveries")
+}
+
+model Donation {
+  id            Int             @id @default(autoincrement())
+  foodName      String
+  category      String
+  isVegetarian  Boolean         @default(true)
+  quantity      Float
+  servings      Int
+  preparedAt    DateTime
+  consumeBefore DateTime
+  storage       String
+  imageUrl      String?
+  pickupAddress String
+  city          String
+  area          String
+  pickupStart   DateTime
+  pickupEnd     DateTime
+  contactPerson String
+  contactPhone  String
+  status        DonationStatus  @default(AVAILABLE)
+  donorId       Int
+  donor         User            @relation("DonorDonations", fields: [donorId], references: [id])
+  volunteerId   Int?
+  volunteer     User?           @relation("VolunteerDeliveries", fields: [volunteerId], references: [id])
+  request       Request?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Request {
+  id             Int      @id @default(autoincrement())
+  ngoId          Int
+  ngo            User     @relation(fields: [ngoId], references: [id])
+  donationId     Int      @unique
+  donation       Donation @relation(fields: [donationId], references: [id])
+  quantity       Float
+  status         String   @default("PENDING")
+  notes          String?
+  dropoffAddress String?
+  contactPhone   String?
+  createdAt      DateTime @default(now())
+}
