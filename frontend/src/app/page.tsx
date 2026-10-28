@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth, Role } from './context/AuthProvider';
 import { useRouter } from 'next/navigation';
+import FeedbackModal from '../components/FeedbackModal';
 
 interface Donation {
   id: number;
@@ -33,6 +34,23 @@ export default function HomePage() {
   const [vegOnly, setVegOnly] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Community Ratings & Feedback State
+  const [homeReviews, setHomeReviews] = useState<any[]>([]);
+  const [avgRating, setAvgRating] = useState<number>(5.0);
+  const [totalRatingCount, setTotalRatingCount] = useState<number>(0);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState<boolean>(false);
+
+  const loadFeedback = () => {
+    fetch('/api/feedback?limit=6')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.reviews) setHomeReviews(data.reviews);
+        if (data.averageRating) setAvgRating(data.averageRating);
+        if (data.totalCount) setTotalRatingCount(data.totalCount);
+      })
+      .catch((err) => console.error('Error fetching home reviews:', err));
+  };
+
   useEffect(() => {
     fetch('/api/donations?status=AVAILABLE')
       .then((res) => res.json())
@@ -41,6 +59,12 @@ export default function HomePage() {
       })
       .catch((err) => console.error('Fetch error:', err))
       .finally(() => setLoading(false));
+
+    loadFeedback();
+
+    const handleUpdate = () => loadFeedback();
+    window.addEventListener('foodshare:feedback-submitted', handleUpdate);
+    return () => window.removeEventListener('foodshare:feedback-submitted', handleUpdate);
   }, []);
 
   const filtered = donations.filter((d) => {
@@ -288,6 +312,89 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      {/* Community Ratings & Feedback Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 sm:p-10 text-white shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
+                <span>⭐ COMMUNITY RATINGS & TESTIMONIALS</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white">
+                Loved by Donors, NGOs, Couriers & Visitors
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                Any type of user can rate and review FoodShare. See what our community has to say about rescuing food and feeding communities.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center space-x-2 bg-white/10 px-4 py-2.5 rounded-2xl border border-white/10">
+                <span className="text-2xl font-black text-emerald-400">{avgRating.toFixed(1)}</span>
+                <div className="text-left">
+                  <div className="text-amber-400 text-xs">★★★★★</div>
+                  <div className="text-[10px] text-slate-300">{totalRatingCount} ratings</div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setFeedbackModalOpen(true)}
+                className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center space-x-1.5"
+              >
+                <span>⭐ Give Feedback</span>
+              </button>
+
+              <Link
+                href="/feedback"
+                className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl transition"
+              >
+                View All Reviews →
+              </Link>
+            </div>
+          </div>
+
+          {/* Reviews Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            {homeReviews.slice(0, 3).map((item) => (
+              <div
+                key={item.id}
+                className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-between space-y-3 hover:bg-white/10 transition"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="text-amber-400 text-sm">
+                      {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}
+                    </div>
+                    <span className="text-[10px] font-medium text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                      {item.category}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-200 italic line-clamp-3 leading-relaxed">
+                    "{item.feedback}"
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                  <div className="text-xs font-bold text-white truncate">
+                    {item.name}
+                  </div>
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-white/10 text-emerald-200 border border-white/10">
+                    {item.userType || 'COMMUNITY'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={feedbackModalOpen}
+        onClose={() => setFeedbackModalOpen(false)}
+        onSuccess={() => loadFeedback()}
+      />
     </div>
   );
 }

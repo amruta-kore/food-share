@@ -126,8 +126,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('authUser', JSON.stringify(data.user));
         syncAuthCookies(data.accessToken, data.user.role);
         setUser(data.user);
-        const targetUrl = getDashboardRoute(data.user.role);
+        let targetUrl = getDashboardRoute(data.user.role);
         if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          const redirectParam = params.get('redirect');
+          if (redirectParam && redirectParam.startsWith('/')) {
+            targetUrl = redirectParam;
+          }
           window.location.href = targetUrl;
         } else {
           router.push(targetUrl);

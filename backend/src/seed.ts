@@ -138,6 +138,69 @@ async function main() {
     console.log('✅ Created 3 sample surplus food donations.');
   }
 
+  // 3. Seed demo feedback and ratings from different user types
+  const existingFeedback = await prisma.feedback.count();
+  if (existingFeedback === 0) {
+    await prisma.feedback.createMany({
+      data: [
+        {
+          rating: 5,
+          feedback: 'Posting leftover wedding banquet food takes under 2 minutes. Knowing good food reaches hungry families instead of going to waste makes this our favorite platform.',
+          category: 'Donation & Listing',
+          userType: 'DONOR',
+          name: donor.name,
+          email: donor.email,
+          userId: donor.id,
+          isPublic: true,
+          status: 'APPROVED',
+        },
+        {
+          rating: 5,
+          feedback: 'FoodShare has been a blessing for our shelter. We can claim hot, safe nutritious meals and coordinate directly with couriers. Truly revolutionary!',
+          category: 'NGO Food Claiming',
+          userType: 'NGO',
+          name: ngo.name,
+          email: ngo.email,
+          userId: ngo.id,
+          isPublic: true,
+          status: 'APPROVED',
+        },
+        {
+          rating: 5,
+          feedback: 'Volunteering here is so rewarding! The delivery board gives exact pickup addresses, timing, and direct contacts for smooth handoffs.',
+          category: 'Volunteer Delivery',
+          userType: 'VOLUNTEER',
+          name: volunteer.name,
+          email: volunteer.email,
+          userId: volunteer.id,
+          isPublic: true,
+          status: 'APPROVED',
+        },
+        {
+          rating: 5,
+          feedback: 'The website is so clean, intuitive, and fast. The green-and-white theme gives a fresh and trustworthy feel. Amazing social impact project!',
+          category: 'Website & Usability',
+          userType: 'VISITOR',
+          name: 'Ananya Joshi',
+          email: 'ananya.j@gmail.com',
+          isPublic: true,
+          status: 'APPROVED',
+        },
+        {
+          rating: 5,
+          feedback: 'Super inspiring platform. Every city needs FoodShare to bridge the gap between food abundance and food poverty.',
+          category: 'General Suggestion',
+          userType: 'VISITOR',
+          name: 'Vikram Mehta',
+          email: 'vikram.m@outlook.com',
+          isPublic: true,
+          status: 'APPROVED',
+        },
+      ],
+    });
+    console.log('✅ Seeded sample reviews and ratings across all user types.');
+  }
+
   console.log('🎉 Database seeding complete!');
 }
 

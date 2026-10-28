@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isReadOnly, setIsReadOnly] = useState(true);
+
+  // Clear inputs on mount to ensure user manually enters credentials
+  useEffect(() => {
+    setEmail('');
+    setPassword('');
+    // Remove readOnly slightly after mount so manual typing is smooth
+    const timer = setTimeout(() => {
+      setIsReadOnly(false);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Forgot password modal state
   const [showForgotModal, setShowForgotModal] = useState(false);
@@ -25,47 +37,23 @@ export default function LoginPage() {
 
 
 
-  const handleInstantLogin = async (targetEmail: string, targetPass: string) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password) {
+      setError('Please enter both your email address and password.');
+      return;
+    }
     setError(null);
-    setEmail(targetEmail);
-    setPassword(targetPass);
     setLoading(true);
-    const cleanEmail = targetEmail.trim().toLowerCase();
-    const cleanPass = targetPass.trim();
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPass = password.trim();
     const res = await login(cleanEmail, cleanPass);
     if (!res.success) {
-      setError(res.message || 'Login failed. Please check your credentials.');
+      setError(res.message || 'Invalid credentials. Please verify your email and password.');
     }
     setLoading(false);
   };
-
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    if (!email || !password) {
-      setError('Please enter your email and password');
-      return;
-    }
-    await handleInstantLogin(email, password);
-  };
-
-  const handleDemoFill = (demoEmail: string, demoPass: string) => {
-    handleInstantLogin(demoEmail, demoPass);
-  };
-
-  // Auto-login if query params exist in URL from native mobile submission
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const urlEmail = params.get('foodshare_manual_email') || params.get('email');
-      const urlPass = params.get('foodshare_manual_secret') || params.get('password');
-      if (urlEmail && urlPass) {
-        handleInstantLogin(urlEmail, urlPass);
-      }
-    }
-  }, []);
 
   const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,69 +142,49 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* 1-Tap Demo Instant Logins (1-Tap direct entry into Dashboard) */}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
-          <div className="flex justify-between items-center text-[11px] text-slate-500 font-medium">
-            <span className="font-bold text-slate-700">⚡ Instant 1-Tap Login:</span>
-            <span className="text-emerald-700 font-bold font-mono">tap to enter</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => handleDemoFill('admin.demo@foodshare.org', 'Admin@123')}
-              className="py-2 px-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-lg text-xs font-bold text-emerald-800 shadow-2xs transition active:scale-95 text-center truncate disabled:opacity-50"
-            >
-              👑 Admin
-            </button>
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => handleDemoFill('donor.demo@foodshare.org', 'password123')}
-              className="py-2 px-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-2xs transition active:scale-95 text-center truncate disabled:opacity-50"
-            >
-              🥦 Donor
-            </button>
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => handleDemoFill('ngo.demo@foodshare.org', 'password123')}
-              className="py-2 px-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-2xs transition active:scale-95 text-center truncate disabled:opacity-50"
-            >
-              🤝 NGO
-            </button>
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => handleDemoFill('volunteer.demo@foodshare.org', 'password123')}
-              className="py-2 px-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-2xs transition active:scale-95 text-center truncate disabled:opacity-50"
-            >
-              🚴 Volunteer
-            </button>
-          </div>
-        </div>
 
         <form
           action="javascript:void(0);"
           method="POST"
           onSubmit={handleSubmit}
-          autoComplete="on"
+          autoComplete="off"
           className="space-y-4"
         >
+          {/* Invisible trap inputs to prevent browser autofill engines from populating user fields */}
+          <input
+            type="text"
+            name="prevent_autofill_user"
+            id="prevent_autofill_user"
+            style={{ display: 'none' }}
+            tabIndex={-1}
+            autoComplete="off"
+          />
+          <input
+            type="password"
+            name="prevent_autofill_pass"
+            id="prevent_autofill_pass"
+            style={{ display: 'none' }}
+            tabIndex={-1}
+            autoComplete="new-password"
+          />
+
           <div>
             <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
               Email Address
             </label>
             <input
               type="email"
-              name="foodshare_manual_email"
-              id="foodshare_manual_email"
-              autoComplete="email"
+              name="user_manual_login_email"
+              id="user_manual_login_email"
+              autoComplete="off"
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
               inputMode="email"
               required
+              readOnly={isReadOnly}
+              onFocus={() => setIsReadOnly(false)}
+              onClick={() => setIsReadOnly(false)}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@organization.org"
@@ -240,13 +208,16 @@ export default function LoginPage() {
             <input
               type="password"
               ref={passwordInputRef}
-              name="foodshare_manual_secret"
-              id="foodshare_manual_secret"
-              autoComplete="current-password"
+              name="user_manual_login_secret"
+              id="user_manual_login_secret"
+              autoComplete="new-password"
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
               required
+              readOnly={isReadOnly}
+              onFocus={() => setIsReadOnly(false)}
+              onClick={() => setIsReadOnly(false)}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"

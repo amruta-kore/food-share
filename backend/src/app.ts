@@ -9,6 +9,7 @@ import donorRouter from './routes/donor';
 import ngoRouter from './routes/ngo';
 import volunteerRouter from './routes/volunteer';
 import adminRouter from './routes/admin';
+import feedbackRouter from './routes/feedback';
 
 import fs from 'fs';
 
@@ -43,6 +44,7 @@ app.use('/api/donor', donorRouter);
 app.use('/api/ngo', ngoRouter);
 app.use('/api/volunteer', volunteerRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/feedback', feedbackRouter);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

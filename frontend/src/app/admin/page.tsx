@@ -55,7 +55,10 @@ function AdminContent() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<UserItem[]>([]);
   const [donations, setDonations] = useState<DonationItem[]>([]);
-  const [activeTab, setActiveTab] = useState<'users' | 'donations'>('users');
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [feedbackSearch, setFeedbackSearch] = useState('');
+  const [feedbackRoleFilter, setFeedbackRoleFilter] = useState('ALL');
+  const [activeTab, setActiveTab] = useState<'users' | 'donations' | 'feedback'>('users');
   const [fetching, setFetching] = useState(true);
 
   // Document inspection modal state
@@ -82,10 +85,11 @@ function AdminContent() {
     if (isInitial) setFetching(true);
 
     try {
-      const [statsRes, usersRes, donationsRes] = await Promise.all([
+      const [statsRes, usersRes, donationsRes, feedbackRes] = await Promise.all([
         fetch('/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } }),
         fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } }),
         fetch('/api/admin/donations', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/feedback/admin', { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (statsRes.ok) {
@@ -96,6 +100,12 @@ function AdminContent() {
       }
       if (donationsRes.ok) {
         try { setDonations(await donationsRes.json()); } catch (e) { console.error('Donations parse error:', e); }
+      }
+      if (feedbackRes.ok) {
+        try {
+          const fbData = await feedbackRes.json();
+          setFeedbacks(fbData.feedbacks || []);
+        } catch (e) { console.error('Feedback parse error:', e); }
       }
     } catch (err) {
       console.error('Failed to load admin data:', err);
@@ -182,6 +192,44 @@ function AdminContent() {
       alert(err?.message || 'Error communicating with server');
     } finally {
       setRejectLoading(false);
+    }
+  };
+
+  const handleToggleFeedbackStatus = async (id: number, currentStatus: string) => {
+    const token = localStorage.getItem('accessToken');
+    const newStatus = currentStatus === 'APPROVED' ? 'HIDDEN' : 'APPROVED';
+    try {
+      const res = await fetch(`/api/feedback/admin/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        setFeedbacks((prev) =>
+          prev.map((f) => (f.id === id ? { ...f, status: newStatus } : f))
+        );
+      }
+    } catch (err) {
+      console.error('Error toggling feedback status:', err);
+    }
+  };
+
+  const handleDeleteFeedback = async (id: number) => {
+    if (!confirm('Are you sure you want to permanently delete this user feedback?')) return;
+    const token = localStorage.getItem('accessToken');
+    try {
+      const res = await fetch(`/api/feedback/admin/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setFeedbacks((prev) => prev.filter((f) => f.id !== id));
+      }
+    } catch (err) {
+      console.error('Error deleting feedback:', err);
     }
   };
 
@@ -282,6 +330,17 @@ function AdminContent() {
           }`}
         >
           All Surplus Donations ({donations.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab('feedback')}
+          className={`pb-3 px-4 font-bold text-xs sm:text-sm border-b-2 whitespace-nowrap transition ${
+            activeTab === 'feedback'
+              ? 'border-purple-600 text-purple-700'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          ⭐ Ratings & Feedback ({feedbacks.length})
         </button>
       </div>
 
@@ -472,6 +531,152 @@ function AdminContent() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Tab */}
+      {activeTab === 'feedback' && (
+        <div className="space-y-6">
+          {/* Feedback Stats & Search */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                type="text"
+                placeholder="Search feedback, reviewer, or email..."
+                value={feedbackSearch}
+                onChange={(e) => setFeedbackSearch(e.target.value)}
+                className="px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 w-64"
+              />
+              <select
+                value={feedbackRoleFilter}
+                onChange={(e) => setFeedbackRoleFilter(e.target.value)}
+                className="px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium"
+              >
+                <option value="ALL">All User Types</option>
+                <option value="DONOR">👨‍🍳 Food Donors</option>
+                <option value="NGO">🏢 NGOs / Shelters</option>
+                <option value="VOLUNTEER">🚴 Volunteers</option>
+                <option value="VISITOR">👥 Community Visitors</option>
+              </select>
+            </div>
+
+            <div className="flex items-center space-x-4 text-xs font-semibold text-slate-600">
+              <div className="flex items-center space-x-1.5">
+                <span className="text-amber-500 text-sm">★</span>
+                <span>Avg Rating:</span>
+                <strong className="text-slate-900">
+                  {feedbacks.length > 0
+                    ? (feedbacks.reduce((a: number, b: any) => a + b.rating, 0) / feedbacks.length).toFixed(1)
+                    : '0.0'} / 5.0
+                </strong>
+              </div>
+              <div className="text-slate-300">|</div>
+              <div>
+                Total: <strong className="text-slate-900">{feedbacks.length}</strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Feedback Table */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs min-w-[720px]">
+                <thead className="bg-slate-50 text-slate-500 font-bold uppercase border-b border-slate-200">
+                  <tr>
+                    <th className="p-4">Reviewer</th>
+                    <th className="p-4">User Type</th>
+                    <th className="p-4">Rating</th>
+                    <th className="p-4">Category</th>
+                    <th className="p-4">Feedback & Suggestions</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {feedbacks
+                    .filter((f) => {
+                      const matchSearch =
+                        (f.name || '').toLowerCase().includes(feedbackSearch.toLowerCase()) ||
+                        (f.email || '').toLowerCase().includes(feedbackSearch.toLowerCase()) ||
+                        (f.feedback || '').toLowerCase().includes(feedbackSearch.toLowerCase());
+                      const matchRole =
+                        feedbackRoleFilter === 'ALL' ||
+                        (f.userType || f.user?.role || 'VISITOR').toUpperCase() === feedbackRoleFilter.toUpperCase();
+                      return matchSearch && matchRole;
+                    })
+                    .map((f) => (
+                      <tr key={f.id} className="hover:bg-slate-50/70 transition">
+                        <td className="p-4">
+                          <div className="font-bold text-slate-900">{f.name || 'Anonymous'}</div>
+                          <div className="text-[11px] text-slate-400">{f.email || 'No email provided'}</div>
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2 py-0.5 rounded font-bold uppercase text-[10px] border ${
+                            f.userType === 'DONOR'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : f.userType === 'NGO'
+                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              : f.userType === 'VOLUNTEER'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : f.userType === 'ADMIN'
+                              ? 'bg-purple-50 text-purple-700 border-purple-200'
+                              : 'bg-slate-100 text-slate-700 border-slate-200'
+                          }`}>
+                            {f.userType || 'VISITOR'}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center space-x-1">
+                            <span className="text-amber-400 text-sm">
+                              {'★'.repeat(f.rating)}{'☆'.repeat(5 - f.rating)}
+                            </span>
+                            <span className="font-bold text-slate-700 text-[11px]">({f.rating}/5)</span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                            {f.category}
+                          </span>
+                        </td>
+                        <td className="p-4 max-w-xs text-slate-700">
+                          <p className="line-clamp-2 italic text-[11px]">"{f.feedback}"</p>
+                          <span className="text-[10px] text-slate-400 block mt-1">
+                            {new Date(f.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${
+                            f.status === 'APPROVED'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-slate-200 text-slate-700'
+                          }`}>
+                            {f.status}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right space-x-2">
+                          <button
+                            onClick={() => handleToggleFeedbackStatus(f.id, f.status)}
+                            className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
+                              f.status === 'APPROVED'
+                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                            }`}
+                          >
+                            {f.status === 'APPROVED' ? 'Hide' : 'Approve'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteFeedback(f.id)}
+                            className="px-2.5 py-1 text-[11px] font-bold rounded-lg text-rose-600 hover:bg-rose-50 transition"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

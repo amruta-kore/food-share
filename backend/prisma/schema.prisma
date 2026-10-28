@@ -50,6 +50,7 @@ model User {
   donations            Donation[] @relation("DonorDonations")
   requests             Request[]
   deliveries           Donation[] @relation("VolunteerDeliveries")
+  feedbacks            Feedback[]
 }
 
 model Donation {
@@ -92,4 +93,20 @@ model Request {
   dropoffAddress String?
   contactPhone   String?
   createdAt      DateTime @default(now())
+}
+
+model Feedback {
+  id          Int      @id @default(autoincrement())
+  rating      Int      // 1 to 5
+  feedback    String   @db.Text
+  category    String   @default("Website & Usability")
+  userType    String   @default("VISITOR") // DONOR, NGO, VOLUNTEER, ADMIN, VISITOR
+  name        String
+  email       String?
+  userId      Int?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  isPublic    Boolean  @default(true)
+  status      String   @default("APPROVED") // APPROVED, HIDDEN
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

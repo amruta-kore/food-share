@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthProvider";
 import Navbar from "../components/Navbar";
+import FloatingFeedbackButton from "../components/FloatingFeedbackButton";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +34,19 @@ export default function RootLayout({ children }: LayoutProps) {
           <div className="flex-1">
             {children}
           </div>
-          <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+          <FloatingFeedbackButton />
+          <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 space-y-2">
+            <div className="flex items-center justify-center space-x-4 text-xs font-medium text-slate-600">
+              <Link href="/" className="hover:text-emerald-700 transition">Home</Link>
+              <span>•</span>
+              <Link href="/feedback" className="hover:text-emerald-700 text-emerald-600 font-semibold transition flex items-center space-x-1">
+                <span>⭐ Reviews & Feedback</span>
+              </Link>
+              <span>•</span>
+              <Link href="/login" className="hover:text-emerald-700 transition">Login</Link>
+              <span>•</span>
+              <Link href="/register" className="hover:text-emerald-700 transition">Register</Link>
+            </div>
             <p>© {new Date().getFullYear()} FoodShare Platform. Reducing Food Waste • Empowering Communities.</p>
           </footer>
         </AuthProvider>
