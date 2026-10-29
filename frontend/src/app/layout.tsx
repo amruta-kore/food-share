@@ -39,6 +39,10 @@ export default function RootLayout({ children }: LayoutProps) {
             <div className="flex items-center justify-center space-x-4 text-xs font-medium text-slate-600">
               <Link href="/" className="hover:text-emerald-700 transition">Home</Link>
               <span>•</span>
+              <Link href="/food-impact" className="hover:text-emerald-700 text-teal-700 font-semibold transition flex items-center space-x-1">
+                <span>🌍 Food Impact & Case Study</span>
+              </Link>
+              <span>•</span>
               <Link href="/feedback" className="hover:text-emerald-700 text-emerald-600 font-semibold transition flex items-center space-x-1">
                 <span>⭐ Reviews & Feedback</span>
               </Link>

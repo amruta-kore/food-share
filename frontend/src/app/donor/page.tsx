@@ -23,6 +23,7 @@ interface Donation {
   contactPerson: string;
   contactPhone: string;
   status: string;
+  pickupOtp?: string | null;
   createdAt: string;
   request?: {
     id: number;
@@ -287,6 +288,45 @@ function DonorDashboardContent() {
     }
   };
 
+  // Handover Verification Modal State
+  const [verifyingDonation, setVerifyingDonation] = useState<Donation | null>(null);
+  const [enteredPickupOtp, setEnteredPickupOtp] = useState('');
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpError, setOtpError] = useState<string | null>(null);
+
+  const handleVerifyPickupOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verifyingDonation) return;
+    setOtpError(null);
+    setOtpVerifying(true);
+    const token = localStorage.getItem('accessToken');
+
+    try {
+      const res = await fetch(`/api/donor/verify-pickup/${verifyingDonation.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ otp: enteredPickupOtp }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert('✅ Handover Verified! Food safely transferred to FoodShare courier.');
+        setVerifyingDonation(null);
+        setEnteredPickupOtp('');
+        loadDonations(false);
+      } else {
+        setOtpError(data.error || 'Invalid OTP. Please check the code shown on courier screen.');
+      }
+    } catch (err: any) {
+      setOtpError(err?.message || 'Server communication error');
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'AVAILABLE':
@@ -488,6 +528,36 @@ function DonorDashboardContent() {
                   </div>
                 </div>
 
+                {/* Volunteer Assigned Handover Box */}
+                {d.status === 'VOLUNTEER_ASSIGNED' && (
+                  <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <div className="text-xs font-bold text-blue-900 flex items-center space-x-1.5">
+                        <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
+                        <span>🚴 Volunteer Assigned for Pickup</span>
+                      </div>
+                      <p className="text-xs text-blue-800">
+                        Courier <strong>{d.volunteer?.name || 'A volunteer'}</strong> is arriving at your kitchen gate.
+                      </p>
+                      <p className="text-[11px] text-blue-600">
+                        Verify courier identity: Ask volunteer to show their 4-digit Pickup Code or QR code.
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setVerifyingDonation(d);
+                        setEnteredPickupOtp('');
+                        setOtpError(null);
+                      }}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 flex items-center justify-center space-x-1.5 whitespace-nowrap"
+                    >
+                      <span>🔒</span>
+                      <span>Verify Handover Code</span>
+                    </button>
+                  </div>
+                )}
+
                 {/* NGO Request Action Box */}
                 {d.status === 'REQUESTED' && d.request && (
                   <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -521,11 +591,140 @@ function DonorDashboardContent() {
                     </div>
                   </div>
                 )}
+
+                {/* Picked up / In Transit Status Box */}
+                {d.status === 'PICKED_UP' && (
+                  <div className="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-200 text-xs text-indigo-900 flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span>✓</span>
+                      <span><strong>Pickup Verified!</strong> Food safely handed over to courier {d.volunteer?.name}.</span>
+                    </div>
+                    <span className="text-[11px] font-semibold text-indigo-700">Awaiting transit to shelter</span>
+                  </div>
+                )}
+
+                {d.status === 'OUT_FOR_DELIVERY' && (
+                  <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-900 flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span>🚚</span>
+                      <span><strong>Food In Transit:</strong> Courier is on their way to {d.request?.ngo?.organization || 'the shelter'}.</span>
+                    </div>
+                  </div>
+                )}
+
+                {d.status === 'DELIVERED' && (
+                  <div className="p-3.5 rounded-xl bg-teal-50 border border-teal-200 text-xs text-teal-900 flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span>📦</span>
+                      <span><strong>Handover Complete!</strong> Food safely delivered to {d.request?.ngo?.organization || 'NGO Shelter'}.</span>
+                    </div>
+                    <span className="text-[11px] font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded">DELIVERED</span>
+                  </div>
+                )}
+
+                {d.status === 'COMPLETED' && (
+                  <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span>🏆</span>
+                      <span><strong>Mission Completed!</strong> Confirmed & received by {d.request?.ngo?.organization || 'NGO Shelter'}.</span>
+                    </div>
+                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">COMPLETED</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Handover Verification Modal (Donor enters / verifies courier's 4-digit OTP) */}
+      {verifyingDonation && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
+              <div>
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold uppercase tracking-wide">
+                  Kitchen Handover Security
+                </span>
+                <h3 className="text-xl font-black text-slate-900 mt-1">Verify Courier Identity</h3>
+                <p className="text-xs text-slate-500">
+                  Confirm the authorized volunteer courier standing at your gate
+                </p>
+              </div>
+              <button
+                onClick={() => setVerifyingDonation(null)}
+                className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Food Item:</span>
+                <span className="font-bold text-slate-900">{verifyingDonation.foodName}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Assigned Courier:</span>
+                <span className="font-bold text-blue-700">{verifyingDonation.volunteer?.name}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Recipient NGO:</span>
+                <span className="font-bold text-slate-800">{verifyingDonation.request?.ngo?.organization || 'Partner Shelter'}</span>
+              </div>
+            </div>
+
+            {otpError && (
+              <div className="p-3.5 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200 flex items-start space-x-2">
+                <span>⚠️</span>
+                <span>{otpError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyPickupOtp} className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700">
+                  Enter 4-Digit Courier Pickup OTP:
+                </label>
+                <input
+                  type="text"
+                  maxLength={4}
+                  required
+                  autoFocus
+                  placeholder="e.g. 5421"
+                  value={enteredPickupOtp}
+                  onChange={(e) => setEnteredPickupOtp(e.target.value.replace(/\D/g, ''))}
+                  className="w-full text-center tracking-[0.5em] text-3xl font-black font-mono py-3 px-4 border-2 border-blue-400 focus:border-blue-600 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 bg-blue-50/30 text-blue-900"
+                />
+                <p className="text-[11px] text-slate-500 text-center">
+                  Ask the courier: <em>"Please show your 4-digit FoodShare Pickup Code or QR code"</em>
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setVerifyingDonation(null)}
+                  className="w-1/2 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={otpVerifying || enteredPickupOtp.length < 4}
+                  className={`w-1/2 py-2.5 rounded-xl text-xs font-bold text-white transition shadow-md ${
+                    otpVerifying || enteredPickupOtp.length < 4
+                      ? 'bg-slate-300 cursor-not-allowed'
+                      : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20 active:scale-95'
+                  }`}
+                >
+                  {otpVerifying ? 'Verifying...' : 'Confirm Handover ✓'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Create Donation Modal */}
       {showCreateModal && (

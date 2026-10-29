@@ -132,7 +132,14 @@ router.get('/', async (req, res: Response) => {
     });
 
     // Custom sorting: AVAILABLE donations come first, followed by in-progress and delivered
-    const sorted = donations.sort((a, b) => {
+    // Mask sensitive security handover OTPs from public feed
+    const sanitized = donations.map((d) => ({
+      ...d,
+      pickupOtp: undefined,
+      dropoffOtp: undefined,
+    }));
+
+    const sorted = sanitized.sort((a, b) => {
       if (a.status === DonationStatus.AVAILABLE && b.status !== DonationStatus.AVAILABLE) return -1;
       if (a.status !== DonationStatus.AVAILABLE && b.status === DonationStatus.AVAILABLE) return 1;
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();

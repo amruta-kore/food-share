@@ -102,6 +102,15 @@ export const Navbar: React.FC = () => {
             )}
 
             <Link
+              href="/food-impact"
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-1 ${isActive('/food-impact') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+            >
+              <span>🌍</span>
+              <span>Impact & Case Study</span>
+            </Link>
+
+            <Link
               href="/feedback"
               className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-1 ${isActive('/feedback') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
@@ -250,6 +259,16 @@ export const Navbar: React.FC = () => {
                 <span>Admin Panel</span>
               </Link>
             )}
+
+            <Link
+              href="/food-impact"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition ${isActive('/food-impact') ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-50'
+                }`}
+            >
+              <span>🌍</span>
+              <span>Impact & Case Study</span>
+            </Link>
 
             <Link
               href="/feedback"

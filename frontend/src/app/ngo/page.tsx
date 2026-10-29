@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 
 import CountdownTimer from '../../components/CountdownTimer';
+import HandoverQRCode from '../../components/HandoverQRCode';
 
 interface AvailableFood {
   id: number;
@@ -53,6 +54,7 @@ interface NGORequest {
     contactPhone: string;
     status: string;
     consumeBefore: string;
+    dropoffOtp?: string | null;
     donor?: {
       name: string;
       organization?: string;
@@ -578,10 +580,10 @@ function NGODashboardContent() {
                           </span>
                           <span className="text-slate-500 ml-1">
                             {req.donation.status === 'AVAILABLE' && 'Awaiting courier assignment.'}
-                            {req.donation.status === 'VOLUNTEER_ASSIGNED' && 'Volunteer assigned to pick up food.'}
+                            {req.donation.status === 'VOLUNTEER_ASSIGNED' && 'Volunteer assigned to pick up food from donor.'}
                             {req.donation.status === 'PICKED_UP' && 'Volunteer has picked up the food from donor.'}
-                            {req.donation.status === 'OUT_FOR_DELIVERY' && 'Food is out for delivery to your shelter!'}
-                            {req.donation.status === 'DELIVERED' && 'Food has arrived at your facility! Please confirm receipt.'}
+                            {req.donation.status === 'OUT_FOR_DELIVERY' && 'Food is on the road! Courier is arriving at your shelter.'}
+                            {req.donation.status === 'DELIVERED' && 'Food has arrived! Handover successfully verified.'}
                             {req.donation.status === 'COMPLETED' && 'Delivery completed and confirmed!'}
                           </span>
                         </div>
@@ -606,16 +608,39 @@ function NGODashboardContent() {
                         className="self-start sm:self-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-xl transition shadow-sm flex items-center space-x-1.5 whitespace-nowrap"
                       >
                         <span>✓</span>
-                        <span>Mark as Received (Done)</span>
+                        <span>Confirm Food Receipt (Complete)</span>
                       </button>
                     )}
 
                     {req.donation.status === 'COMPLETED' && (
                       <span className="px-3 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-lg text-xs whitespace-nowrap border border-emerald-300">
-                        🏆 Successfully Received
+                        🏆 Handover Complete & Verified
                       </span>
                     )}
                   </div>
+
+                  {/* Secure Handover Verification Box for NGO Drop-off */}
+                  {(req.donation.status === 'OUT_FOR_DELIVERY' || req.donation.status === 'PICKED_UP') && req.donation.dropoffOtp && (
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                      <div className="space-y-1 text-center md:text-left">
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold uppercase tracking-wide">
+                          Step 2 • Drop-off Gate Verification
+                        </span>
+                        <h4 className="font-bold text-sm text-amber-950">
+                          Share this Code or QR with Courier {req.donation.volunteer?.name || ''} Upon Arrival
+                        </h4>
+                        <p className="text-xs text-amber-800 max-w-md">
+                          When the volunteer delivers the food to your shelter gate, ask them to enter this 4-digit code on their phone to officially complete the chain of custody.
+                        </p>
+                      </div>
+
+                      <HandoverQRCode
+                        value={req.donation.dropoffOtp}
+                        label="Shelter Drop-off Code"
+                        size={120}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

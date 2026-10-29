@@ -158,4 +158,70 @@ router.post(
   }
 );
 
+// Secure Handover: Donor enters / scans volunteer's 4-digit Pickup OTP
+router.post(
+  '/verify-pickup/:donationId',
+  authenticate,
+  authorize([Role.DONOR]),
+  requireVerified,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const donationId = Number(req.params.donationId);
+      const donorId = req.user!.id;
+      const { otp } = req.body;
+
+      if (!otp) {
+        return res.status(400).json({ error: 'Pickup OTP is required' });
+      }
+
+      const donation = await prisma.donation.findUnique({
+        where: { id: donationId },
+        include: {
+          donor: { select: { id: true, name: true, organization: true } },
+          volunteer: { select: { id: true, name: true, phone: true } },
+          request: { include: { ngo: { select: { id: true, name: true, organization: true } } } },
+        },
+      });
+
+      if (!donation || donation.donorId !== donorId) {
+        return res.status(403).json({ error: 'Unauthorized or donation not found' });
+      }
+
+      if (donation.status !== 'VOLUNTEER_ASSIGNED') {
+        return res.status(400).json({
+          error: `Cannot verify pickup for food in '${donation.status}' state. Food must be in 'VOLUNTEER_ASSIGNED' status.`,
+        });
+      }
+
+      // Check OTP matching (trim and compare)
+      if (donation.pickupOtp && donation.pickupOtp.trim() !== String(otp).trim()) {
+        return res.status(400).json({
+          error: 'Invalid Pickup OTP! Please ensure you verify the exact 4-digit code shown by the volunteer.',
+        });
+      }
+
+      // Transition donation to PICKED_UP
+      const updated = await prisma.donation.update({
+        where: { id: donationId },
+        data: {
+          status: 'PICKED_UP',
+        },
+        include: {
+          donor: { select: { id: true, name: true, organization: true } },
+          volunteer: { select: { id: true, name: true, phone: true } },
+          request: { include: { ngo: { select: { id: true, name: true, organization: true } } } },
+        },
+      });
+
+      res.json({
+        message: 'Pickup OTP successfully verified! Food safely handed over to courier.',
+        donation: updated,
+      });
+    } catch (error: any) {
+      console.error('Verify pickup OTP error:', error);
+      res.status(500).json({ error: error?.message || 'Failed to verify pickup OTP' });
+    }
+  }
+);
+
 export default router;

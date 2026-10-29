@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 
 import CountdownTimer from '../../components/CountdownTimer';
+import HandoverQRCode from '../../components/HandoverQRCode';
 
 interface DeliveryTask {
   id: number;
@@ -21,6 +22,7 @@ interface DeliveryTask {
   contactPerson: string;
   contactPhone: string;
   status: string;
+  pickupOtp?: string | null;
   createdAt: string;
   donor?: {
     id: number;
@@ -108,27 +110,42 @@ function VolunteerDashboardContent() {
     }
   };
 
-  const handleUpdateStatus = async (donationId: number, nextStatus: string) => {
-    setActionLoading(true);
+  // Drop-off Handover Modal State
+  const [dropoffTask, setDropoffTask] = useState<DeliveryTask | null>(null);
+  const [enteredDropoffOtp, setEnteredDropoffOtp] = useState('');
+  const [dropoffVerifying, setDropoffVerifying] = useState(false);
+  const [dropoffError, setDropoffError] = useState<string | null>(null);
+
+  const handleVerifyDropoffOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!dropoffTask) return;
+    setDropoffError(null);
+    setDropoffVerifying(true);
     const token = localStorage.getItem('accessToken');
+
     try {
-      const res = await fetch(`/api/volunteer/status/${donationId}`, {
-        method: 'PATCH',
+      const res = await fetch(`/api/volunteer/verify-dropoff/${dropoffTask.id}`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ status: nextStatus }),
+        body: JSON.stringify({ otp: enteredDropoffOtp }),
       });
+
+      const data = await res.json();
       if (res.ok) {
+        alert('🎉 Mission Accomplished! Drop-off OTP verified by NGO. Donation officially marked as DELIVERED!');
+        setDropoffTask(null);
+        setEnteredDropoffOtp('');
         loadTasks(false);
       } else {
-        alert('Failed to update status');
+        setDropoffError(data.error || 'Invalid Drop-off OTP. Please ask the shelter manager for their 4-digit code.');
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setDropoffError(err?.message || 'Error communicating with server');
     } finally {
-      setActionLoading(false);
+      setDropoffVerifying(false);
     }
   };
 
@@ -290,51 +307,117 @@ function VolunteerDashboardContent() {
                   </div>
                 </div>
 
-                {/* Stepper Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3 pt-1">
+                {/* Chain of Custody & OTP Handover Actions */}
+                <div className="space-y-3 pt-1">
+                  {/* Step 1 Handover: Volunteer at Donor Gate */}
                   {task.status === 'VOLUNTEER_ASSIGNED' && (
-                    <button
-                      onClick={() => handleUpdateStatus(task.id, 'PICKED_UP')}
-                      disabled={actionLoading}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center space-x-1"
-                    >
-                      <span>✓</span>
-                      <span>Mark Pickup as Done (Food Picked Up)</span>
-                    </button>
+                    <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                      <div className="space-y-1 text-center md:text-left">
+                        <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold uppercase">
+                          Step 1 • Pickup Gate Verification
+                        </span>
+                        <h4 className="font-bold text-sm text-blue-950">Show this Code or QR to the Restaurant Manager</h4>
+                        <p className="text-xs text-blue-800 max-w-md">
+                          The donor will scan or enter your 4-digit code on their device to authenticate you and release the food.
+                        </p>
+                      </div>
+
+                      {task.pickupOtp ? (
+                        <HandoverQRCode
+                          value={task.pickupOtp}
+                          label="Volunteer Pickup Code"
+                          size={120}
+                        />
+                      ) : (
+                        <div className="px-4 py-2 bg-white rounded-xl border border-blue-200 text-xs font-mono font-bold text-blue-700">
+                          Code Generating...
+                        </div>
+                      )}
+                    </div>
                   )}
 
+                  {/* Step 2: Food Picked Up -> Mark Out for Delivery */}
                   {task.status === 'PICKED_UP' && (
-                    <button
-                      onClick={() => handleUpdateStatus(task.id, 'OUT_FOR_DELIVERY')}
-                      disabled={actionLoading}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center space-x-1"
-                    >
-                      <span>🚀</span>
-                      <span>Mark Out for Delivery to Shelter</span>
-                    </button>
+                    <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold text-indigo-950 flex items-center space-x-1.5">
+                          <span>✓</span>
+                          <span>Food Picked Up from Donor!</span>
+                        </div>
+                        <p className="text-xs text-indigo-800">
+                          Ready to ride? Click below when you start traveling towards {task.request?.ngo?.organization || 'the shelter'}.
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={async () => {
+                          setActionLoading(true);
+                          const token = localStorage.getItem('accessToken');
+                          try {
+                            const res = await fetch(`/api/volunteer/status/${task.id}`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                              body: JSON.stringify({ status: 'OUT_FOR_DELIVERY' }),
+                            });
+                            if (res.ok) loadTasks(false);
+                          } finally {
+                            setActionLoading(false);
+                          }
+                        }}
+                        disabled={actionLoading}
+                        className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white rounded-xl text-xs font-bold transition shadow-md shadow-indigo-600/20 flex items-center space-x-1.5 whitespace-nowrap"
+                      >
+                        <span>🚀</span>
+                        <span>Start Transit (Out for Delivery)</span>
+                      </button>
+                    </div>
                   )}
 
+                  {/* Step 3: Arrived at NGO Shelter -> Enter Drop-off OTP */}
                   {task.status === 'OUT_FOR_DELIVERY' && (
-                    <button
-                      onClick={() => handleUpdateStatus(task.id, 'DELIVERED')}
-                      disabled={actionLoading}
-                      className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center space-x-1"
-                    >
-                      <span>📦</span>
-                      <span>Mark as Dropped Off at NGO (Awaiting Confirmation)</span>
-                    </button>
+                    <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold text-amber-950 flex items-center space-x-1.5">
+                          <span className="w-2 h-2 rounded-full bg-amber-600 animate-ping"></span>
+                          <span>Arrived at Shelter Gate?</span>
+                        </div>
+                        <p className="text-xs text-amber-800">
+                          Ask the shelter representative: <em>"Please share your 4-digit Drop-off Code"</em>
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setDropoffTask(task);
+                          setEnteredDropoffOtp('');
+                          setDropoffError(null);
+                        }}
+                        className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-xl text-xs font-bold transition shadow-md shadow-amber-600/20 flex items-center space-x-1.5 whitespace-nowrap"
+                      >
+                        <span>📦</span>
+                        <span>Enter NGO Drop-off Code</span>
+                      </button>
+                    </div>
                   )}
 
                   {task.status === 'DELIVERED' && (
-                    <span className="text-xs font-bold text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200">
-                      ⏳ Food Delivered to Shelter — Awaiting NGO to Confirm Receipt
-                    </span>
+                    <div className="p-3.5 rounded-xl bg-teal-50 border border-teal-200 text-xs text-teal-900 flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span>📦</span>
+                        <span><strong>Drop-off Verified!</strong> Mission marked as DELIVERED to {task.request?.ngo?.organization || 'the shelter'}.</span>
+                      </div>
+                      <span className="text-[11px] font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded">DELIVERED</span>
+                    </div>
                   )}
 
                   {task.status === 'COMPLETED' && (
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
-                      🏆 Delivery Confirmed & Completed by NGO! Thank you for your service!
-                    </span>
+                    <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span>🏆</span>
+                        <span><strong>Mission Completed!</strong> Verified & confirmed received by shelter. Thank you!</span>
+                      </div>
+                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">COMPLETED</span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -427,6 +510,94 @@ function VolunteerDashboardContent() {
           </div>
         )}
       </div>
+      {/* Drop-off Handover Modal (Volunteer enters NGO's 4-digit code) */}
+      {dropoffTask && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
+              <div>
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold uppercase tracking-wide">
+                  Shelter Handover Security
+                </span>
+                <h3 className="text-xl font-black text-slate-900 mt-1">Verify Shelter Drop-off</h3>
+                <p className="text-xs text-slate-500">
+                  Confirm receipt at {dropoffTask.request?.ngo?.organization || 'the shelter'}
+                </p>
+              </div>
+              <button
+                onClick={() => setDropoffTask(null)}
+                className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Food Item:</span>
+                <span className="font-bold text-slate-900">{dropoffTask.foodName}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Quantity:</span>
+                <span className="font-bold text-slate-900">{dropoffTask.quantity} kg (~{dropoffTask.servings} servings)</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">NGO Destination:</span>
+                <span className="font-bold text-amber-800">{dropoffTask.request?.ngo?.organization || dropoffTask.request?.ngo?.name || 'Local Shelter'}</span>
+              </div>
+            </div>
+
+            {dropoffError && (
+              <div className="p-3.5 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200 flex items-start space-x-2">
+                <span>⚠️</span>
+                <span>{dropoffError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyDropoffOtp} className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700">
+                  Enter 4-Digit NGO Drop-off Code:
+                </label>
+                <input
+                  type="text"
+                  maxLength={4}
+                  required
+                  autoFocus
+                  placeholder="e.g. 7824"
+                  value={enteredDropoffOtp}
+                  onChange={(e) => setEnteredDropoffOtp(e.target.value.replace(/\D/g, ''))}
+                  className="w-full text-center tracking-[0.5em] text-3xl font-black font-mono py-3 px-4 border-2 border-amber-400 focus:border-amber-600 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-100 bg-amber-50/30 text-amber-900"
+                />
+                <p className="text-[11px] text-slate-500 text-center">
+                  Ask the shelter manager: <em>"Please share the 4-digit Drop-off Code displayed on your NGO dashboard"</em>
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDropoffTask(null)}
+                  className="w-1/2 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={dropoffVerifying || enteredDropoffOtp.length < 4}
+                  className={`w-1/2 py-2.5 rounded-xl text-xs font-bold text-white transition shadow-md ${
+                    dropoffVerifying || enteredDropoffOtp.length < 4
+                      ? 'bg-slate-300 cursor-not-allowed'
+                      : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20 active:scale-95'
+                  }`}
+                >
+                  {dropoffVerifying ? 'Verifying...' : 'Confirm Delivery ✓'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

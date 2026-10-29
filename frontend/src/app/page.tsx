@@ -500,6 +500,63 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Food Distribution Impact & Case Study Banner (Global & India Focus) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white p-8 sm:p-12 shadow-xl border border-emerald-800/50">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+            <div className="space-y-4 max-w-2xl">
+              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
+                <span>🌍 GLOBAL & INDIA IMPACT STUDY</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span>INSPIRED BY IFBN</span>
+              </div>
+
+              <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
+                Why Donating Surplus Food Matters: <br />
+                <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-200 bg-clip-text text-transparent">
+                  Ending Hunger & Protecting the Environment
+                </span>
+              </h2>
+
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                India generates over <strong>78 million tonnes</strong> of food waste annually while over <strong>190 million people</strong> go hungry every night. Discover the science, environmental facts, operational models, and real-world case study on how food distribution turns waste into dignity.
+              </p>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                <div className="bg-white/10 p-3 rounded-xl border border-white/10">
+                  <div className="text-xl sm:text-2xl font-black text-emerald-400">78.2M T</div>
+                  <div className="text-[10px] text-slate-300 font-semibold uppercase">India Waste/Year</div>
+                </div>
+                <div className="bg-white/10 p-3 rounded-xl border border-white/10">
+                  <div className="text-xl sm:text-2xl font-black text-amber-400">190M+</div>
+                  <div className="text-[10px] text-slate-300 font-semibold uppercase">Hungry Citizens</div>
+                </div>
+                <div className="bg-white/10 p-3 rounded-xl border border-white/10 col-span-2 sm:col-span-1">
+                  <div className="text-xl sm:text-2xl font-black text-cyan-400">8-10%</div>
+                  <div className="text-[10px] text-slate-300 font-semibold uppercase">Global GHGs Saved</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
+              <Link
+                href="/food-impact"
+                className="px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition text-center flex items-center justify-center space-x-2"
+              >
+                <span>📖 Read Full Impact Case Study</span>
+                <span>→</span>
+              </Link>
+              <Link
+                href="/donor"
+                className="px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-sm rounded-xl border border-white/20 transition text-center"
+              >
+                Post Surplus Food Now
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Feedback Modal */}
       <FeedbackModal
         isOpen={feedbackModalOpen}

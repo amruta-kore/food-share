@@ -70,11 +70,17 @@ router.post(
         return res.status(400).json({ error: 'Task has already been claimed by another volunteer' });
       }
 
+      // Generate secure 4-digit numeric OTPs for chain-of-custody verification
+      const generatedPickupOtp = Math.floor(1000 + Math.random() * 9000).toString();
+      const generatedDropoffOtp = Math.floor(1000 + Math.random() * 9000).toString();
+
       const updated = await prisma.donation.update({
         where: { id: donationId },
         data: {
           volunteerId,
           status: DonationStatus.VOLUNTEER_ASSIGNED,
+          pickupOtp: generatedPickupOtp,
+          dropoffOtp: generatedDropoffOtp,
         },
         include: {
           donor: { select: { id: true, name: true, email: true, organization: true } },
@@ -175,8 +181,99 @@ router.patch(
 
       res.json(updated);
     } catch (error: any) {
-      console.error('Update delivery status error:', error);
-      res.status(500).json({ error: 'Failed to update delivery status' });
+      res.status(500).json({ error: error.message || 'Failed to update status' });
+    }
+  }
+);
+
+// Volunteer completes drop-off at NGO by entering / scanning NGO's Drop-off OTP
+router.post(
+  '/verify-dropoff/:donationId',
+  authenticate,
+  authorize([Role.VOLUNTEER]),
+  requireVerified,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const donationId = Number(req.params.donationId);
+      const volunteerId = req.user!.id;
+      const { otp } = req.body;
+
+      if (!otp) {
+        return res.status(400).json({ error: 'Drop-off OTP is required' });
+      }
+
+      const donation = await prisma.donation.findUnique({
+        where: { id: donationId },
+        include: {
+          donor: { select: { id: true, name: true, email: true, organization: true } },
+          volunteer: { select: { id: true, name: true, phone: true } },
+          request: { include: { ngo: { select: { id: true, name: true, email: true, organization: true } } } },
+        },
+      });
+
+      if (!donation || donation.volunteerId !== volunteerId) {
+        return res.status(403).json({ error: 'Unauthorized or donation not assigned to you' });
+      }
+
+      if (donation.status !== 'OUT_FOR_DELIVERY' && donation.status !== 'PICKED_UP') {
+        return res.status(400).json({
+          error: `Cannot complete drop-off for food in '${donation.status}' state. Food must be in transit.`,
+        });
+      }
+
+      // Check Drop-off OTP matching
+      if (donation.dropoffOtp && donation.dropoffOtp.trim() !== String(otp).trim()) {
+        return res.status(400).json({
+          error: 'Invalid Drop-off OTP! Please ask the NGO shelter representative for their 4-digit handover verification code.',
+        });
+      }
+
+      // Mark officially as DELIVERED
+      const updated = await prisma.donation.update({
+        where: { id: donationId },
+        data: {
+          status: DonationStatus.DELIVERED,
+        },
+        include: {
+          donor: { select: { id: true, name: true, email: true, organization: true } },
+          volunteer: { select: { id: true, name: true, phone: true } },
+          request: { include: { ngo: { select: { id: true, name: true, email: true, organization: true } } } },
+        },
+      });
+
+      const volunteer = await prisma.user.findUnique({
+        where: { id: volunteerId },
+        select: { name: true },
+      });
+      const volunteerName = volunteer?.name || 'Volunteer Courier';
+
+      // Email notifications
+      if (updated.donor?.email) {
+        await sendDeliveryStatusUpdateEmail(
+          updated.donor.email,
+          updated.donor.name,
+          updated.foodName,
+          'DELIVERED (Handover Verified by Drop-off OTP)',
+          volunteerName
+        );
+      }
+      if (updated.request?.ngo?.email) {
+        await sendDeliveryStatusUpdateEmail(
+          updated.request.ngo.email,
+          updated.request.ngo.name,
+          updated.foodName,
+          'DELIVERED (Handover Verified by Drop-off OTP)',
+          volunteerName
+        );
+      }
+
+      res.json({
+        message: 'Drop-off OTP verified successfully! Mission marked as DELIVERED.',
+        donation: updated,
+      });
+    } catch (error: any) {
+      console.error('Verify drop-off OTP error:', error);
+      res.status(500).json({ error: error?.message || 'Failed to verify drop-off OTP' });
     }
   }
 );

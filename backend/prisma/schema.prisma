@@ -72,6 +72,8 @@ model Donation {
   contactPerson String
   contactPhone  String
   status        DonationStatus  @default(AVAILABLE)
+  pickupOtp     String?         // 4-digit verification code shown by Volunteer & verified by Donor
+  dropoffOtp    String?         // 4-digit verification code held by NGO & entered by Volunteer
   donorId       Int
   donor         User            @relation("DonorDonations", fields: [donorId], references: [id])
   volunteerId   Int?
