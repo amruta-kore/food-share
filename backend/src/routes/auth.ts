@@ -33,7 +33,7 @@ function generateTokens(payload: { id: number; role: Role }) {
 // ADMIN role cannot self-register for security
 router.post('/register', documentUpload.single('document'), async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role, organization, phone } = req.body;
+    const { name, email, password, role, organization, phone, address, latitude, longitude } = req.body;
 
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: 'Missing required fields (name, email, password, role)' });
@@ -68,6 +68,9 @@ router.post('/register', documentUpload.single('document'), async (req: Request,
       documentName = req.file.originalname;
     }
 
+    const parsedLat = latitude !== undefined && latitude !== '' && !isNaN(Number(latitude)) ? Number(latitude) : null;
+    const parsedLng = longitude !== undefined && longitude !== '' && !isNaN(Number(longitude)) ? Number(longitude) : null;
+
     const user = await prisma.user.create({
       data: {
         name,
@@ -76,6 +79,9 @@ router.post('/register', documentUpload.single('document'), async (req: Request,
         role,
         organization: organization || null,
         phone: phone || null,
+        address: address || null,
+        latitude: parsedLat,
+        longitude: parsedLng,
         verified: false,
         verificationToken,
         documentUrl,
@@ -100,6 +106,9 @@ router.post('/register', documentUpload.single('document'), async (req: Request,
         role: user.role,
         organization: user.organization,
         phone: user.phone,
+        address: user.address,
+        latitude: user.latitude,
+        longitude: user.longitude,
         verified: user.verified,
       },
     });
@@ -160,12 +169,56 @@ router.post('/login', async (req: Request, res: Response) => {
         role: user.role,
         organization: user.organization,
         phone: user.phone,
+        address: user.address,
+        latitude: user.latitude,
+        longitude: user.longitude,
         verified: user.verified,
       },
     });
   } catch (error: any) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Login failed' });
+  }
+});
+
+// Update location / profile (authenticated user - NGO or donor)
+router.patch('/profile', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { address, latitude, longitude, phone, organization } = req.body;
+
+    const data: any = {};
+    if (address !== undefined) data.address = address;
+    if (latitude !== undefined) {
+      data.latitude = latitude !== '' && !isNaN(Number(latitude)) ? Number(latitude) : null;
+    }
+    if (longitude !== undefined) {
+      data.longitude = longitude !== '' && !isNaN(Number(longitude)) ? Number(longitude) : null;
+    }
+    if (phone !== undefined) data.phone = phone;
+    if (organization !== undefined) data.organization = organization;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        organization: true,
+        phone: true,
+        address: true,
+        latitude: true,
+        longitude: true,
+        verified: true,
+      },
+    });
+
+    res.json({ user: updatedUser, message: 'Profile & location updated successfully' });
+  } catch (error: any) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ message: 'Failed to update profile' });
   }
 });
 

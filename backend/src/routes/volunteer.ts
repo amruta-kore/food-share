@@ -17,6 +17,7 @@ router.get(
       const volunteerId = req.user!.id;
 
       // Available tasks to claim: donations accepted by donor and awaiting volunteer
+      // Privacy safeguard: Only show generalized location (organization & city), not precise NGO GPS coordinates or full street address
       const availableForPickup = await prisma.donation.findMany({
         where: {
           status: DonationStatus.ACCEPTED,
@@ -24,17 +25,43 @@ router.get(
         },
         include: {
           donor: { select: { id: true, name: true, organization: true } },
-          request: { include: { ngo: { select: { id: true, name: true, organization: true, phone: true } } } },
+          request: {
+            include: {
+              ngo: {
+                select: {
+                  id: true,
+                  name: true,
+                  organization: true,
+                  // Note: Address and GPS coordinates are masked until assigned to protect NGO privacy
+                },
+              },
+            },
+          },
         },
         orderBy: { createdAt: 'desc' },
       });
 
-      // Volunteer's active tasks
+      // Volunteer's active tasks: Full NGO destination details (GPS latitude, longitude, and address)
+      // are unlocked ONLY for the volunteer who claimed and is assigned to the delivery
       const myTasks = await prisma.donation.findMany({
         where: { volunteerId },
         include: {
           donor: { select: { id: true, name: true, organization: true } },
-          request: { include: { ngo: { select: { id: true, name: true, organization: true, phone: true } } } },
+          request: {
+            include: {
+              ngo: {
+                select: {
+                  id: true,
+                  name: true,
+                  organization: true,
+                  phone: true,
+                  address: true,
+                  latitude: true,
+                  longitude: true,
+                },
+              },
+            },
+          },
         },
         orderBy: { updatedAt: 'desc' },
       });
@@ -84,7 +111,22 @@ router.post(
         },
         include: {
           donor: { select: { id: true, name: true, email: true, organization: true } },
-          request: { include: { ngo: { select: { id: true, name: true, email: true, organization: true, phone: true } } } },
+          request: {
+            include: {
+              ngo: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  organization: true,
+                  phone: true,
+                  address: true,
+                  latitude: true,
+                  longitude: true,
+                },
+              },
+            },
+          },
         },
       });
 

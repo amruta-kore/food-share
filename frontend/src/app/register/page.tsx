@@ -16,8 +16,64 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [documentFile, setDocumentFile] = useState<File | null>(null);
+
+  // NGO Location state
+  const [address, setAddress] = useState('');
+  const [latitude, setLatitude] = useState<string>('');
+  const [longitude, setLongitude] = useState<string>('');
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsStatus, setGpsStatus] = useState<string | null>(null);
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Browser Geolocation API to fetch GPS coordinates
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setGpsStatus('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setGpsLoading(true);
+    setGpsStatus('Requesting GPS permission from your browser...');
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setLatitude(lat.toFixed(6));
+        setLongitude(lng.toFixed(6));
+        setGpsLoading(false);
+        setGpsStatus(`✓ GPS Captured: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`);
+
+        // Reverse geocode via OpenStreetMap Nominatim if address is empty
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.display_name && !address) {
+              setAddress(data.display_name);
+            }
+          }
+        } catch {
+          // Non-blocking reverse geocode
+        }
+      },
+      (err) => {
+        setGpsLoading(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setGpsStatus('⚠️ GPS Permission Denied. Please enter your shelter address manually.');
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          setGpsStatus('⚠️ Location unavailable. Please enter your address manually.');
+        } else {
+          setGpsStatus('⚠️ Location request timed out. Please enter address manually.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +81,11 @@ export default function RegisterPage() {
 
     if (!documentFile) {
       setError('Please upload an official legal document (ID / FSSAI / NGO Registration Certificate / Driving License) for Admin verification.');
+      return;
+    }
+
+    if (role === 'NGO' && !address.trim() && !latitude) {
+      setError('Please provide your NGO shelter location (either by clicking "Use My Current Location" or typing an address).');
       return;
     }
 
@@ -37,6 +98,9 @@ export default function RegisterPage() {
     formData.append('role', role);
     if (organization) formData.append('organization', organization);
     if (phone) formData.append('phone', phone);
+    if (address) formData.append('address', address);
+    if (latitude) formData.append('latitude', latitude);
+    if (longitude) formData.append('longitude', longitude);
     formData.append('document', documentFile);
 
     const res = await register(formData);
@@ -161,6 +225,81 @@ export default function RegisterPage() {
               />
             </div>
           </div>
+
+          {/* NGO Shelter Location Section (GPS or Manual Address) */}
+          {role === 'NGO' && (
+            <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/40 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">📍</span>
+                  <label className="block text-xs font-bold uppercase text-blue-950">
+                    Shelter Location & Delivery Destination *
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleUseCurrentLocation}
+                  disabled={gpsLoading}
+                  className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition flex items-center space-x-1.5 shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  <span>{gpsLoading ? '⏳ Fetching GPS...' : '🎯 Use My Current Location'}</span>
+                </button>
+              </div>
+
+              <p className="text-[11px] text-slate-600">
+                Share your current shelter GPS coordinates or enter the address manually. Volunteer couriers will use this to navigate to your facility.
+              </p>
+
+              {gpsStatus && (
+                <div className="text-xs p-2 rounded-lg bg-white border border-blue-200 text-blue-900 font-medium">
+                  {gpsStatus}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Shelter Full Street Address *
+                </label>
+                <textarea
+                  rows={2}
+                  required={role === 'NGO'}
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="e.g. 124 Hope Foundation Shelter, 5th Cross, Indiranagar, Bengaluru"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    Latitude (GPS)
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={latitude}
+                    onChange={(e) => setLatitude(e.target.value)}
+                    placeholder="e.g. 12.9716"
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    Longitude (GPS)
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={longitude}
+                    onChange={(e) => setLongitude(e.target.value)}
+                    placeholder="e.g. 77.5946"
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">

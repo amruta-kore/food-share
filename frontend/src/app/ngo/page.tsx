@@ -89,6 +89,104 @@ function NGODashboardContent() {
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'AVAILABLE' | 'DELIVERED'>('ALL');
   const [vegOnly, setVegOnly] = useState(false);
 
+  // NGO Shelter Location Management
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [ngoAddress, setNgoAddress] = useState(user?.address || '');
+  const [ngoLat, setNgoLat] = useState<string>(user?.latitude ? String(user.latitude) : '');
+  const [ngoLng, setNgoLng] = useState<string>(user?.longitude ? String(user.longitude) : '');
+  const [locLoading, setLocLoading] = useState(false);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [locMsg, setLocMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Sync state if user loads
+  useEffect(() => {
+    if (user) {
+      if (user.address) setNgoAddress(user.address);
+      if (user.latitude) setNgoLat(String(user.latitude));
+      if (user.longitude) setNgoLng(String(user.longitude));
+    }
+  }, [user]);
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocMsg({ type: 'error', text: 'Geolocation is not supported by your browser.' });
+      return;
+    }
+    setGpsLoading(true);
+    setLocMsg(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setNgoLat(lat.toFixed(6));
+        setNgoLng(lng.toFixed(6));
+        setGpsLoading(false);
+        setLocMsg({ type: 'success', text: `✓ GPS coordinates captured (${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E)` });
+
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.display_name && !ngoAddress) {
+              setNgoAddress(data.display_name);
+            }
+          }
+        } catch {}
+      },
+      (err) => {
+        setGpsLoading(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setLocMsg({ type: 'error', text: 'GPS Permission Denied. Please input your shelter address manually.' });
+        } else {
+          setLocMsg({ type: 'error', text: 'Unable to fetch current location. Please enter manually.' });
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
+  const handleSaveLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocLoading(true);
+    setLocMsg(null);
+
+    const token = localStorage.getItem('accessToken');
+    try {
+      const res = await fetch('/api/auth/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          address: ngoAddress,
+          latitude: ngoLat ? Number(ngoLat) : null,
+          longitude: ngoLng ? Number(ngoLng) : null,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Update user in localStorage
+        const stored = localStorage.getItem('user');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          localStorage.setItem('user', JSON.stringify({ ...parsed, ...data.user }));
+        }
+        setLocMsg({ type: 'success', text: '✓ Shelter destination & GPS location saved successfully!' });
+        setTimeout(() => setShowLocationModal(false), 1500);
+      } else {
+        const err = await res.json();
+        setLocMsg({ type: 'error', text: err.message || 'Failed to update location' });
+      }
+    } catch {
+      setLocMsg({ type: 'error', text: 'Network error updating shelter location' });
+    } finally {
+      setLocLoading(false);
+    }
+  };
+
   const loadData = async (isInitial = false) => {
     if (isInitial) setFetching(true);
     const token = localStorage.getItem('accessToken');
@@ -230,13 +328,23 @@ function NGODashboardContent() {
           </p>
         </div>
 
-        <button
-          onClick={() => loadData(false)}
-          className="self-start sm:self-auto px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
-        >
-          <span>🔄</span>
-          <span>Refresh Listings</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setShowLocationModal(true)}
+            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-xs cursor-pointer"
+          >
+            <span>📍</span>
+            <span>{user?.latitude || ngoLat ? 'Shelter Location Set ✓' : 'Set Shelter Location'}</span>
+          </button>
+
+          <button
+            onClick={() => loadData(false)}
+            className="px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20 cursor-pointer"
+          >
+            <span>🔄</span>
+            <span>Refresh Listings</span>
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -718,6 +826,123 @@ function NGODashboardContent() {
                   className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-600/20 disabled:opacity-50"
                 >
                   {claiming ? 'Submitting...' : 'Confirm Request'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Shelter Location Modal */}
+      {showLocationModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center space-x-2">
+                <span className="text-xl">📍</span>
+                <div>
+                  <h3 className="font-bold text-base text-slate-900">Shelter Destination & GPS</h3>
+                  <p className="text-[11px] text-slate-500">Configure your shelter address for courier delivery navigation</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLocationModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveLocation} className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-blue-50/60 border border-blue-200">
+                <div className="text-xs text-blue-950">
+                  <span className="font-bold block">Current GPS Auto-Detect</span>
+                  <span className="text-[11px] text-blue-700">Request browser GPS access for precision destination</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleUseCurrentLocation}
+                  disabled={gpsLoading}
+                  className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition flex items-center space-x-1.5 shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  <span>{gpsLoading ? '⏳ Fetching...' : '🎯 Use Current Location'}</span>
+                </button>
+              </div>
+
+              {locMsg && (
+                <div
+                  className={`text-xs p-3 rounded-xl border ${
+                    locMsg.type === 'success'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                      : 'bg-red-50 border-red-200 text-red-900'
+                  }`}
+                >
+                  {locMsg.text}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Shelter Street Address *
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={ngoAddress}
+                  onChange={(e) => setNgoAddress(e.target.value)}
+                  placeholder="e.g. Hope Child Shelter, 42 Karve Road, Deccan Gymkhana, Pune"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50/50"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Latitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={ngoLat}
+                    onChange={(e) => setNgoLat(e.target.value)}
+                    placeholder="18.5204"
+                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Longitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={ngoLng}
+                    onChange={(e) => setNgoLng(e.target.value)}
+                    placeholder="73.8567"
+                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-500 italic">
+                🔒 Privacy Guarantee: Your coordinates and full street address are only revealed to verified volunteer couriers after they claim a mission to your shelter.
+              </p>
+
+              <div className="pt-2 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowLocationModal(false)}
+                  className="px-4 py-2 border border-slate-300 rounded-xl text-slate-700 text-xs font-semibold hover:bg-slate-50 cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  disabled={locLoading}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  {locLoading ? 'Saving Location...' : 'Save Shelter Location'}
                 </button>
               </div>
             </form>

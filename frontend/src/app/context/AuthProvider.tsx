@@ -13,6 +13,9 @@ export interface User {
   verified?: boolean;
   organization?: string;
   phone?: string;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface AuthContextProps {

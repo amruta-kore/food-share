@@ -39,6 +39,9 @@ interface DeliveryTask {
       organization?: string;
       phone?: string;
       email?: string;
+      address?: string | null;
+      latitude?: number | null;
+      longitude?: number | null;
     };
   } | null;
 }
@@ -295,17 +298,112 @@ function VolunteerDashboardContent() {
                     <strong className="text-slate-900 block text-sm mt-0.5">{task.donor?.organization || task.donor?.name}</strong>
                     <div className="text-slate-600 mt-1">📍 {task.pickupAddress}</div>
                     <div className="text-slate-600">📞 Contact: {task.contactPhone}</div>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        `${task.pickupAddress}, ${task.city}`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-1 text-emerald-700 hover:text-emerald-800 font-bold mt-2 text-[11px] underline"
+                    >
+                      <span>🗺️ Navigate to Pickup (Google Maps) ↗</span>
+                    </a>
                   </div>
 
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">2. Deliver to NGO</span>
-                    <strong className="text-slate-900 block text-sm mt-0.5">{task.request?.ngo?.organization || task.request?.ngo?.name || 'Partner Shelter'}</strong>
-                    <div className="text-slate-600 mt-1">📞 NGO Phone: {task.request?.ngo?.phone || 'On File'}</div>
+                  <div className="border-t md:border-t-0 md:border-l md:pl-4 border-slate-200 pt-3 md:pt-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">2. Deliver to NGO Shelter</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                        🔒 Unlocked for Assigned Courier
+                      </span>
+                    </div>
+
+                    <strong className="text-slate-900 block text-sm mt-0.5">
+                      {task.request?.ngo?.organization || task.request?.ngo?.name || 'Partner Shelter'}
+                    </strong>
+
+                    <div className="text-slate-700 mt-1">
+                      📍 <strong>Destination:</strong>{' '}
+                      {task.request?.ngo?.address || 'Shelter address on file with coordination team'}
+                    </div>
+
+                    <div className="text-slate-600">📞 NGO Phone: {task.request?.ngo?.phone || 'On File'}</div>
+
+                    {task.request?.ngo?.latitude && task.request?.ngo?.longitude && (
+                      <div className="text-[11px] font-mono text-slate-500 mt-0.5">
+                        🛰️ GPS: {Number(task.request.ngo.latitude).toFixed(4)}°N, {Number(task.request.ngo.longitude).toFixed(4)}°E
+                      </div>
+                    )}
+
                     {task.request?.notes && (
                       <div className="text-slate-500 italic mt-0.5">Note: "{task.request.notes}"</div>
                     )}
+
+                    {/* Google Maps Directions Button */}
+                    <div className="mt-2.5">
+                      {task.request?.ngo?.latitude && task.request?.ngo?.longitude ? (
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${task.request.ngo.latitude},${task.request.ngo.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] transition shadow-xs"
+                        >
+                          <span>🗺️</span>
+                          <span>Get Directions (Google Maps GPS)</span>
+                        </a>
+                      ) : task.request?.ngo?.address ? (
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                            task.request.ngo.address
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] transition shadow-xs"
+                        >
+                          <span>🗺️</span>
+                          <span>Get Directions (Google Maps)</span>
+                        </a>
+                      ) : (
+                        <span className="text-[11px] text-slate-400 italic">
+                          (Shelter GPS not registered yet — contact shelter coordinator via phone)
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {/* Embedded Interactive Map for Assigned Volunteer */}
+                {(task.request?.ngo?.latitude && task.request?.ngo?.longitude) || task.request?.ngo?.address ? (
+                  <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-800 flex items-center space-x-1.5">
+                        <span>🧭</span>
+                        <span>NGO Destination Map View</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {task.request?.ngo?.latitude ? 'Live Coordinates' : 'Street Location'}
+                      </span>
+                    </div>
+
+                    <div className="w-full h-48 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 relative">
+                      <iframe
+                        title="NGO Delivery Location Map"
+                        width="100%"
+                        height="100%"
+                        frameBorder="0"
+                        scrolling="no"
+                        marginHeight={0}
+                        marginWidth={0}
+                        src={
+                          task.request?.ngo?.latitude && task.request?.ngo?.longitude
+                            ? `https://www.openstreetmap.org/export/embed.html?bbox=${Number(task.request.ngo.longitude) - 0.01}%2C${Number(task.request.ngo.latitude) - 0.01}%2C${Number(task.request.ngo.longitude) + 0.01}%2C${Number(task.request.ngo.latitude) + 0.01}&layer=mapnik&marker=${task.request.ngo.latitude}%2C${task.request.ngo.longitude}`
+                            : `https://maps.google.com/maps?q=${encodeURIComponent(task.request?.ngo?.address || '')}&t=&z=14&ie=UTF8&iwloc=&output=embed`
+                        }
+                        className="w-full h-full"
+                      />
+                    </div>
+                  </div>
+                ) : null}
 
                 {/* Chain of Custody & OTP Handover Actions */}
                 <div className="space-y-3 pt-1">
@@ -485,7 +583,10 @@ function VolunteerDashboardContent() {
 
                 <div className="text-xs text-slate-600 space-y-1">
                   <div>📍 <strong>Pickup:</strong> {task.pickupAddress}, {task.city}</div>
-                  <div>🏢 <strong>Destination NGO:</strong> {task.request?.ngo?.organization || task.request?.ngo?.name || 'Local NGO Shelter'}</div>
+                  <div className="flex items-center justify-between">
+                    <div>🏢 <strong>Destination NGO:</strong> {task.request?.ngo?.organization || task.request?.ngo?.name || 'Local NGO Shelter'}</div>
+                    <span className="text-[10px] text-slate-400 font-semibold">🔒 GPS Map reveals on claim</span>
+                  </div>
                 </div>
 
                 <button

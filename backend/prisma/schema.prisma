@@ -36,6 +36,9 @@ model User {
   role                 Role
   phone                String?
   organization         String?
+  address              String?   @db.Text
+  latitude             Float?
+  longitude            Float?
   verified             Boolean   @default(false)
   verificationToken    String?
   passwordResetToken   String?
