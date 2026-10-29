@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 
+import CountdownTimer from '../../components/CountdownTimer';
+
 interface AvailableFood {
   id: number;
   foodName: string;
@@ -25,6 +27,13 @@ interface AvailableFood {
     name: string;
     organization?: string;
   };
+  request?: {
+    ngo?: {
+      id: number;
+      name: string;
+      organization?: string;
+    };
+  } | null;
 }
 
 interface NGORequest {
@@ -43,6 +52,7 @@ interface NGORequest {
     city: string;
     contactPhone: string;
     status: string;
+    consumeBefore: string;
     donor?: {
       name: string;
       organization?: string;
@@ -74,14 +84,15 @@ function NGODashboardContent() {
 
   // Filter state
   const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'AVAILABLE' | 'DELIVERED'>('ALL');
   const [vegOnly, setVegOnly] = useState(false);
 
   const loadData = async (isInitial = false) => {
     if (isInitial) setFetching(true);
     const token = localStorage.getItem('accessToken');
     try {
-      // 1. Fetch available food listings
-      const foodRes = await fetch('/api/donations?status=AVAILABLE');
+      // 1. Fetch food listings (both available and delivered)
+      const foodRes = await fetch('/api/donations');
       if (foodRes.ok) {
         const foodData = await foodRes.json();
         setAvailableFood(foodData);
@@ -176,6 +187,8 @@ function NGODashboardContent() {
   const filteredFood = availableFood.filter((item) => {
     if (categoryFilter !== 'ALL' && item.category !== categoryFilter) return false;
     if (vegOnly && !item.isVegetarian) return false;
+    if (statusFilter === 'AVAILABLE' && item.status !== 'AVAILABLE') return false;
+    if (statusFilter === 'DELIVERED' && item.status !== 'DELIVERED' && item.status !== 'COMPLETED') return false;
     return true;
   });
 
@@ -271,6 +284,16 @@ function NGODashboardContent() {
                 <option value="Packaged Food">Packaged Goods</option>
               </select>
 
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-300 bg-slate-50 focus:outline-none font-semibold text-slate-700"
+              >
+                <option value="ALL">All Food (Active & Rescued)</option>
+                <option value="AVAILABLE">🟢 Available for Claim</option>
+                <option value="DELIVERED">✅ Delivered / Rescued</option>
+              </select>
+
               <label className="flex items-center space-x-2 text-xs font-medium text-slate-700 cursor-pointer">
                 <input
                   type="checkbox"
@@ -283,7 +306,7 @@ function NGODashboardContent() {
             </div>
 
             <div className="text-xs text-slate-500">
-              Showing <strong>{filteredFood.length}</strong> active donations
+              Showing <strong>{filteredFood.length}</strong> donations
             </div>
           </div>
 
@@ -300,100 +323,173 @@ function NGODashboardContent() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredFood.map((food) => (
-                <div
-                  key={food.id}
-                  className="bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition overflow-hidden flex flex-col justify-between group"
-                >
-                  <div>
-                    {/* Food Photo Banner */}
-                    {food.imageUrl ? (
-                      <div className="relative w-full h-44 bg-slate-100 overflow-hidden">
-                        <img
-                          src={food.imageUrl}
-                          alt={food.foodName}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute top-3 right-3">
-                          <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-md backdrop-blur-md ${food.isVegetarian ? 'bg-emerald-600/95 text-white' : 'bg-red-600/95 text-white'}`}>
-                            {food.isVegetarian ? '🥬 VEG' : '🍗 NON-VEG'}
-                          </span>
+              {filteredFood.map((food) => {
+                const isDelivered = food.status === 'DELIVERED' || food.status === 'COMPLETED';
+                const isClaimedByOther = food.status !== 'AVAILABLE' && !isDelivered;
+
+                return (
+                  <div
+                    key={food.id}
+                    className="bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition overflow-hidden flex flex-col justify-between group"
+                  >
+                    <div>
+                      {/* Food Photo Banner */}
+                      {food.imageUrl ? (
+                        <div className="relative w-full h-44 bg-slate-100 overflow-hidden">
+                          <img
+                            src={food.imageUrl}
+                            alt={food.foodName}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                            <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-md backdrop-blur-md ${food.isVegetarian ? 'bg-emerald-600/95 text-white' : 'bg-red-600/95 text-white'}`}>
+                              {food.isVegetarian ? '🥬 VEG' : '🍗 NON-VEG'}
+                            </span>
+                            {isDelivered ? (
+                              <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md bg-teal-600 text-white border border-white/20">
+                                ✅ DELIVERED
+                              </span>
+                            ) : food.status === 'AVAILABLE' ? (
+                              <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md bg-emerald-600 text-white border border-white/20">
+                                🟢 AVAILABLE
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md bg-amber-600 text-white border border-white/20">
+                                🚚 IN TRANSIT
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative w-full h-20 bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-between px-5 border-b border-slate-100">
+                          <div className="text-2xl">
+                            {food.category.includes('Bakery') ? '🥖' : food.category.includes('Produce') ? '🍎' : food.category.includes('Dairy') ? '🥛' : '🍲'}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${food.isVegetarian ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                              {food.isVegetarian ? 'VEG' : 'NON-VEG'}
+                            </span>
+                            {isDelivered && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 border border-teal-300">
+                                DELIVERED
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="p-5 space-y-4">
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-bold text-base text-slate-900 leading-tight">
+                              {food.foodName}
+                            </h3>
+                            {isDelivered && (
+                              <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded">
+                                ✓ Rescued
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 font-medium mt-0.5">
+                            {food.donor?.organization || food.donor?.name || 'Local Donor'}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-xs py-2 border-y border-slate-100">
+                          <div>
+                            <span className="text-slate-400 block text-[10px] uppercase font-bold">Quantity</span>
+                            <span className="font-semibold text-slate-800">{food.quantity} kg</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block text-[10px] uppercase font-bold">Est. Servings</span>
+                            <span className="font-semibold text-slate-800">{food.servings} people</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block text-[10px] uppercase font-bold">Storage</span>
+                            <span className="font-semibold text-slate-800 truncate block">{food.storage}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block text-[10px] uppercase font-bold">Category</span>
+                            <span className="font-semibold text-slate-800 truncate block">{food.category}</span>
+                          </div>
+                        </div>
+
+                        <div className="text-xs text-slate-600 space-y-2">
+                          <div className="flex items-center space-x-1.5">
+                            <span>📍</span>
+                            <span className="truncate">{food.pickupAddress}, {food.city}</span>
+                          </div>
+
+                          {/* Live Expiry Countdown Timer */}
+                          <div className="pt-2 border-t border-slate-100 flex flex-col space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold uppercase text-slate-400">
+                                {isDelivered ? 'Delivery State:' : 'Expiry Countdown:'}
+                              </span>
+                              <CountdownTimer consumeBefore={food.consumeBefore} status={food.status} />
+                            </div>
+                            <div className="flex items-center space-x-1.5 text-[11px] text-slate-500">
+                              <span>⏰</span>
+                              <span>
+                                Consume before: {new Date(food.consumeBefore).toLocaleDateString([], { month: 'short', day: 'numeric' })} at {new Date(food.consumeBefore).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Action / Locked for delivered or claimed */}
+                    {isDelivered ? (
+                      <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-bold text-teal-800 bg-teal-100 px-2 py-0.5 rounded border border-teal-200">
+                          DELIVERED
+                        </span>
+                        <div
+                          className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 select-none flex items-center space-x-1"
+                          title="This food donation has already been delivered and completed. Other NGOs cannot access or claim it."
+                        >
+                          <span>🔒</span>
+                          <span>Delivered • Closed to other NGOs</span>
+                        </div>
+                      </div>
+                    ) : isClaimedByOther ? (
+                      <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
+                          {food.status.replace('_', ' ')}
+                        </span>
+                        <div
+                          className="text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 select-none flex items-center space-x-1"
+                          title="This food donation is currently being fulfilled by another NGO."
+                        >
+                          <span>⏳</span>
+                          <span>Claimed • In Transit</span>
                         </div>
                       </div>
                     ) : (
-                      <div className="relative w-full h-20 bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-between px-5 border-b border-slate-100">
-                        <div className="text-2xl">
-                          {food.category.includes('Bakery') ? '🥖' : food.category.includes('Produce') ? '🍎' : food.category.includes('Dairy') ? '🥛' : '🍲'}
-                        </div>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${food.isVegetarian ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                          {food.isVegetarian ? 'VEG' : 'NON-VEG'}
-                        </span>
+                      <div className="p-4 bg-slate-50 border-t border-slate-100">
+                        <button
+                          onClick={() => {
+                            if (!user?.verified) {
+                              alert('Your NGO account is awaiting administrative verification. You can claim surplus food once approved by Admin.');
+                              return;
+                            }
+                            setSelectedDonation(food);
+                            setRequestQuantity(food.quantity.toString());
+                          }}
+                          className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs transition shadow-sm ${
+                            user?.verified
+                              ? 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white shadow-blue-600/20'
+                              : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                          }`}
+                        >
+                          {user?.verified ? 'Request / Claim Food' : 'Verification Required to Claim'}
+                        </button>
                       </div>
                     )}
-
-                    <div className="p-5 space-y-4">
-                      <div>
-                        <h3 className="font-bold text-base text-slate-900 leading-tight">
-                          {food.foodName}
-                        </h3>
-                        <p className="text-xs text-slate-500 font-medium mt-0.5">
-                          {food.donor?.organization || food.donor?.name || 'Local Donor'}
-                        </p>
-                      </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-xs py-2 border-y border-slate-100">
-                      <div>
-                        <span className="text-slate-400 block text-[10px] uppercase font-bold">Quantity</span>
-                        <span className="font-semibold text-slate-800">{food.quantity} kg</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block text-[10px] uppercase font-bold">Est. Servings</span>
-                        <span className="font-semibold text-slate-800">{food.servings} people</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block text-[10px] uppercase font-bold">Storage</span>
-                        <span className="font-semibold text-slate-800 truncate block">{food.storage}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block text-[10px] uppercase font-bold">Category</span>
-                        <span className="font-semibold text-slate-800 truncate block">{food.category}</span>
-                      </div>
-                    </div>
-
-                    <div className="text-xs text-slate-600 space-y-1">
-                      <div className="flex items-center space-x-1.5">
-                        <span>📍</span>
-                        <span className="truncate">{food.pickupAddress}, {food.city}</span>
-                      </div>
-                      <div className="flex items-center space-x-1.5 text-slate-500">
-                        <span>⏰</span>
-                        <span>Best before: {new Date(food.consumeBefore).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                    </div>
                   </div>
-                </div>
-
-                <div className="p-4 bg-slate-50 border-t border-slate-100">
-                  <button
-                      onClick={() => {
-                        if (!user?.verified) {
-                          alert('Your NGO account is awaiting administrative verification. You can claim surplus food once approved by Admin.');
-                          return;
-                        }
-                        setSelectedDonation(food);
-                        setRequestQuantity(food.quantity.toString());
-                      }}
-                      className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs transition shadow-sm ${
-                        user?.verified
-                          ? 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white shadow-blue-600/20'
-                          : 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                      }`}
-                    >
-                      {user?.verified ? 'Request / Claim Food' : 'Verification Required to Claim'}
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -453,6 +549,11 @@ function NGODashboardContent() {
                         <p className="text-xs text-slate-500 mt-1">
                           Donor: <strong>{req.donation.donor?.organization || req.donation.donor?.name}</strong> • Requested: {req.quantity} kg
                         </p>
+                        {req.donation.consumeBefore && (
+                          <div className="mt-1.5 flex items-center space-x-2">
+                            <CountdownTimer consumeBefore={req.donation.consumeBefore} status={req.donation.status} />
+                          </div>
+                        )}
                       </div>
                     </div>
 

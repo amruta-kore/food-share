@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth, Role } from './context/AuthProvider';
 import { useRouter } from 'next/navigation';
 import FeedbackModal from '../components/FeedbackModal';
+import CountdownTimer from '../components/CountdownTimer';
 
 interface Donation {
   id: number;
@@ -22,6 +23,12 @@ interface Donation {
     name: string;
     organization?: string;
   };
+  request?: {
+    ngo?: {
+      name: string;
+      organization?: string;
+    };
+  } | null;
 }
 
 export default function HomePage() {
@@ -31,6 +38,7 @@ export default function HomePage() {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [vegOnly, setVegOnly] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -51,18 +59,25 @@ export default function HomePage() {
       .catch((err) => console.error('Error fetching home reviews:', err));
   };
 
-  useEffect(() => {
-    fetch('/api/donations?status=AVAILABLE')
+  const loadDonations = () => {
+    // Fetch all active and delivered donations so they do not disappear
+    fetch('/api/donations')
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setDonations(data);
       })
       .catch((err) => console.error('Fetch error:', err))
       .finally(() => setLoading(false));
+  };
 
+  useEffect(() => {
+    loadDonations();
     loadFeedback();
 
-    const handleUpdate = () => loadFeedback();
+    const handleUpdate = () => {
+      loadFeedback();
+      loadDonations();
+    };
     window.addEventListener('foodshare:feedback-submitted', handleUpdate);
     return () => window.removeEventListener('foodshare:feedback-submitted', handleUpdate);
   }, []);
@@ -74,7 +89,15 @@ export default function HomePage() {
       (d.donor?.organization || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchCat = selectedCategory === 'ALL' || d.category === selectedCategory;
     const matchVeg = !vegOnly || d.isVegetarian;
-    return matchSearch && matchCat && matchVeg;
+    const matchStatus =
+      statusFilter === 'ALL'
+        ? true
+        : statusFilter === 'AVAILABLE'
+        ? d.status === 'AVAILABLE'
+        : statusFilter === 'DELIVERED'
+        ? d.status === 'DELIVERED' || d.status === 'COMPLETED'
+        : true;
+    return matchSearch && matchCat && matchVeg && matchStatus;
   });
 
   return (
@@ -194,6 +217,16 @@ export default function HomePage() {
               <option value="Dairy & Sweets">Dairy & Sweets</option>
             </select>
 
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none font-semibold text-slate-700"
+            >
+              <option value="ALL">All Food (Active & Rescued)</option>
+              <option value="AVAILABLE">🟢 Available for Claim</option>
+              <option value="DELIVERED">✅ Delivered / Rescued</option>
+            </select>
+
             <label className="flex items-center space-x-1.5 text-xs text-slate-700 bg-white px-3 py-2 border border-slate-300 rounded-xl cursor-pointer">
               <input
                 type="checkbox"
@@ -224,91 +257,169 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((d) => (
-              <div
-                key={d.id}
-                className="bg-white rounded-2xl border border-slate-200 hover:border-emerald-400 hover:shadow-lg transition overflow-hidden flex flex-col justify-between group"
-              >
-                <div>
-                  {/* Food Image Banner */}
-                  {d.imageUrl ? (
-                    <div className="relative w-full h-48 bg-slate-100 overflow-hidden">
-                      <img
-                        src={d.imageUrl}
-                        alt={d.foodName}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute top-3 right-3">
-                        <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-md backdrop-blur-md ${d.isVegetarian ? 'bg-emerald-600/95 text-white' : 'bg-red-600/95 text-white'}`}>
-                          {d.isVegetarian ? '🥬 VEG' : '🍗 NON-VEG'}
-                        </span>
+            {filtered.map((d) => {
+              const isDelivered = d.status === 'DELIVERED' || d.status === 'COMPLETED';
+              return (
+                <div
+                  key={d.id}
+                  className={`bg-white rounded-2xl border transition overflow-hidden flex flex-col justify-between group ${
+                    isDelivered ? 'border-teal-200 bg-slate-50/40' : 'border-slate-200 hover:border-emerald-400 hover:shadow-lg'
+                  }`}
+                >
+                  <div>
+                    {/* Food Image Banner */}
+                    {d.imageUrl ? (
+                      <div className="relative w-full h-48 bg-slate-100 overflow-hidden">
+                        <img
+                          src={d.imageUrl}
+                          alt={d.foodName}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                          <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-md backdrop-blur-md ${d.isVegetarian ? 'bg-emerald-600/95 text-white' : 'bg-red-600/95 text-white'}`}>
+                            {d.isVegetarian ? '🥬 VEG' : '🍗 NON-VEG'}
+                          </span>
+                          {isDelivered ? (
+                            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md bg-teal-600 text-white border border-white/20">
+                              ✅ DELIVERED
+                            </span>
+                          ) : d.status === 'AVAILABLE' ? (
+                            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md bg-emerald-600 text-white border border-white/20">
+                              🟢 AVAILABLE
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md bg-amber-600 text-white border border-white/20">
+                              🚚 IN TRANSIT
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="relative w-full h-24 bg-gradient-to-r from-emerald-50 to-teal-50 flex items-center justify-between px-5 border-b border-slate-100">
-                      <div className="text-3xl">
-                        {d.category.includes('Bakery') ? '🥖' : d.category.includes('Produce') ? '🍎' : d.category.includes('Dairy') ? '🥛' : '🍲'}
+                    ) : (
+                      <div className="relative w-full h-24 bg-gradient-to-r from-emerald-50 to-teal-50 flex items-center justify-between px-5 border-b border-slate-100">
+                        <div className="text-3xl">
+                          {d.category.includes('Bakery') ? '🥖' : d.category.includes('Produce') ? '🍎' : d.category.includes('Dairy') ? '🥛' : '🍲'}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${d.isVegetarian ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'}`}>
+                            {d.isVegetarian ? 'VEG' : 'NON-VEG'}
+                          </span>
+                          {isDelivered && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 border border-teal-300">
+                              DELIVERED
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${d.isVegetarian ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'}`}>
-                        {d.isVegetarian ? 'VEG' : 'NON-VEG'}
-                      </span>
-                    </div>
-                  )}
+                    )}
 
-                  <div className="p-5 space-y-4">
-                    <div>
-                      <h3 className="font-bold text-base text-slate-900 leading-tight">{d.foodName}</h3>
-                      <p className="text-xs text-slate-500 font-medium mt-0.5">
-                        {d.donor?.organization || d.donor?.name || 'Local Kitchen'}
-                      </p>
-                    </div>
+                    <div className="p-5 space-y-4">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-bold text-base text-slate-900 leading-tight">{d.foodName}</h3>
+                          {isDelivered && (
+                            <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded">
+                              ✓ Rescued
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">
+                          {d.donor?.organization || d.donor?.name || 'Local Kitchen'}
+                        </p>
+                      </div>
 
-                    <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl text-xs">
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Quantity</span>
-                        <strong className="text-slate-800">{d.quantity} kg</strong>
+                      <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl text-xs">
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block">Quantity</span>
+                          <strong className="text-slate-800">{d.quantity} kg</strong>
+                        </div>
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block">Servings</span>
+                          <strong className="text-slate-800">~{d.servings} people</strong>
+                        </div>
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block">Category</span>
+                          <span className="text-slate-700 truncate block">{d.category}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block">City</span>
+                          <span className="text-slate-700 truncate block">{d.city}</span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Servings</span>
-                        <strong className="text-slate-800">~{d.servings} people</strong>
-                      </div>
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Category</span>
-                        <span className="text-slate-700 truncate block">{d.category}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">City</span>
-                        <span className="text-slate-700 truncate block">{d.city}</span>
-                      </div>
-                    </div>
 
-                    <div className="text-xs text-slate-600 space-y-1">
-                      <div className="flex items-center space-x-1.5">
-                        <span>📍</span>
-                        <span className="truncate">{d.pickupAddress}</span>
-                      </div>
-                      <div className="flex items-center space-x-1.5 text-slate-500">
-                        <span>⏰</span>
-                        <span>Best before: {new Date(d.consumeBefore).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      {/* Expiry Countdown Timer & Details */}
+                      <div className="text-xs text-slate-600 space-y-2">
+                        <div className="flex items-center space-x-1.5">
+                          <span>📍</span>
+                          <span className="truncate">{d.pickupAddress}</span>
+                        </div>
+
+                        {/* Live Countdown Timer */}
+                        <div className="pt-2 border-t border-slate-100 flex flex-col space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase text-slate-400">
+                              {isDelivered ? 'Delivery State:' : 'Expiry Countdown:'}
+                            </span>
+                            <CountdownTimer consumeBefore={d.consumeBefore} status={d.status} />
+                          </div>
+                          <div className="flex items-center space-x-1.5 text-[11px] text-slate-500">
+                            <span>⏰</span>
+                            <span>
+                              Expires: {new Date(d.consumeBefore).toLocaleDateString([], { month: 'short', day: 'numeric' })} at {new Date(d.consumeBefore).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded">
-                    AVAILABLE
-                  </span>
+                  {/* Card Bottom / Action Area */}
+                  {isDelivered ? (
+                    <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <div className="flex items-center space-x-1.5">
+                        <span className="text-[11px] font-bold text-teal-800 bg-teal-100 px-2 py-0.5 rounded border border-teal-200">
+                          DELIVERED
+                        </span>
+                        {d.request?.ngo && (
+                          <span className="text-[11px] text-slate-600 font-medium truncate max-w-[130px]">
+                            To: {d.request.ngo.organization || d.request.ngo.name}
+                          </span>
+                        )}
+                      </div>
 
-                  <Link
-                    href="/ngo"
-                    className="text-xs font-bold text-blue-600 hover:text-blue-800 transition"
-                  >
-                    Claim via NGO Hub →
-                  </Link>
+                      <div
+                        className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 select-none flex items-center space-x-1"
+                        title="This food donation has already been delivered and completed. Other NGOs cannot access or claim it."
+                      >
+                        <span>🔒</span>
+                        <span>Delivered • Closed to other NGOs</span>
+                      </div>
+                    </div>
+                  ) : d.status === 'AVAILABLE' ? (
+                    <div className="p-4 bg-emerald-50/40 border-t border-emerald-100 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded">
+                        AVAILABLE
+                      </span>
+
+                      <Link
+                        href="/ngo"
+                        className="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 rounded-xl shadow-xs transition"
+                      >
+                        Claim via NGO Hub →
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-amber-50/50 border-t border-amber-100 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                        CLAIMED / IN TRANSIT
+                      </span>
+                      <span className="text-xs font-semibold text-amber-700 truncate max-w-[170px]">
+                        {d.request?.ngo ? `Claimed by ${d.request.ngo.organization || d.request.ngo.name}` : 'Reserved'}
+                      </span>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

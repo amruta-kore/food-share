@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 
+import CountdownTimer from '../../components/CountdownTimer';
+
 interface DeliveryTask {
   id: number;
   foodName: string;
@@ -12,6 +14,7 @@ interface DeliveryTask {
   quantity: number;
   servings: number;
   storage: string;
+  consumeBefore?: string;
   imageUrl?: string | null;
   pickupAddress: string;
   city: string;
@@ -255,6 +258,11 @@ function VolunteerDashboardContent() {
                       <p className="text-xs text-slate-500 mt-0.5">
                         {task.quantity} kg (~{task.servings} servings) • Category: {task.category}
                       </p>
+                      {task.consumeBefore && (
+                        <div className="mt-1.5 flex items-center space-x-2">
+                          <CountdownTimer consumeBefore={task.consumeBefore} status={task.status} />
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -380,6 +388,11 @@ function VolunteerDashboardContent() {
                       <p className="text-xs text-slate-500">
                         Donor: <strong>{task.donor?.organization || task.donor?.name}</strong>
                       </p>
+                      {task.consumeBefore && (
+                        <div className="mt-1 flex items-center space-x-2">
+                          <CountdownTimer consumeBefore={task.consumeBefore} status={task.status} />
+                        </div>
+                      )}
                     </div>
                   </div>
                   <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 shrink-0">

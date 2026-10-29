@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { RoleGuard } from '../../components/RoleGuard';
+import CountdownTimer from '../../components/CountdownTimer';
 
 interface Donation {
   id: number;
@@ -65,6 +66,14 @@ function DonorDashboardContent() {
   const [area, setArea] = useState('Kothrud');
   const [contactPerson, setContactPerson] = useState('');
   const [contactPhone, setContactPhone] = useState('');
+
+  // Expiry Date & Time State (Default 6 hours from current time)
+  const getDefaultExpiryTime = () => {
+    const d = new Date(Date.now() + 6 * 3600 * 1000);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  };
+  const [consumeBefore, setConsumeBefore] = useState(getDefaultExpiryTime());
 
   // Food Image State
   const [foodImageFile, setFoodImageFile] = useState<File | null>(null);
@@ -210,6 +219,7 @@ function DonorDashboardContent() {
       formData.append('area', area);
       formData.append('contactPerson', contactPerson);
       formData.append('contactPhone', contactPhone);
+      formData.append('consumeBefore', new Date(consumeBefore).toISOString());
       if (foodImageFile) {
         formData.append('image', foodImageFile);
       }
@@ -230,6 +240,7 @@ function DonorDashboardContent() {
         setQuantity('');
         setServings('');
         setPickupAddress('');
+        setConsumeBefore(getDefaultExpiryTime());
         clearImage();
         loadDonations(false);
       } else {
@@ -455,6 +466,12 @@ function DonorDashboardContent() {
                       <div className="text-xs text-slate-600 mt-1 flex items-center space-x-1.5">
                         <span>📍</span>
                         <span className="truncate">{d.pickupAddress}, {d.city}</span>
+                      </div>
+                      <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                        <CountdownTimer consumeBefore={d.consumeBefore} status={d.status} />
+                        <span className="text-[11px] text-slate-500 font-medium">
+                          Expires: {new Date(d.consumeBefore).toLocaleDateString([], { month: 'short', day: 'numeric' })} at {new Date(d.consumeBefore).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -733,6 +750,52 @@ function DonorDashboardContent() {
                   <option>Refrigerated (Kept at 4°C)</option>
                   <option>Hot Box / Bain-Marie</option>
                 </select>
+              </div>
+
+              {/* Expiry Date & Time Input with Presets */}
+              <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/90 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-amber-900">
+                    ⏰ Food Expiry Date & Time (Consume Before) *
+                  </label>
+                  <span className="text-[10px] text-amber-700 font-bold bg-amber-100 px-2 py-0.5 rounded">
+                    Countdown Live
+                  </span>
+                </div>
+                <input
+                  type="datetime-local"
+                  required
+                  value={consumeBefore}
+                  min={new Date().toISOString().slice(0, 16)}
+                  onChange={(e) => setConsumeBefore(e.target.value)}
+                  className="w-full px-3.5 py-2 text-sm border border-amber-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white font-mono font-medium"
+                />
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] font-bold text-amber-800">Quick Presets:</span>
+                  {[
+                    { label: '+2h', hours: 2 },
+                    { label: '+4h', hours: 4 },
+                    { label: '+6h', hours: 6 },
+                    { label: '+12h', hours: 12 },
+                    { label: 'Tomorrow (+24h)', hours: 24 },
+                  ].map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => {
+                        const d = new Date(Date.now() + preset.hours * 3600 * 1000);
+                        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                        setConsumeBefore(d.toISOString().slice(0, 16));
+                      }}
+                      className="px-2 py-0.5 text-[10px] font-bold bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-md transition shadow-2xs"
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-amber-700/80">
+                  A real-time countdown timer will display on the dashboard so NGOs and volunteers know the exact window for pickup.
+                </p>
               </div>
 
               <div>

@@ -61,8 +61,12 @@ router.post(
         return res.status(404).json({ message: 'Donation not found' });
       }
 
+      if (donation.status === 'DELIVERED' || donation.status === 'COMPLETED') {
+        return res.status(400).json({ message: 'This food donation has already been delivered and completed. Other NGOs cannot access or claim it.' });
+      }
+
       if (donation.status !== 'AVAILABLE') {
-        return res.status(400).json({ message: 'Donation is already claimed or no longer available' });
+        return res.status(400).json({ message: `Donation is currently in ${donation.status.toLowerCase()} status and is not available for claiming.` });
       }
 
       const ngo = await prisma.user.findUnique({

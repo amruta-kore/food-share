@@ -87,37 +87,58 @@ router.post(
   }
 );
 
-// Get all active donations (public, no auth required)
+// Get active and delivered donations (public feed)
 router.get('/', async (req, res: Response) => {
   try {
     const { city, isVegetarian, category, status } = req.query as {
       city?: string;
       isVegetarian?: string;
       category?: string;
-      status?: DonationStatus;
+      status?: string;
     };
 
     const where: any = {};
-    if (status) {
-      where.status = status;
+    if (status && status !== 'ALL' && status !== 'FEED') {
+      where.status = status as DonationStatus;
     } else {
-      where.status = DonationStatus.AVAILABLE;
+      // Return AVAILABLE as well as DELIVERED/COMPLETED donations so they remain on dashboard!
+      where.status = {
+        in: [
+          DonationStatus.AVAILABLE,
+          DonationStatus.DELIVERED,
+          DonationStatus.COMPLETED,
+          DonationStatus.OUT_FOR_DELIVERY,
+          DonationStatus.PICKED_UP,
+          DonationStatus.ACCEPTED,
+          DonationStatus.REQUESTED,
+        ],
+      };
     }
 
     if (city) where.city = { contains: city };
-    if (category) where.category = category;
-    if (isVegetarian !== undefined) where.isVegetarian = isVegetarian === 'true';
+    if (category && category !== 'ALL') where.category = category;
+    if (isVegetarian !== undefined && isVegetarian !== 'ALL') {
+      where.isVegetarian = isVegetarian === 'true';
+    }
 
     const donations = await prisma.donation.findMany({
       where,
       include: {
         donor: { select: { id: true, name: true, organization: true } },
         request: { include: { ngo: { select: { id: true, name: true, organization: true } } } },
+        volunteer: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
 
-    res.json(donations);
+    // Custom sorting: AVAILABLE donations come first, followed by in-progress and delivered
+    const sorted = donations.sort((a, b) => {
+      if (a.status === DonationStatus.AVAILABLE && b.status !== DonationStatus.AVAILABLE) return -1;
+      if (a.status !== DonationStatus.AVAILABLE && b.status === DonationStatus.AVAILABLE) return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    res.json(sorted);
   } catch (error: any) {
     console.error('Fetch donations error:', error);
     res.status(500).json({ error: 'Failed to fetch donations' });
