@@ -52,6 +52,8 @@ function DonorDashboardContent() {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [fetching, setFetching] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingDonation, setEditingDonation] = useState<Donation | null>(null);
+  const [deletingDonationId, setDeletingDonationId] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -251,6 +253,110 @@ function DonorDashboardContent() {
       setActionError(err?.message || 'Error communicating with server');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const openEditModal = (donation: Donation) => {
+    setEditingDonation(donation);
+    setFoodName(donation.foodName);
+    setCategory(donation.category || 'Cooked Meals');
+    setIsVegetarian(donation.isVegetarian);
+    setQuantity(String(donation.quantity));
+    setServings(String(donation.servings));
+    setStorage(donation.storage || 'Room Temperature');
+    setPickupAddress(donation.pickupAddress);
+    setCity(donation.city || 'Pune');
+    setArea(donation.area || 'Kothrud');
+    setContactPerson(donation.contactPerson || '');
+    setContactPhone(donation.contactPhone || '');
+    
+    // Parse consumeBefore for datetime-local input
+    if (donation.consumeBefore) {
+      const d = new Date(donation.consumeBefore);
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      setConsumeBefore(d.toISOString().slice(0, 16));
+    } else {
+      setConsumeBefore(getDefaultExpiryTime());
+    }
+
+    clearImage();
+    setActionError(null);
+  };
+
+  const handleUpdateDonation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDonation) return;
+
+    setActionError(null);
+    setSubmitting(true);
+    const token = localStorage.getItem('accessToken');
+
+    try {
+      const formData = new FormData();
+      formData.append('foodName', foodName);
+      formData.append('category', category);
+      formData.append('isVegetarian', String(isVegetarian));
+      formData.append('quantity', quantity);
+      formData.append('servings', servings);
+      formData.append('storage', storage);
+      formData.append('pickupAddress', pickupAddress);
+      formData.append('city', city);
+      formData.append('area', area);
+      formData.append('contactPerson', contactPerson);
+      formData.append('contactPhone', contactPhone);
+      formData.append('consumeBefore', new Date(consumeBefore).toISOString());
+      if (foodImageFile) {
+        formData.append('image', foodImageFile);
+      }
+
+      const res = await fetch(`/api/donations/${editingDonation.id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setEditingDonation(null);
+        clearImage();
+        loadDonations(false);
+      } else {
+        setActionError(data.error || data.message || 'Failed to update donation');
+      }
+    } catch (err: any) {
+      setActionError(err?.message || 'Error communicating with server');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteDonation = async (donationId: number) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this food donation? This action cannot be undone.');
+    if (!confirmDelete) return;
+
+    setDeletingDonationId(donationId);
+    const token = localStorage.getItem('accessToken');
+
+    try {
+      const res = await fetch(`/api/donations/${donationId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        loadDonations(false);
+      } else {
+        alert(data.error || data.message || 'Failed to delete donation');
+      }
+    } catch (err: any) {
+      alert(err?.message || 'Error communicating with server');
+    } finally {
+      setDeletingDonationId(null);
     }
   };
 
@@ -516,13 +622,41 @@ function DonorDashboardContent() {
                     </div>
                   </div>
 
-                  <div className="text-xs text-slate-500 sm:text-right shrink-0">
-                    <div className="text-[11px] text-slate-400">
-                      Posted: {new Date(d.createdAt).toLocaleDateString()}
+                  <div className="text-xs text-slate-500 sm:text-right shrink-0 flex flex-col sm:items-end justify-between space-y-2">
+                    <div>
+                      <div className="text-[11px] text-slate-400">
+                        Posted: {new Date(d.createdAt).toLocaleDateString()}
+                      </div>
+                      {d.volunteer && (
+                        <div className="mt-1 text-emerald-700 font-medium">
+                          Courier: {d.volunteer.name} {d.volunteer.phone && `(${d.volunteer.phone})`}
+                        </div>
+                      )}
                     </div>
-                    {d.volunteer && (
-                      <div className="mt-1 text-emerald-700 font-medium">
-                        Courier: {d.volunteer.name} {d.volunteer.phone && `(${d.volunteer.phone})`}
+
+                    {/* Donor Action Controls: Edit & Delete (Available when food is still editable before courier assignment) */}
+                    {(d.status === 'AVAILABLE' || d.status === 'REQUESTED') && (
+                      <div className="flex items-center space-x-1.5 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(d)}
+                          className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition flex items-center space-x-1 border border-slate-200 shadow-2xs cursor-pointer"
+                          title="Edit donation details"
+                        >
+                          <span>✏️</span>
+                          <span>Edit</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={deletingDonationId === d.id}
+                          onClick={() => handleDeleteDonation(d.id)}
+                          className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-lg transition flex items-center space-x-1 border border-red-200 shadow-2xs cursor-pointer disabled:opacity-50"
+                          title="Delete this donation"
+                        >
+                          <span>🗑️</span>
+                          <span>{deletingDonationId === d.id ? 'Deleting...' : 'Delete'}</span>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -1074,6 +1208,311 @@ function DonorDashboardContent() {
                   className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-600/20 disabled:opacity-50 transition"
                 >
                   {submitting ? 'Posting...' : 'Publish Surplus'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Donation Modal */}
+      {editingDonation && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 space-y-5 shadow-2xl border border-slate-100">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900">Edit Surplus Food Listing</h3>
+                <p className="text-xs text-slate-500">Update meal details, quantity, or pickup window</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingDonation(null)}
+                className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {actionError && (
+              <div className="p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
+                {actionError}
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateDonation} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Food Item Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={foodName}
+                  onChange={(e) => setFoodName(e.target.value)}
+                  placeholder="e.g., Vegetable Biryani & Paneer Curry"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Food Image (Optional Replacement) */}
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Food Photo (Optional replacement)
+                  </label>
+                  {foodImagePreview && (
+                    <button
+                      type="button"
+                      onClick={clearImage}
+                      className="text-[11px] text-red-600 hover:underline font-semibold"
+                    >
+                      Remove photo
+                    </button>
+                  )}
+                </div>
+
+                {foodImagePreview ? (
+                  <div className="relative w-full h-40 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                    <img
+                      src={foodImagePreview}
+                      alt="Selected food preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : editingDonation.imageUrl ? (
+                  <div className="relative w-full h-36 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-between p-3">
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={editingDonation.imageUrl}
+                        alt="Current food"
+                        className="w-20 h-20 rounded-lg object-cover border border-slate-200"
+                      />
+                      <div className="text-xs text-slate-600">
+                        <span className="font-semibold block text-slate-900">Current Photo on File</span>
+                        <span className="text-[11px] text-slate-500">Upload a new photo below if you wish to replace it.</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="mt-2 flex items-center space-x-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Category</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+                  >
+                    <option value="Cooked Meals">Cooked Meals</option>
+                    <option value="Bakery & Bread">Bakery & Bread</option>
+                    <option value="Packaged Food">Packaged Food</option>
+                    <option value="Raw Produce & Veggies">Raw Produce & Veggies</option>
+                    <option value="Dairy Products">Dairy Products</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Type</label>
+                  <div className="flex space-x-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setIsVegetarian(true)}
+                      className={`flex-1 py-1.5 text-xs font-semibold rounded-lg border transition ${
+                        isVegetarian
+                          ? 'bg-green-50 text-green-700 border-green-500 ring-1 ring-green-500'
+                          : 'bg-white text-slate-600 border-slate-200'
+                      }`}
+                    >
+                      🥦 Veg
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsVegetarian(false)}
+                      className={`flex-1 py-1.5 text-xs font-semibold rounded-lg border transition ${
+                        !isVegetarian
+                          ? 'bg-amber-50 text-amber-800 border-amber-500 ring-1 ring-amber-500'
+                          : 'bg-white text-slate-600 border-slate-200'
+                      }`}
+                    >
+                      🍗 Non-Veg
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Quantity (kg) *</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    required
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    placeholder="e.g. 15"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Servings *</label>
+                  <input
+                    type="number"
+                    required
+                    value={servings}
+                    onChange={(e) => setServings(e.target.value)}
+                    placeholder="e.g. 40"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Storage</label>
+                  <select
+                    value={storage}
+                    onChange={(e) => setStorage(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-xs"
+                  >
+                    <option value="Room Temperature">Room Temp</option>
+                    <option value="Refrigerated">Refrigerated</option>
+                    <option value="Frozen">Frozen</option>
+                    <option value="Keep Warm">Keep Warm</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Expiry Date & Time Input */}
+              <div className="p-3.5 bg-amber-50/60 border border-amber-200 rounded-xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-amber-900 flex items-center space-x-1.5">
+                    <span>⏰</span>
+                    <span>Best Before / Expiry Time *</span>
+                  </label>
+                  <span className="text-[10px] uppercase font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                    Required for food safety
+                  </span>
+                </div>
+                <input
+                  type="datetime-local"
+                  required
+                  value={consumeBefore}
+                  min={new Date().toISOString().slice(0, 16)}
+                  onChange={(e) => setConsumeBefore(e.target.value)}
+                  className="w-full px-3.5 py-2 text-sm border border-amber-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white font-mono font-medium"
+                />
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] font-bold text-amber-800">Quick Presets:</span>
+                  {[
+                    { label: '+2h', hours: 2 },
+                    { label: '+4h', hours: 4 },
+                    { label: '+6h', hours: 6 },
+                    { label: '+12h', hours: 12 },
+                    { label: 'Tomorrow (+24h)', hours: 24 },
+                  ].map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => {
+                        const d = new Date(Date.now() + preset.hours * 3600 * 1000);
+                        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                        setConsumeBefore(d.toISOString().slice(0, 16));
+                      }}
+                      className="px-2 py-0.5 text-[10px] font-bold bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-md transition shadow-2xs"
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Pickup Address *</label>
+                <input
+                  type="text"
+                  required
+                  value={pickupAddress}
+                  onChange={(e) => setPickupAddress(e.target.value)}
+                  placeholder="e.g., Kitchen Gate 2, Hotel Grand Orchid, JM Road"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">City *</label>
+                  <input
+                    type="text"
+                    required
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Area / Locality</label>
+                  <input
+                    type="text"
+                    value={area}
+                    onChange={(e) => setArea(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Contact Person
+                  </label>
+                  <input
+                    type="text"
+                    value={contactPerson}
+                    onChange={(e) => setContactPerson(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Contact Phone *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    placeholder="+91 9876543210"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingDonation(null)}
+                  className="px-4 py-2 border border-slate-300 rounded-xl text-slate-700 text-sm font-semibold hover:bg-slate-50 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-600/20 disabled:opacity-50 transition cursor-pointer"
+                >
+                  {submitting ? 'Updating...' : 'Save Changes'}
                 </button>
               </div>
             </form>

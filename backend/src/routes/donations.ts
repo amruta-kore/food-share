@@ -171,4 +171,161 @@ router.get('/:id', async (req, res: Response) => {
   }
 });
 
+// Edit a donation – Verified Donor only (only allowed if food is still AVAILABLE or REQUESTED before courier assignment)
+router.put(
+  '/:id',
+  authenticate,
+  authorize([Role.DONOR]),
+  requireVerified,
+  (req, res, next) => {
+    foodImageUpload.single('image')(req, res, (err) => {
+      if (err) {
+        return res.status(400).json({ error: err.message || 'Image upload error' });
+      }
+      next();
+    });
+  },
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const donationId = Number(req.params.id);
+      const donorId = req.user!.id;
+
+      const existing = await prisma.donation.findUnique({
+        where: { id: donationId },
+      });
+
+      if (!existing) {
+        return res.status(404).json({ error: 'Donation not found' });
+      }
+
+      if (existing.donorId !== donorId) {
+        return res.status(403).json({ error: 'Unauthorized: You can only edit your own donations' });
+      }
+
+      // Check if food has already been claimed and assigned to a volunteer courier or beyond
+      if (
+        existing.status === DonationStatus.VOLUNTEER_ASSIGNED ||
+        existing.status === DonationStatus.PICKED_UP ||
+        existing.status === DonationStatus.OUT_FOR_DELIVERY ||
+        existing.status === DonationStatus.DELIVERED ||
+        existing.status === DonationStatus.COMPLETED
+      ) {
+        return res.status(400).json({
+          error: `Cannot edit this donation because it is already in '${existing.status}' status (courier is already coordinating or food has been picked up/delivered).`,
+        });
+      }
+
+      const {
+        foodName,
+        category,
+        isVegetarian,
+        quantity,
+        servings,
+        preparedAt,
+        consumeBefore,
+        storage,
+        pickupAddress,
+        city,
+        area,
+        contactPerson,
+        contactPhone,
+      } = req.body;
+
+      const updateData: any = {};
+      if (foodName) updateData.foodName = foodName;
+      if (category) updateData.category = category;
+      if (isVegetarian !== undefined) {
+        updateData.isVegetarian = isVegetarian === 'true' || isVegetarian === true || isVegetarian === '1';
+      }
+      if (quantity) updateData.quantity = Number(quantity);
+      if (servings) updateData.servings = Number(servings);
+      if (preparedAt) updateData.preparedAt = new Date(preparedAt);
+      if (consumeBefore) updateData.consumeBefore = new Date(consumeBefore);
+      if (storage) updateData.storage = storage;
+      if (pickupAddress) updateData.pickupAddress = pickupAddress;
+      if (city) updateData.city = city;
+      if (area) updateData.area = area;
+      if (contactPerson) updateData.contactPerson = contactPerson;
+      if (contactPhone) updateData.contactPhone = contactPhone;
+
+      if (req.file) {
+        updateData.imageUrl = `/uploads/food/${req.file.filename}`;
+      } else if (req.body.imageUrl !== undefined) {
+        updateData.imageUrl = req.body.imageUrl || null;
+      }
+
+      const updated = await prisma.donation.update({
+        where: { id: donationId },
+        data: updateData,
+        include: {
+          donor: { select: { id: true, name: true, organization: true } },
+          request: { include: { ngo: { select: { id: true, name: true, organization: true } } } },
+        },
+      });
+
+      res.json({ message: 'Donation successfully updated', donation: updated });
+    } catch (error: any) {
+      console.error('Update donation error:', error);
+      res.status(500).json({ error: error?.message || 'Failed to update donation' });
+    }
+  }
+);
+
+// Delete a donation – Verified Donor only (only allowed if food is still AVAILABLE or REQUESTED before courier assignment)
+router.delete(
+  '/:id',
+  authenticate,
+  authorize([Role.DONOR]),
+  requireVerified,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const donationId = Number(req.params.id);
+      const donorId = req.user!.id;
+
+      const existing = await prisma.donation.findUnique({
+        where: { id: donationId },
+        include: { request: true },
+      });
+
+      if (!existing) {
+        return res.status(404).json({ error: 'Donation not found' });
+      }
+
+      if (existing.donorId !== donorId) {
+        return res.status(403).json({ error: 'Unauthorized: You can only delete your own donations' });
+      }
+
+      // Check if food has already been claimed and assigned to a volunteer courier or beyond
+      if (
+        existing.status === DonationStatus.VOLUNTEER_ASSIGNED ||
+        existing.status === DonationStatus.PICKED_UP ||
+        existing.status === DonationStatus.OUT_FOR_DELIVERY ||
+        existing.status === DonationStatus.DELIVERED ||
+        existing.status === DonationStatus.COMPLETED
+      ) {
+        return res.status(400).json({
+          error: `Cannot delete this donation because it is already in '${existing.status}' status. Couriers are actively transporting or food has been received.`,
+        });
+      }
+
+      // If there's an associated pending/requested Request record, remove it first
+      if (existing.request) {
+        await prisma.request.delete({
+          where: { id: existing.request.id },
+        });
+      }
+
+      // Now delete the donation
+      await prisma.donation.delete({
+        where: { id: donationId },
+      });
+
+      res.json({ message: 'Donation successfully deleted' });
+    } catch (error: any) {
+      console.error('Delete donation error:', error);
+      res.status(500).json({ error: error?.message || 'Failed to delete donation' });
+    }
+  }
+);
+
 export default router;
