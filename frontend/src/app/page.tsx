@@ -36,9 +36,9 @@ export default function HomePage() {
   const router = useRouter();
 
   const [donations, setDonations] = useState<Donation[]>([]);
+  const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
-  const [statusFilter, setStatusFilter] = useState('ALL');
   const [vegOnly, setVegOnly] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -60,7 +60,6 @@ export default function HomePage() {
   };
 
   const loadDonations = () => {
-    // Fetch all active and delivered donations so they do not disappear
     fetch('/api/donations')
       .then((res) => res.json())
       .then((data) => {
@@ -82,22 +81,26 @@ export default function HomePage() {
     return () => window.removeEventListener('foodshare:feedback-submitted', handleUpdate);
   }, []);
 
-  const filtered = donations.filter((d) => {
+  // Split donations into Active (Available / In-transit) and Completed Distribution History
+  const activeDonations = donations.filter(
+    (d) => d.status !== 'DELIVERED' && d.status !== 'COMPLETED'
+  );
+  const historyDonations = donations.filter(
+    (d) => d.status === 'DELIVERED' || d.status === 'COMPLETED'
+  );
+
+  // Display the relevant collection based on the selected tab
+  const currentDataset = activeTab === 'active' ? activeDonations : historyDonations;
+
+  const filtered = currentDataset.filter((d) => {
     const matchSearch =
       d.foodName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       d.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (d.donor?.organization || '').toLowerCase().includes(searchTerm.toLowerCase());
+      (d.donor?.organization || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (d.request?.ngo?.organization || d.request?.ngo?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchCat = selectedCategory === 'ALL' || d.category === selectedCategory;
     const matchVeg = !vegOnly || d.isVegetarian;
-    const matchStatus =
-      statusFilter === 'ALL'
-        ? true
-        : statusFilter === 'AVAILABLE'
-        ? d.status === 'AVAILABLE'
-        : statusFilter === 'DELIVERED'
-        ? d.status === 'DELIVERED' || d.status === 'COMPLETED'
-        : true;
-    return matchSearch && matchCat && matchVeg && matchStatus;
+    return matchSearch && matchCat && matchVeg;
   });
 
   return (
@@ -186,13 +189,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Live Surplus Food Feed */}
+      {/* Live Surplus Food Feed & Distribution History */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        {/* Navigation Tabs: Active Surplus vs Distribution History */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Live Surplus Food Feed</h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Active donations posted by registered restaurants, bakeries, and banquet halls
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={() => setActiveTab('active')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition flex items-center space-x-2 cursor-pointer ${
+                  activeTab === 'active'
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <span>🍲 Active Surplus Food</span>
+                <span
+                  className={`text-[11px] px-2 py-0.5 rounded-full font-extrabold ${
+                    activeTab === 'active' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}
+                >
+                  {activeDonations.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('history')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition flex items-center space-x-2 cursor-pointer ${
+                  activeTab === 'history'
+                    ? 'bg-teal-700 text-white shadow-md shadow-teal-700/20'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+                title="View successfully delivered food and distribution history"
+              >
+                <span>📜 Distribution History</span>
+                <span
+                  className={`text-[11px] px-2 py-0.5 rounded-full font-extrabold ${
+                    activeTab === 'history' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}
+                >
+                  {historyDonations.length}
+                </span>
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-500 mt-2">
+              {activeTab === 'active'
+                ? 'Active donations available for claiming or currently in transit. Delivered food is archived in History.'
+                : 'Verified record of past surplus food successfully received and distributed by partner shelters.'}
             </p>
           </div>
 
@@ -201,30 +247,20 @@ export default function HomePage() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by food or city..."
+              placeholder={activeTab === 'active' ? "Search food or city..." : "Search past deliveries, NGOs, or city..."}
               className="px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
 
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none"
+              className="px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none text-slate-700"
             >
               <option value="ALL">All Categories</option>
               <option value="Cooked Meals">Cooked Meals</option>
               <option value="Bakery & Bread">Bakery & Bread</option>
               <option value="Fresh Produce / Fruits">Fresh Produce</option>
               <option value="Dairy & Sweets">Dairy & Sweets</option>
-            </select>
-
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none font-semibold text-slate-700"
-            >
-              <option value="ALL">All Food (Active & Rescued)</option>
-              <option value="AVAILABLE">🟢 Available for Claim</option>
-              <option value="DELIVERED">✅ Delivered / Rescued</option>
             </select>
 
             <label className="flex items-center space-x-1.5 text-xs text-slate-700 bg-white px-3 py-2 border border-slate-300 rounded-xl cursor-pointer">
@@ -240,20 +276,39 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <div className="p-16 text-center text-slate-400">Loading surplus listings...</div>
+          <div className="p-16 text-center text-slate-400">Loading listings...</div>
         ) : filtered.length === 0 ? (
           <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-3">
-            <div className="text-4xl">🥗</div>
-            <h3 className="font-bold text-slate-800">No surplus food currently matches your search</h3>
+            <div className="text-4xl">{activeTab === 'active' ? '🥗' : '📦'}</div>
+            <h3 className="font-bold text-slate-800">
+              {activeTab === 'active'
+                ? 'No active surplus food currently available'
+                : 'No distribution history matching your criteria'}
+            </h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Donors can post new donations directly through the <strong>Donor Dashboard</strong>.
+              {activeTab === 'active' ? (
+                <span>
+                  All recent surplus donations have either been claimed or delivered. Check the{' '}
+                  <button
+                    onClick={() => setActiveTab('history')}
+                    className="text-teal-700 font-bold hover:underline"
+                  >
+                    Distribution History
+                  </button>{' '}
+                  tab or post new meals below.
+                </span>
+              ) : (
+                <span>Delivered missions and completed food handovers will automatically be archived here.</span>
+              )}
             </p>
-            <Link
-              href="/donor"
-              className="inline-block px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition"
-            >
-              Post a Food Listing Now
-            </Link>
+            {activeTab === 'active' && (
+              <Link
+                href="/donor"
+                className="inline-block px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition cursor-pointer"
+              >
+                Post a Food Listing Now
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
