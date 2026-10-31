@@ -48,7 +48,9 @@ router.post('/register', documentUpload.single('document'), async (req: Request,
       return res.status(400).json({ message: 'Invalid role' });
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const cleanEmail = email.trim().toLowerCase();
+
+    const existing = await prisma.user.findUnique({ where: { email: cleanEmail } });
     if (existing) {
       return res.status(409).json({ message: 'Email is already registered' });
     }
@@ -73,13 +75,13 @@ router.post('/register', documentUpload.single('document'), async (req: Request,
 
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
+        name: name.trim(),
+        email: cleanEmail,
         passwordHash,
         role,
-        organization: organization || null,
-        phone: phone || null,
-        address: address || null,
+        organization: organization ? organization.trim() : null,
+        phone: phone ? phone.trim() : null,
+        address: address ? address.trim() : null,
         latitude: parsedLat,
         longitude: parsedLng,
         verified: false,

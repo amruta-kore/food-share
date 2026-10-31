@@ -92,9 +92,9 @@ export default function RegisterPage() {
     setLoading(true);
 
     const formData = new FormData();
-    formData.append('name', name);
-    formData.append('email', email);
-    formData.append('password', password);
+    formData.append('name', name.trim());
+    formData.append('email', email.trim().toLowerCase());
+    formData.append('password', password.trim());
     formData.append('role', role);
     if (organization) formData.append('organization', organization);
     if (phone) formData.append('phone', phone);
