@@ -22,7 +22,43 @@ export interface MailOptions {
 }
 
 export const sendMail = async (options: MailOptions) => {
-  const fromAddress = process.env.EMAIL_USER || 'notifications@foodshare.org';
+  const fromAddress = process.env.EMAIL_USER || 'amrutakore2006@gmail.com';
+  const brevoApiKey = process.env.BREVO_API_KEY;
+
+  // 1. If Brevo API Key is configured, send via HTTPS REST API (Port 443 - NEVER blocked by cloud hosts)
+  if (brevoApiKey) {
+    try {
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'api-key': brevoApiKey,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: {
+            name: 'FoodShare Platform',
+            email: fromAddress,
+          },
+          to: [{ email: options.to }],
+          subject: options.subject,
+          htmlContent: options.html,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (response.ok) {
+        console.log(`✉️ [Brevo API] Email successfully delivered to ${options.to}:`, (data as any)?.messageId || 'OK');
+        return data;
+      } else {
+        console.warn(`⚠️ [Brevo API Error] ${response.status}:`, data);
+      }
+    } catch (apiErr: any) {
+      console.warn(`⚠️ [Brevo API Request Failed]:`, apiErr?.message || apiErr);
+    }
+  }
+
+  // 2. Fallback to Nodemailer SMTP (works locally & on paid cloud tiers)
   const mailOptions = {
     from: `"FoodShare Platform" <${fromAddress}>`,
     ...options,
@@ -37,7 +73,7 @@ export const sendMail = async (options: MailOptions) => {
     console.log(`✉️ Email successfully delivered to ${options.to}:`, info.messageId);
     return info;
   } catch (err: any) {
-    console.warn(`⚠️ Email delivery notice for ${options.to} (app continues normally):`, err?.message || err);
+    console.warn(`⚠️ Email delivery notice for ${options.to}:`, err?.message || err);
     return null;
   }
 };
