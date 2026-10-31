@@ -113,12 +113,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const getApiUrl = (endpoint: string) => {
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+    if (base && typeof window !== 'undefined') {
+      return `${base}${endpoint}`;
+    }
+    return endpoint;
+  };
+
   const login = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
     setLoading(true);
     try {
       const cleanEmail = email.trim().toLowerCase();
       const cleanPassword = password.trim();
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(getApiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: cleanEmail, password: cleanPassword }),
@@ -176,12 +184,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       let res: Response;
       if (nameOrFormData instanceof FormData) {
-        res = await fetch('/api/auth/register', {
+        res = await fetch(getApiUrl('/api/auth/register'), {
           method: 'POST',
           body: nameOrFormData,
         });
       } else {
-        res = await fetch('/api/auth/register', {
+        res = await fetch(getApiUrl('/api/auth/register'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: nameOrFormData, email, password, role }),
