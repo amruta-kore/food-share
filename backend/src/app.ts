@@ -39,40 +39,41 @@ app.get('/api/health', (req, res) => {
 // Diagnostic check for email configuration
 app.get('/api/health/email', async (req, res) => {
   const emailUser = process.env.EMAIL_USER;
+  const brevoApiKey = process.env.BREVO_API_KEY;
   const hasPass = Boolean(process.env.EMAIL_PASS);
   const targetEmail: string = (req.query.to as string) || emailUser || 'amrutakore2006@gmail.com';
 
-  if (!emailUser || !hasPass) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'EMAIL_USER or EMAIL_PASS environment variables are missing on the server',
-      emailConfigured: false,
-    });
-  }
+  const diagnostics = {
+    emailUser: emailUser || 'not set',
+    hasEmailPass: hasPass,
+    hasBrevoApiKey: Boolean(brevoApiKey),
+    targetEmail,
+  };
 
   try {
     const { sendMail } = await import('./utils/mailer');
     const result = await sendMail({
       to: targetEmail,
-      subject: 'FoodShare Cloud SMTP Verification',
+      subject: 'FoodShare Email Delivery Confirmed',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
           <h2 style="color: #059669;">FoodShare Email Delivery Confirmed!</h2>
-          <p>Your SMTP mailer on <strong>FoodShare Backend</strong> is connected and sending emails successfully.</p>
+          <p>Your email system on <strong>FoodShare Backend</strong> is working and delivering messages successfully.</p>
           <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
         </div>
       `,
     });
     return res.json({
-      status: 'ok',
-      message: `Test email sent to ${targetEmail}`,
+      status: result ? 'ok' : 'notice',
+      message: result ? `Test email dispatched to ${targetEmail}` : 'Email dispatch attempted (check logs)',
+      diagnostics,
       result,
     });
   } catch (err: any) {
     return res.status(500).json({
       status: 'error',
       message: err?.message || 'Failed to send test email',
-      error: err,
+      diagnostics,
     });
   }
 });
