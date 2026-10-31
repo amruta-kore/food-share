@@ -74,7 +74,21 @@ export default function LoginPage() {
         body: JSON.stringify({ email: forgotEmail.trim() }),
       });
 
-      const data = await res.json();
+      let data: any = {};
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        setForgotError(
+          res.status === 502 || res.status === 503 || res.status === 504
+            ? 'Backend server is waking up. Please try again in 30 seconds.'
+            : text && text.length < 120
+            ? text
+            : `Server returned HTTP ${res.status}. Please check your backend connection.`
+        );
+        return;
+      }
 
       if (res.ok && data.success) {
         setForgotSuccess(

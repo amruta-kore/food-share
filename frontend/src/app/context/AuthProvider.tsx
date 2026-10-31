@@ -123,7 +123,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: cleanEmail, password: cleanPassword }),
       });
-      const data = await res.json();
+      let data: any = {};
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        return {
+          success: false,
+          message: res.status === 502 || res.status === 503 || res.status === 504
+            ? 'Backend server is waking up or temporarily unavailable. Please try again in 30 seconds.'
+            : text && text.length < 120
+            ? text
+            : `Server returned HTTP ${res.status}. Please check your backend connection.`,
+        };
+      }
+
       if (res.ok && data.accessToken) {
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('authUser', JSON.stringify(data.user));
@@ -172,7 +187,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           body: JSON.stringify({ name: nameOrFormData, email, password, role }),
         });
       }
-      const data = await res.json();
+      let data: any = {};
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        return {
+          success: false,
+          message: res.status === 502 || res.status === 503 || res.status === 504
+            ? 'Backend server is waking up or temporarily unavailable. Please try again in 30 seconds.'
+            : text && text.length < 120
+            ? text
+            : `Server returned HTTP ${res.status}. Please check your backend connection.`,
+        };
+      }
+
       if (res.ok && data.accessToken) {
         localStorage.setItem('accessToken', data.accessToken);
         syncAuthCookies(data.accessToken, data.user.role);
