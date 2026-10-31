@@ -9,7 +9,11 @@
     "start": "node dist/app.js",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
-    "prisma": "prisma"
+    "prisma": "prisma",
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
