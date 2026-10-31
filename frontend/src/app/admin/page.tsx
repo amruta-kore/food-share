@@ -69,11 +69,21 @@ function AdminContent() {
   const [rejectReason, setRejectReason] = useState('');
   const [rejectLoading, setRejectLoading] = useState(false);
 
+  const getApiUrl = (endpoint: string) => {
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+    if (base && typeof window !== 'undefined') {
+      return `${base}${endpoint}`;
+    }
+    return endpoint;
+  };
+
   // Helper to ensure URL correctly points to static proxy
   const resolveDocUrl = (url?: string | null) => {
     if (!url) return '';
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return url.startsWith('/') ? url : `/${url}`;
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+    const cleanPath = url.startsWith('/') ? url : `/${url}`;
+    return base ? `${base}${cleanPath}` : cleanPath;
   };
 
   const loadAdminData = async (isInitial = false) => {
@@ -86,10 +96,10 @@ function AdminContent() {
 
     try {
       const [statsRes, usersRes, donationsRes, feedbackRes] = await Promise.all([
-        fetch('/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/admin/donations', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/feedback/admin', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(getApiUrl('/api/admin/stats'), { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(getApiUrl('/api/admin/users'), { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(getApiUrl('/api/admin/donations'), { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(getApiUrl('/api/feedback/admin'), { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (statsRes.ok) {
@@ -127,7 +137,7 @@ function AdminContent() {
   const handleVerifyUser = async (userId: number) => {
     const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch(`/api/admin/users/${userId}/verify`, {
+      const res = await fetch(getApiUrl(`/api/admin/users/${userId}/verify`), {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -160,7 +170,7 @@ function AdminContent() {
     const token = localStorage.getItem('accessToken');
 
     try {
-      const res = await fetch(`/api/admin/users/${rejectingUser.id}/reject`, {
+      const res = await fetch(getApiUrl(`/api/admin/users/${rejectingUser.id}/reject`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

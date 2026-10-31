@@ -36,6 +36,47 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'FoodShare API', timestamp: new Date().toISOString() });
 });
 
+// Diagnostic check for email configuration
+app.get('/api/health/email', async (req, res) => {
+  const emailUser = process.env.EMAIL_USER;
+  const hasPass = Boolean(process.env.EMAIL_PASS);
+  const targetEmail = (req.query.to as string) || emailUser;
+
+  if (!emailUser || !hasPass) {
+    return res.status(500).json({
+      status: 'error',
+      message: 'EMAIL_USER or EMAIL_PASS environment variables are missing on the server',
+      emailConfigured: false,
+    });
+  }
+
+  try {
+    const { sendMail } = await import('./utils/mailer');
+    const result = await sendMail({
+      to: targetEmail,
+      subject: 'FoodShare Cloud SMTP Verification',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2 style="color: #059669;">FoodShare Email Delivery Confirmed!</h2>
+          <p>Your SMTP mailer on <strong>FoodShare Backend</strong> is connected and sending emails successfully.</p>
+          <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+        </div>
+      `,
+    });
+    return res.json({
+      status: 'ok',
+      message: `Test email sent to ${targetEmail}`,
+      result,
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      status: 'error',
+      message: err?.message || 'Failed to send test email',
+      error: err,
+    });
+  }
+});
+
 // Register routes
 app.use('/api/auth', authRouter);
 app.use('/api/donations', donationRouter);
