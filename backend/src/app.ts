@@ -40,7 +40,7 @@ app.get('/api/health', (req, res) => {
 app.get('/api/health/email', async (req, res) => {
   const emailUser = process.env.EMAIL_USER;
   const hasPass = Boolean(process.env.EMAIL_PASS);
-  const targetEmail = (req.query.to as string) || emailUser;
+  const targetEmail: string = (req.query.to as string) || emailUser || 'amrutakore2006@gmail.com';
 
   if (!emailUser || !hasPass) {
     return res.status(500).json({
