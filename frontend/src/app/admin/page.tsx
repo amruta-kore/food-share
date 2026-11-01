@@ -780,8 +780,12 @@ function AdminContent() {
                   )}
                 </div>
               ) : (
-                <div className="p-8 text-center text-slate-500">
-                  Document path not available.
+                <div className="p-8 text-center space-y-2">
+                  <div className="text-3xl">📁</div>
+                  <h4 className="font-bold text-slate-700">Document Not Found On Server</h4>
+                  <p className="text-xs text-slate-500 max-w-sm">
+                    This user registered before the latest cloud deployment. On Render free tier, server restarts reset temporary local storage. New registrations will have documents saved reliably.
+                  </p>
                 </div>
               )}
             </div>

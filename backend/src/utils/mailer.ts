@@ -78,6 +78,8 @@ export const sendMail = async (options: MailOptions) => {
   }
 };
 
+const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://food-share-uocl.vercel.app').replace(/\/$/, '');
+
 // 1. Email sent upon registration with document submission
 export const sendRegistrationPendingEmail = async (email: string, name: string, role: string) => {
   return sendMail({
@@ -92,6 +94,9 @@ export const sendRegistrationPendingEmail = async (email: string, name: string, 
           <p style="margin: 4px 0 0; font-size: 13px; color: #047857;">Our platform administration is verifying your submitted document. You will receive an email as soon as your account is approved.</p>
         </div>
         <p style="font-size: 13px; color: #64748b;">Once verified, you will have full access to create donations, claim food, or take delivery missions.</p>
+        <div style="margin-top: 20px;">
+          <a href="${FRONTEND_URL}" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Visit FoodShare Platform</a>
+        </div>
       </div>
     `,
   });
@@ -115,7 +120,7 @@ export const sendAccountVerifiedEmail = async (email: string, name: string, role
             ${role === 'VOLUNTEER' ? '<li>You can now pick up and deliver food rescue missions across the city.</li>' : ''}
           </ul>
         </div>
-        <a href="http://localhost:3000/login" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Log In to Your Dashboard</a>
+        <a href="${FRONTEND_URL}/login" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Log In to Your Dashboard</a>
       </div>
     `,
   });
@@ -144,7 +149,7 @@ export const sendClaimRequestedEmailToDonor = async (
           <p style="margin: 4px 0;"><strong>Requesting Organization:</strong> ${ngoOrg || ngoName}</p>
         </div>
         <p>Please log in to your Donor Dashboard to accept or decline this claim.</p>
-        <a href="http://localhost:3000/donor" style="display:inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Review Claim Request</a>
+        <a href="${FRONTEND_URL}/donor" style="display:inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Review Claim Request</a>
       </div>
     `,
   });
@@ -171,7 +176,7 @@ export const sendClaimAcceptedEmailToNGO = async (
           <p style="margin: 4px 0;"><strong>Pickup Address:</strong> ${pickupAddress}</p>
           <p style="margin: 4px 0;"><strong>Status:</strong> Ready for pickup / awaiting volunteer dispatch.</p>
         </div>
-        <a href="http://localhost:3000/ngo" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Track in NGO Hub</a>
+        <a href="${FRONTEND_URL}/ngo" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Track in NGO Hub</a>
       </div>
     `,
   });
@@ -200,7 +205,7 @@ export const sendNewMissionBroadcastEmailToVolunteers = async (
             <p style="margin: 4px 0;"><strong>Destination:</strong> ${ngoOrg}</p>
           </div>
           <p>Log in to claim this delivery mission before another volunteer takes it.</p>
-          <a href="http://localhost:3000/volunteer" style="display:inline-block; padding: 12px 24px; background-color: #d97706; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Claim Mission</a>
+          <a href="${FRONTEND_URL}/volunteer" style="display:inline-block; padding: 12px 24px; background-color: #d97706; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Claim Mission</a>
         </div>
       `,
     });
@@ -227,6 +232,9 @@ export const sendVolunteerAssignedEmail = async (
           <p style="margin: 4px 0;"><strong>Volunteer Name:</strong> ${volunteerName}</p>
           <p style="margin: 4px 0;"><strong>Phone:</strong> ${volunteerPhone || 'Available in dashboard'}</p>
           <p style="margin: 4px 0;"><strong>Status:</strong> Heading to pickup location</p>
+        </div>
+        <div style="margin-top: 20px;">
+          <a href="${FRONTEND_URL}" style="display:inline-block; padding: 12px 24px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Open FoodShare</a>
         </div>
       </div>
     `,
@@ -262,6 +270,9 @@ export const sendDeliveryStatusUpdateEmail = async (
           <p style="margin: 0; font-size: 16px; font-weight: bold; color: #0f172a;">${label}</p>
           <p style="margin: 4px 0 0; font-size: 12px; color: #64748b;">Timestamp: ${new Date().toLocaleString()}</p>
         </div>
+        <div style="margin-top: 20px;">
+          <a href="${FRONTEND_URL}" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">View Live Updates</a>
+        </div>
       </div>
     `,
   });
@@ -269,20 +280,34 @@ export const sendDeliveryStatusUpdateEmail = async (
 
 // Backward-compatible verification/reset stubs
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const verifyUrl = `http://localhost:3000/verify-email?token=${token}`;
+  const verifyUrl = `${FRONTEND_URL}/verify-email?token=${token}`;
   return sendMail({
     to: email,
     subject: 'Verify your FoodShare Account',
-    html: `<p>Verify email by clicking <a href="${verifyUrl}">here</a>.</p>`,
+    html: `
+      <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b;">
+        <h2 style="color: #059669;">Verify Your FoodShare Account</h2>
+        <p>Please click below to verify your email address:</p>
+        <a href="${verifyUrl}" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Verify Email Address</a>
+        <p style="font-size: 12px; color: #64748b; margin-top: 16px;">Or visit: <a href="${FRONTEND_URL}">${FRONTEND_URL}</a></p>
+      </div>
+    `,
   });
 };
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
-  const resetUrl = `http://localhost:3000/reset-password?token=${token}`;
+  const resetUrl = `${FRONTEND_URL}/reset-password?token=${token}`;
   return sendMail({
     to: email,
     subject: 'Reset your FoodShare Password',
-    html: `<p>Reset password by clicking <a href="${resetUrl}">here</a>.</p>`,
+    html: `
+      <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b;">
+        <h2 style="color: #059669;">Reset Your Password</h2>
+        <p>Please click below to reset your password:</p>
+        <a href="${resetUrl}" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Reset Password</a>
+        <p style="font-size: 12px; color: #64748b; margin-top: 16px;">Or visit: <a href="${FRONTEND_URL}">${FRONTEND_URL}</a></p>
+      </div>
+    `,
   });
 };
 
@@ -303,7 +328,7 @@ export const sendForgotPasswordEmail = async (email: string, name: string, newPa
         </div>
         <p style="font-size: 14px; color: #334155;">Please enter this 6-character password on the login screen to access your dashboard.</p>
         <div style="margin-top: 24px;">
-          <a href="http://localhost:3000/login" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">Sign In to FoodShare</a>
+          <a href="${FRONTEND_URL}/login" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">Sign In to FoodShare</a>
         </div>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
         <p style="font-size: 11px; color: #94a3b8; margin: 0;">If you did not initiate this request, please contact FoodShare administration immediately.</p>
