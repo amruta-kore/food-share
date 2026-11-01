@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(true);
 
   // Clear inputs on mount to ensure user manually enters credentials
@@ -222,24 +223,35 @@ export default function LoginPage() {
                 Forgot Password?
               </button>
             </div>
-            <input
-              type="password"
-              ref={passwordInputRef}
-              name="user_manual_login_secret"
-              id="user_manual_login_secret"
-              autoComplete="new-password"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              required
-              readOnly={isReadOnly}
-              onFocus={() => setIsReadOnly(false)}
-              onClick={() => setIsReadOnly(false)}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-slate-50/50 font-mono tracking-wider"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                ref={passwordInputRef}
+                name="user_manual_login_secret"
+                id="user_manual_login_secret"
+                autoComplete="new-password"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                required
+                readOnly={isReadOnly}
+                onFocus={() => setIsReadOnly(false)}
+                onClick={() => setIsReadOnly(false)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-slate-50/50 font-mono tracking-wider"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer select-none text-base"
+              >
+                {showPassword ? '👁️' : '🙈'}
+              </button>
+            </div>
           </div>
 
           <button

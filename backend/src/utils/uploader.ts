@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 
 // Resolve uploads directory reliably
-const uploadsRoot = path.resolve(__dirname, '..', '..', 'uploads');
+const uploadsRoot = path.resolve(process.cwd(), 'uploads');
 const docUploadDir = path.join(uploadsRoot, 'documents');
 const foodUploadDir = path.join(uploadsRoot, 'food');
 
@@ -12,12 +12,6 @@ if (!fs.existsSync(docUploadDir)) {
 }
 if (!fs.existsSync(foodUploadDir)) {
   fs.mkdirSync(foodUploadDir, { recursive: true });
-}
-
-// Also ensure cwd-based uploads folder exists for consistency
-const cwdUploads = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(cwdUploads)) {
-  try { fs.mkdirSync(cwdUploads, { recursive: true }); } catch (_) {}
 }
 
 // 1. Legal Document Uploader (Admin Verification)

@@ -730,24 +730,55 @@ function AdminContent() {
             </div>
 
             {/* Document Viewer Body */}
-            <div className="flex-1 bg-slate-100 p-2 sm:p-4 overflow-y-auto flex items-center justify-center min-h-[50vh]">
+            <div className="flex-1 bg-slate-100 p-2 sm:p-4 overflow-y-auto flex flex-col items-center justify-center min-h-[50vh]">
               {resolveDocUrl(inspectingUserDoc.documentUrl) ? (
-                inspectingUserDoc.documentUrl?.toLowerCase().endsWith('.pdf') ||
-                inspectingUserDoc.documentType?.includes('pdf') ? (
-                  <iframe
-                    src={resolveDocUrl(inspectingUserDoc.documentUrl)}
-                    className="w-full h-[65vh] rounded-xl border border-slate-300 bg-white shadow-inner"
-                    title="Document Inspection Viewer"
-                  />
-                ) : (
-                  <div className="max-h-[65vh] overflow-auto flex items-center justify-center">
-                    <img
-                      src={resolveDocUrl(inspectingUserDoc.documentUrl)}
-                      alt="Verification document"
-                      className="max-h-[65vh] max-w-full object-contain rounded-xl shadow-md border border-slate-200"
-                    />
+                <div className="w-full flex flex-col items-center space-y-3">
+                  <div className="w-full flex items-center justify-between px-2 text-xs text-slate-500">
+                    <span className="truncate max-w-xs font-mono">{inspectingUserDoc.documentName || 'Document'}</span>
+                    <a
+                      href={resolveDocUrl(inspectingUserDoc.documentUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-xs flex items-center space-x-1"
+                    >
+                      <span>↗ Open in New Window</span>
+                    </a>
                   </div>
-                )
+
+                  {inspectingUserDoc.documentUrl?.toLowerCase().endsWith('.pdf') ||
+                  inspectingUserDoc.documentType?.includes('pdf') ? (
+                    <iframe
+                      src={resolveDocUrl(inspectingUserDoc.documentUrl)}
+                      className="w-full h-[65vh] rounded-xl border border-slate-300 bg-white shadow-inner"
+                      title="Document Inspection Viewer"
+                    />
+                  ) : (
+                    <div className="max-h-[65vh] w-full overflow-auto flex items-center justify-center bg-white p-2 rounded-xl border border-slate-200">
+                      <img
+                        src={resolveDocUrl(inspectingUserDoc.documentUrl)}
+                        alt="Verification document"
+                        className="max-h-[62vh] max-w-full object-contain rounded-lg shadow-xs"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.style.display = 'none';
+                          const fallback = target.nextElementSibling;
+                          if (fallback) (fallback as HTMLElement).style.display = 'block';
+                        }}
+                      />
+                      <div style={{ display: 'none' }} className="p-8 text-center text-slate-500">
+                        <p className="font-semibold text-slate-700 mb-2">Unable to display preview inline</p>
+                        <a
+                          href={resolveDocUrl(inspectingUserDoc.documentUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold"
+                        >
+                          Click here to open and view the document
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="p-8 text-center text-slate-500">
                   Document path not available.
@@ -760,11 +791,20 @@ function AdminContent() {
               <div className="flex items-center space-x-2">
                 <a
                   href={resolveDocUrl(inspectingUserDoc.documentUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center space-x-1.5"
+                >
+                  <span>↗</span>
+                  <span>View Full Screen</span>
+                </a>
+                <a
+                  href={resolveDocUrl(inspectingUserDoc.documentUrl)}
                   download={inspectingUserDoc.documentName || 'verification-document'}
                   className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center space-x-1.5"
                 >
                   <span>⬇</span>
-                  <span>Download Document</span>
+                  <span>Download</span>
                 </a>
               </div>
 

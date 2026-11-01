@@ -17,13 +17,14 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [documentFile, setDocumentFile] = useState<File | null>(null);
 
-  // NGO Location state
+  // Location state (Available for DONOR & NGO)
   const [address, setAddress] = useState('');
   const [latitude, setLatitude] = useState<string>('');
   const [longitude, setLongitude] = useState<string>('');
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsStatus, setGpsStatus] = useState<string | null>(null);
 
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -226,47 +227,61 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* NGO Shelter Location Section (GPS or Manual Address) */}
-          {role === 'NGO' && (
-            <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/40 space-y-3">
+          {/* Location Section (Available for DONOR & NGO for pickup and delivery routing) */}
+          {(role === 'NGO' || role === 'DONOR') && (
+            <div className={`p-4 rounded-xl border space-y-3 ${
+              role === 'DONOR' ? 'border-emerald-200 bg-emerald-50/40' : 'border-blue-200 bg-blue-50/40'
+            }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <span className="text-lg">📍</span>
-                  <label className="block text-xs font-bold uppercase text-blue-950">
-                    Shelter Location & Delivery Destination *
+                  <label className={`block text-xs font-bold uppercase ${
+                    role === 'DONOR' ? 'text-emerald-950' : 'text-blue-950'
+                  }`}>
+                    {role === 'DONOR' ? 'Kitchen / Food Pickup Location' : 'Shelter Location & Delivery Destination *'}
                   </label>
                 </div>
                 <button
                   type="button"
                   onClick={handleUseCurrentLocation}
                   disabled={gpsLoading}
-                  className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition flex items-center space-x-1.5 shadow-xs disabled:opacity-50 cursor-pointer"
+                  className={`px-3 py-1.5 rounded-lg text-white font-semibold text-xs transition flex items-center space-x-1.5 shadow-xs disabled:opacity-50 cursor-pointer ${
+                    role === 'DONOR' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
                 >
-                  <span>{gpsLoading ? '⏳ Fetching GPS...' : '🎯 Use My Current Location'}</span>
+                  <span>{gpsLoading ? '⏳ Fetching GPS...' : '🎯 Detect My Current Location'}</span>
                 </button>
               </div>
 
               <p className="text-[11px] text-slate-600">
-                Share your current shelter GPS coordinates or enter the address manually. Volunteer couriers will use this to navigate to your facility.
+                {role === 'DONOR'
+                  ? 'Auto-detect or type your food pickup address. Volunteer couriers will use this to navigate to your kitchen/restaurant for food pickup.'
+                  : 'Share your current shelter GPS coordinates or enter the address manually. Volunteer couriers will use this to navigate to your facility.'}
               </p>
 
               {gpsStatus && (
-                <div className="text-xs p-2 rounded-lg bg-white border border-blue-200 text-blue-900 font-medium">
+                <div className={`text-xs p-2 rounded-lg bg-white border font-medium ${
+                  role === 'DONOR' ? 'border-emerald-200 text-emerald-900' : 'border-blue-200 text-blue-900'
+                }`}>
                   {gpsStatus}
                 </div>
               )}
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Shelter Full Street Address *
+                  {role === 'DONOR' ? 'Pickup Street Address / Kitchen Location' : 'Shelter Full Street Address *'}
                 </label>
                 <textarea
                   rows={2}
                   required={role === 'NGO'}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="e.g. 124 Hope Foundation Shelter, 5th Cross, Indiranagar, Bengaluru"
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
+                  placeholder={
+                    role === 'DONOR'
+                      ? 'e.g. Spice Garden Restaurant, Main Road, Indiranagar, Bengaluru'
+                      : 'e.g. 124 Hope Foundation Shelter, 5th Cross, Indiranagar, Bengaluru'
+                  }
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
                 />
               </div>
 
@@ -281,7 +296,7 @@ export default function RegisterPage() {
                     value={latitude}
                     onChange={(e) => setLatitude(e.target.value)}
                     placeholder="e.g. 12.9716"
-                    className="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white"
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white"
                   />
                 </div>
                 <div>
@@ -294,7 +309,7 @@ export default function RegisterPage() {
                     value={longitude}
                     onChange={(e) => setLongitude(e.target.value)}
                     placeholder="e.g. 77.5946"
-                    className="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white"
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white"
                   />
                 </div>
               </div>
@@ -305,15 +320,26 @@ export default function RegisterPage() {
             <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
               Create Password *
             </label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Minimum 6 characters"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Minimum 6 characters"
+                className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer select-none text-base"
+              >
+                {showPassword ? '👁️' : '🙈'}
+              </button>
+            </div>
           </div>
 
           {/* Legal Document Upload */}

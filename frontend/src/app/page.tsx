@@ -48,8 +48,16 @@ export default function HomePage() {
   const [totalRatingCount, setTotalRatingCount] = useState<number>(0);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState<boolean>(false);
 
+  const getApiUrl = (endpoint: string) => {
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+    if (base && typeof window !== 'undefined') {
+      return `${base}${endpoint}`;
+    }
+    return endpoint;
+  };
+
   const loadFeedback = () => {
-    fetch('/api/feedback?limit=6')
+    fetch(getApiUrl('/api/feedback?limit=6'))
       .then((res) => res.json())
       .then((data) => {
         if (data.reviews) setHomeReviews(data.reviews);
@@ -60,7 +68,7 @@ export default function HomePage() {
   };
 
   const loadDonations = () => {
-    fetch('/api/donations')
+    fetch(getApiUrl('/api/donations'))
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setDonations(data);

@@ -17,8 +17,8 @@ const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
-// Ensure uploads folder and subdirectories exist
-const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+// Ensure uploads folder and subdirectories exist reliably
+const uploadsDir = path.resolve(process.cwd(), 'uploads');
 const docsDir = path.join(uploadsDir, 'documents');
 const foodDir = path.join(uploadsDir, 'food');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
@@ -27,8 +27,9 @@ if (!fs.existsSync(foodDir)) fs.mkdirSync(foodDir, { recursive: true });
 
 // Serve uploaded documents and food images as static files
 app.use('/uploads', express.static(uploadsDir));
-if (path.resolve(process.cwd(), 'uploads') !== uploadsDir && fs.existsSync(path.resolve(process.cwd(), 'uploads'))) {
-  app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
+const fallbackUploads = path.resolve(__dirname, '..', 'uploads');
+if (fallbackUploads !== uploadsDir && fs.existsSync(fallbackUploads)) {
+  app.use('/uploads', express.static(fallbackUploads));
 }
 
 // Health check

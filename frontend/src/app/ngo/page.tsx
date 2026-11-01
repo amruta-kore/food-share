@@ -146,6 +146,14 @@ function NGODashboardContent() {
     );
   };
 
+  const getApiUrl = (endpoint: string) => {
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+    if (base && typeof window !== 'undefined') {
+      return `${base}${endpoint}`;
+    }
+    return endpoint;
+  };
+
   const handleSaveLocation = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocLoading(true);
@@ -153,7 +161,7 @@ function NGODashboardContent() {
 
     const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('/api/auth/profile', {
+      const res = await fetch(getApiUrl('/api/auth/profile'), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -192,7 +200,7 @@ function NGODashboardContent() {
     const token = localStorage.getItem('accessToken');
     try {
       // 1. Fetch food listings (both available and delivered)
-      const foodRes = await fetch('/api/donations');
+      const foodRes = await fetch(getApiUrl('/api/donations'));
       if (foodRes.ok) {
         const foodData = await foodRes.json();
         setAvailableFood(foodData);
@@ -200,7 +208,7 @@ function NGODashboardContent() {
 
       // 2. Fetch NGO's own requests
       if (token) {
-        const reqRes = await fetch('/api/ngo/my-requests', {
+        const reqRes = await fetch(getApiUrl('/api/ngo/my-requests'), {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (reqRes.ok) {
@@ -735,17 +743,16 @@ function NGODashboardContent() {
                           Step 2 • Drop-off Gate Verification
                         </span>
                         <h4 className="font-bold text-sm text-amber-950">
-                          Share this Code or QR with Courier {req.donation.volunteer?.name || ''} Upon Arrival
+                          Share this Drop-off OTP with Courier {req.donation.volunteer?.name || ''} Upon Arrival
                         </h4>
                         <p className="text-xs text-amber-800 max-w-md">
-                          When the volunteer delivers the food to your shelter gate, ask them to enter this 4-digit code on their phone to officially complete the chain of custody.
+                          When the volunteer delivers the food to your shelter gate, ask them to enter this 4-digit OTP on their phone to officially complete the delivery.
                         </p>
                       </div>
 
                       <HandoverQRCode
                         value={req.donation.dropoffOtp}
-                        label="Shelter Drop-off Code"
-                        size={120}
+                        label="Shelter Drop-off OTP"
                       />
                     </div>
                   )}

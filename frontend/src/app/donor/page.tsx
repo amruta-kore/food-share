@@ -85,6 +85,14 @@ function DonorDashboardContent() {
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
 
+  const getApiUrl = (endpoint: string) => {
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+    if (base && typeof window !== 'undefined') {
+      return `${base}${endpoint}`;
+    }
+    return endpoint;
+  };
+
   const loadDonations = async (isInitial = false) => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
@@ -92,7 +100,7 @@ function DonorDashboardContent() {
       return;
     }
     try {
-      const res = await fetch('/api/donor/my-donations', {
+      const res = await fetch(getApiUrl('/api/donor/my-donations'), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -674,7 +682,7 @@ function DonorDashboardContent() {
                         Courier <strong>{d.volunteer?.name || 'A volunteer'}</strong> is arriving at your kitchen gate.
                       </p>
                       <p className="text-[11px] text-blue-600">
-                        Verify courier identity: Ask volunteer to show their 4-digit Pickup Code or QR code.
+                        Verify courier identity: Ask volunteer to provide their 4-digit Pickup OTP.
                       </p>
                     </div>
 
@@ -831,7 +839,7 @@ function DonorDashboardContent() {
                   className="w-full text-center tracking-[0.5em] text-3xl font-black font-mono py-3 px-4 border-2 border-blue-400 focus:border-blue-600 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 bg-blue-50/30 text-blue-900"
                 />
                 <p className="text-[11px] text-slate-500 text-center">
-                  Ask the courier: <em>"Please show your 4-digit FoodShare Pickup Code or QR code"</em>
+                  Ask the courier: <em>"Please share your 4-digit FoodShare Pickup OTP"</em>
                 </p>
               </div>
 

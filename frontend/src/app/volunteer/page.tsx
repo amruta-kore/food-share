@@ -57,6 +57,14 @@ function VolunteerDashboardContent() {
   const [fetching, setFetching] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
+  const getApiUrl = (endpoint: string) => {
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+    if (base && typeof window !== 'undefined') {
+      return `${base}${endpoint}`;
+    }
+    return endpoint;
+  };
+
   const loadTasks = async (isInitial = false) => {
     if (isInitial) setFetching(true);
     const token = localStorage.getItem('accessToken');
@@ -66,7 +74,7 @@ function VolunteerDashboardContent() {
     }
 
     try {
-      const res = await fetch('/api/volunteer/tasks', {
+      const res = await fetch(getApiUrl('/api/volunteer/tasks'), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -414,17 +422,16 @@ function VolunteerDashboardContent() {
                         <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold uppercase">
                           Step 1 • Pickup Gate Verification
                         </span>
-                        <h4 className="font-bold text-sm text-blue-950">Show this Code or QR to the Restaurant Manager</h4>
+                        <h4 className="font-bold text-sm text-blue-950">Share this 4-Digit Pickup OTP with the Restaurant Manager</h4>
                         <p className="text-xs text-blue-800 max-w-md">
-                          The donor will scan or enter your 4-digit code on their device to authenticate you and release the food.
+                          The food donor will enter your 4-digit OTP on their screen to verify courier arrival and release the food.
                         </p>
                       </div>
 
                       {task.pickupOtp ? (
                         <HandoverQRCode
                           value={task.pickupOtp}
-                          label="Volunteer Pickup Code"
-                          size={120}
+                          label="Volunteer Pickup OTP"
                         />
                       ) : (
                         <div className="px-4 py-2 bg-white rounded-xl border border-blue-200 text-xs font-mono font-bold text-blue-700">
