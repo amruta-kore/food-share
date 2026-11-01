@@ -28,51 +28,72 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Browser Geolocation API to fetch GPS coordinates
+  // Browser Geolocation API to fetch GPS coordinates with instant IP fallback on timeout
   const handleUseCurrentLocation = () => {
+    setGpsLoading(true);
+    setGpsStatus('Detecting your location...');
+
+    const applyCoordsAndReverseGeocode = async (lat: number, lng: number, source: 'GPS' | 'Network') => {
+      setLatitude(lat.toFixed(6));
+      setLongitude(lng.toFixed(6));
+      setGpsLoading(false);
+      setGpsStatus(`✓ ${source} Location Captured: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`);
+
+      // Reverse geocode via OpenStreetMap Nominatim
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.display_name) {
+            setAddress(data.display_name);
+          }
+        }
+      } catch {
+        // Non-blocking reverse geocode
+      }
+    };
+
+    const fallbackToIpLocation = async () => {
+      setGpsStatus('Fetching network location...');
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.latitude && data.longitude) {
+            applyCoordsAndReverseGeocode(data.latitude, data.longitude, 'Network');
+            if (data.city && !address) {
+              setAddress(`${data.city}, ${data.region || ''}, ${data.country_name || ''}`);
+            }
+            return;
+          }
+        }
+      } catch (_) {}
+
+      // Final fallback if IP lookup also fails
+      setGpsLoading(false);
+      setGpsStatus('⚠️ Location could not be detected automatically. Please type your street address below.');
+    };
+
     if (!navigator.geolocation) {
-      setGpsStatus('Geolocation is not supported by your browser.');
+      fallbackToIpLocation();
       return;
     }
 
-    setGpsLoading(true);
-    setGpsStatus('Requesting GPS permission from your browser...');
-
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        setLatitude(lat.toFixed(6));
-        setLongitude(lng.toFixed(6));
-        setGpsLoading(false);
-        setGpsStatus(`✓ GPS Captured: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`);
-
-        // Reverse geocode via OpenStreetMap Nominatim if address is empty
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-          );
-          if (res.ok) {
-            const data = await res.json();
-            if (data?.display_name && !address) {
-              setAddress(data.display_name);
-            }
-          }
-        } catch {
-          // Non-blocking reverse geocode
-        }
+      (position) => {
+        applyCoordsAndReverseGeocode(position.coords.latitude, position.coords.longitude, 'GPS');
       },
       (err) => {
-        setGpsLoading(false);
-        if (err.code === err.PERMISSION_DENIED) {
-          setGpsStatus('⚠️ GPS Permission Denied. Please enter your shelter address manually.');
-        } else if (err.code === err.POSITION_UNAVAILABLE) {
-          setGpsStatus('⚠️ Location unavailable. Please enter your address manually.');
-        } else {
-          setGpsStatus('⚠️ Location request timed out. Please enter address manually.');
-        }
+        console.warn('Browser GPS error, falling back to IP location:', err.message);
+        fallbackToIpLocation();
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      {
+        enableHighAccuracy: false, // Prevents satellite hang on PCs/laptops without GPS chip
+        timeout: 6000,
+        maximumAge: 60000, // Accepts cached location from last 60 seconds
+      }
     );
   };
 

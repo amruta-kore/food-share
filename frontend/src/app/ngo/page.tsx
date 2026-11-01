@@ -108,41 +108,59 @@ function NGODashboardContent() {
   }, [user]);
 
   const handleUseCurrentLocation = () => {
+    setGpsLoading(true);
+    setLocMsg({ type: 'success', text: 'Detecting shelter location...' });
+
+    const applyCoordsAndReverseGeocode = async (lat: number, lng: number, source: 'GPS' | 'Network') => {
+      setNgoLat(lat.toFixed(6));
+      setNgoLng(lng.toFixed(6));
+      setGpsLoading(false);
+      setLocMsg({ type: 'success', text: `✓ ${source} coordinates captured (${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E)` });
+
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.display_name) {
+            setNgoAddress(data.display_name);
+          }
+        }
+      } catch {}
+    };
+
+    const fallbackToIpLocation = async () => {
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.latitude && data.longitude) {
+            applyCoordsAndReverseGeocode(data.latitude, data.longitude, 'Network');
+            if (data.city && !ngoAddress) {
+              setNgoAddress(`${data.city}, ${data.region || ''}, ${data.country_name || ''}`);
+            }
+            return;
+          }
+        }
+      } catch (_) {}
+
+      setGpsLoading(false);
+      setLocMsg({ type: 'error', text: 'Unable to detect location automatically. Please enter your shelter address manually.' });
+    };
+
     if (!navigator.geolocation) {
-      setLocMsg({ type: 'error', text: 'Geolocation is not supported by your browser.' });
+      fallbackToIpLocation();
       return;
     }
-    setGpsLoading(true);
-    setLocMsg(null);
 
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        setNgoLat(lat.toFixed(6));
-        setNgoLng(lng.toFixed(6));
-        setGpsLoading(false);
-        setLocMsg({ type: 'success', text: `✓ GPS coordinates captured (${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E)` });
-
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data?.display_name && !ngoAddress) {
-              setNgoAddress(data.display_name);
-            }
-          }
-        } catch {}
+      (pos) => {
+        applyCoordsAndReverseGeocode(pos.coords.latitude, pos.coords.longitude, 'GPS');
       },
       (err) => {
-        setGpsLoading(false);
-        if (err.code === err.PERMISSION_DENIED) {
-          setLocMsg({ type: 'error', text: 'GPS Permission Denied. Please input your shelter address manually.' });
-        } else {
-          setLocMsg({ type: 'error', text: 'Unable to fetch current location. Please enter manually.' });
-        }
+        console.warn('GPS error, falling back to IP:', err.message);
+        fallbackToIpLocation();
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
     );
   };
 
