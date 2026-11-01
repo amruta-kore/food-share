@@ -172,6 +172,14 @@ function NGODashboardContent() {
     return endpoint;
   };
 
+  const resolveImageUrl = (url?: string | null) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+    const cleanPath = url.startsWith('/') ? url : `/${url}`;
+    return base ? `${base}${cleanPath}` : cleanPath;
+  };
+
   const handleSaveLocation = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocLoading(true);
@@ -473,10 +481,22 @@ function NGODashboardContent() {
                       {food.imageUrl ? (
                         <div className="relative w-full h-44 bg-slate-100 overflow-hidden">
                           <img
-                            src={food.imageUrl}
+                            src={resolveImageUrl(food.imageUrl)}
                             alt={food.foodName}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              target.style.display = 'none';
+                              const fallback = target.nextElementSibling;
+                              if (fallback) (fallback as HTMLElement).style.display = 'flex';
+                            }}
                           />
+                          <div
+                            style={{ display: 'none' }}
+                            className="w-full h-full bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-center text-4xl"
+                          >
+                            {food.category.includes('Bakery') ? '🥖' : food.category.includes('Produce') ? '🍎' : food.category.includes('Dairy') ? '🥛' : '🍲'}
+                          </div>
                           <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
                             <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-md backdrop-blur-md ${food.isVegetarian ? 'bg-emerald-600/95 text-white' : 'bg-red-600/95 text-white'}`}>
                               {food.isVegetarian ? '🥬 VEG' : '🍗 NON-VEG'}

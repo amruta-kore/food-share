@@ -56,6 +56,14 @@ export default function HomePage() {
     return endpoint;
   };
 
+  const resolveImageUrl = (url?: string | null) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+    const cleanPath = url.startsWith('/') ? url : `/${url}`;
+    return base ? `${base}${cleanPath}` : cleanPath;
+  };
+
   const loadFeedback = () => {
     fetch(getApiUrl('/api/feedback?limit=6'))
       .then((res) => res.json())
@@ -334,10 +342,23 @@ export default function HomePage() {
                     {d.imageUrl ? (
                       <div className="relative w-full h-48 bg-slate-100 overflow-hidden">
                         <img
-                          src={d.imageUrl}
+                          src={resolveImageUrl(d.imageUrl)}
                           alt={d.foodName}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.style.display = 'none';
+                            const fallback = target.nextElementSibling;
+                            if (fallback) (fallback as HTMLElement).style.display = 'flex';
+                          }}
                         />
+                        {/* Fallback category banner if server image is unavailable */}
+                        <div
+                          style={{ display: 'none' }}
+                          className="w-full h-full bg-gradient-to-r from-emerald-50 to-teal-50 flex items-center justify-center text-4xl"
+                        >
+                          {d.category.includes('Bakery') ? '🥖' : d.category.includes('Produce') ? '🍎' : d.category.includes('Dairy') ? '🥛' : '🍲'}
+                        </div>
                         <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
                           <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-md backdrop-blur-md ${d.isVegetarian ? 'bg-emerald-600/95 text-white' : 'bg-red-600/95 text-white'}`}>
                             {d.isVegetarian ? '🥬 VEG' : '🍗 NON-VEG'}
