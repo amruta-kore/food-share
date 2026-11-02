@@ -16,6 +16,9 @@ export interface User {
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  documentUrl?: string | null;
+  documentType?: string | null;
+  documentName?: string | null;
 }
 
 interface AuthContextProps {
@@ -242,6 +245,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const setUserDirectly = (newUser: User | null, token?: string) => {
     if (token) localStorage.setItem('accessToken', token);
     syncAuthCookies(token || localStorage.getItem('accessToken'), newUser?.role || null);
+    if (newUser) {
+      localStorage.setItem('authUser', JSON.stringify(newUser));
+    } else {
+      localStorage.removeItem('authUser');
+    }
     setUser(newUser);
   };
 

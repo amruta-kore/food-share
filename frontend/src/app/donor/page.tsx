@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { RoleGuard } from '../../components/RoleGuard';
 import CountdownTimer from '../../components/CountdownTimer';
+import ProfileEditModal from '../../components/ProfileEditModal';
 
 interface Donation {
   id: number;
@@ -52,6 +53,7 @@ function DonorDashboardContent() {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [fetching, setFetching] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [editingDonation, setEditingDonation] = useState<Donation | null>(null);
   const [deletingDonationId, setDeletingDonationId] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -501,23 +503,36 @@ function DonorDashboardContent() {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            if (!user?.verified) {
-              alert('Your account is awaiting administrative verification. You will be able to post donations once verified.');
-              return;
-            }
-            setShowCreateModal(true);
-          }}
-          className={`self-start sm:self-auto px-5 py-3 rounded-xl font-bold transition shadow-md flex items-center space-x-2 text-sm ${
-            user?.verified
-              ? 'bg-white text-emerald-800 hover:bg-emerald-50 active:scale-95'
-              : 'bg-emerald-700/60 text-emerald-200 cursor-not-allowed opacity-80'
-          }`}
-        >
-          <span>➕</span>
-          <span>Post Surplus Food</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setShowProfileModal(true)}
+            className="px-4 py-3 rounded-xl font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 transition flex items-center space-x-2 text-sm shadow-xs cursor-pointer"
+            title="Edit your profile details, contact number, and kitchen address"
+          >
+            <span>👤</span>
+            <span>Edit Profile</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (!user?.verified) {
+                alert('Your account is awaiting administrative verification. You will be able to post donations once verified.');
+                return;
+              }
+              setShowCreateModal(true);
+            }}
+            className={`px-5 py-3 rounded-xl font-bold transition shadow-md flex items-center space-x-2 text-sm cursor-pointer ${
+              user?.verified
+                ? 'bg-white text-emerald-800 hover:bg-emerald-50 active:scale-95'
+                : 'bg-emerald-700/60 text-emerald-200 cursor-not-allowed opacity-80'
+            }`}
+          >
+            <span>➕</span>
+            <span>Post Surplus Food</span>
+          </button>
+        </div>
       </div>
 
       {/* Metrics Row */}
@@ -1527,6 +1542,12 @@ function DonorDashboardContent() {
           </div>
         </div>
       )}
+
+      {/* Profile Edit Modal */}
+      <ProfileEditModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+      />
     </div>
   );
 }

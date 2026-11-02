@@ -47,12 +47,14 @@ interface DeliveryTask {
 }
 
 import { RoleGuard } from '../../components/RoleGuard';
+import ProfileEditModal from '../../components/ProfileEditModal';
 
 function VolunteerDashboardContent() {
   const { user } = useAuth();
   const router = useRouter();
 
   const [availableForPickup, setAvailableForPickup] = useState<DeliveryTask[]>([]);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [myTasks, setMyTasks] = useState<DeliveryTask[]>([]);
   const [fetching, setFetching] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -199,6 +201,13 @@ function VolunteerDashboardContent() {
           </p>
         </div>
 
+        <button
+          onClick={() => setShowProfileModal(true)}
+          className="self-start sm:self-auto px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
+        >
+          <span>👤</span>
+          <span>Edit Profile</span>
+        </button>
         <button
           onClick={() => loadTasks(false)}
           className="self-start sm:self-auto px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
@@ -706,6 +715,7 @@ function VolunteerDashboardContent() {
           </div>
         </div>
       )}
+          <ProfileEditModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
     </div>
   );
 }

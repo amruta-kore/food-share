@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { RoleGuard } from '../../components/RoleGuard';
+import ProfileEditModal from '../../components/ProfileEditModal';
 
 interface AdminStats {
   totalUsers: number;
@@ -53,6 +54,7 @@ function AdminContent() {
   const router = useRouter();
 
   const [stats, setStats] = useState<AdminStats | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [users, setUsers] = useState<UserItem[]>([]);
   const [donations, setDonations] = useState<DonationItem[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
@@ -266,6 +268,13 @@ function AdminContent() {
           </p>
         </div>
 
+        <button
+          onClick={() => setShowProfileModal(true)}
+          className="self-start sm:self-auto px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
+        >
+          <span>👤</span>
+          <span>Edit Profile</span>
+        </button>
         <button
           onClick={() => loadAdminData(false)}
           className="self-start sm:self-auto px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
@@ -884,6 +893,7 @@ function AdminContent() {
           </div>
         </div>
       )}
+          <ProfileEditModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
     </div>
   );
 }

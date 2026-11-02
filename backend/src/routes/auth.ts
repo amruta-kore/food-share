@@ -205,22 +205,49 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
-// Update location / profile (authenticated user - NGO or donor)
+// Update location / profile (authenticated user - Donor, NGO, Volunteer, Admin)
 router.patch('/profile', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user!.id;
-    const { address, latitude, longitude, phone, organization } = req.body;
+    const { name, address, latitude, longitude, phone, organization, currentPassword, newPassword } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
     const data: any = {};
-    if (address !== undefined) data.address = address;
+    if (name !== undefined && typeof name === 'string' && name.trim()) {
+      data.name = name.trim();
+    }
+    if (phone !== undefined) {
+      data.phone = typeof phone === 'string' ? phone.trim() || null : null;
+    }
+    if (organization !== undefined) {
+      data.organization = typeof organization === 'string' ? organization.trim() || null : null;
+    }
+    if (address !== undefined) {
+      data.address = typeof address === 'string' ? address.trim() || null : null;
+    }
     if (latitude !== undefined) {
       data.latitude = latitude !== '' && !isNaN(Number(latitude)) ? Number(latitude) : null;
     }
     if (longitude !== undefined) {
       data.longitude = longitude !== '' && !isNaN(Number(longitude)) ? Number(longitude) : null;
     }
-    if (phone !== undefined) data.phone = phone;
-    if (organization !== undefined) data.organization = organization;
+
+    // Optional password update
+    if (newPassword && typeof newPassword === 'string' && newPassword.trim()) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Current password is required to set a new password.' });
+      }
+      const isMatch = await bcrypt.compare(String(currentPassword).trim(), user.passwordHash);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Current password does not match.' });
+      }
+      if (newPassword.trim().length < 6) {
+        return res.status(400).json({ message: 'New password must be at least 6 characters.' });
+      }
+      data.passwordHash = await bcrypt.hash(newPassword.trim(), 10);
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -236,10 +263,13 @@ router.patch('/profile', authenticate, async (req: AuthRequest, res: Response) =
         latitude: true,
         longitude: true,
         verified: true,
+        documentUrl: true,
+        documentType: true,
+        documentName: true,
       },
     });
 
-    res.json({ user: updatedUser, message: 'Profile & location updated successfully' });
+    res.json({ user: updatedUser, message: 'Profile updated successfully' });
   } catch (error: any) {
     console.error('Profile update error:', error);
     res.status(500).json({ message: 'Failed to update profile' });
@@ -364,7 +394,13 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
         role: true,
         organization: true,
         phone: true,
+        address: true,
+        latitude: true,
+        longitude: true,
         verified: true,
+        documentUrl: true,
+        documentType: true,
+        documentName: true,
       },
     });
     if (!dbUser) return res.status(404).json({ message: 'User not found' });

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import CountdownTimer from '../../components/CountdownTimer';
 import HandoverQRCode from '../../components/HandoverQRCode';
+import ProfileEditModal from '../../components/ProfileEditModal';
 
 interface AvailableFood {
   id: number;
@@ -91,6 +92,7 @@ function NGODashboardContent() {
 
   // NGO Shelter Location Management
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [ngoAddress, setNgoAddress] = useState(user?.address || '');
   const [ngoLat, setNgoLat] = useState<string>(user?.latitude ? String(user.latitude) : '');
   const [ngoLng, setNgoLng] = useState<string>(user?.longitude ? String(user.longitude) : '');
@@ -363,6 +365,13 @@ function NGODashboardContent() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setShowProfileModal(true)}
+            className="self-start sm:self-auto px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
+          >
+            <span>👤</span>
+            <span>Edit Profile</span>
+          </button>
           <button
             onClick={() => setShowLocationModal(true)}
             className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-xs cursor-pointer"
@@ -994,6 +1003,7 @@ function NGODashboardContent() {
           </div>
         </div>
       )}
+          <ProfileEditModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
     </div>
   );
 }
