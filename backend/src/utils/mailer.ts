@@ -37,7 +37,7 @@ export const sendMail = async (options: MailOptions) => {
         },
         body: JSON.stringify({
           sender: {
-            name: 'FoodShare Platform',
+            name: 'AnnaSetu Platform',
             email: fromAddress,
           },
           to: [{ email: options.to }],
@@ -60,7 +60,7 @@ export const sendMail = async (options: MailOptions) => {
 
   // 2. Fallback to Nodemailer SMTP (works locally & on paid cloud tiers)
   const mailOptions = {
-    from: `"FoodShare Platform" <${fromAddress}>`,
+    from: `"AnnaSetu Platform" <${fromAddress}>`,
     ...options,
   };
 
@@ -84,10 +84,10 @@ const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://food-share-uocl.verce
 export const sendRegistrationPendingEmail = async (email: string, name: string, role: string) => {
   return sendMail({
     to: email,
-    subject: `Welcome to FoodShare! Your ${role} verification is under review`,
+    subject: `Welcome to AnnaSetu! Your ${role} verification is under review`,
     html: `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <h2 style="color: #059669; margin-top: 0;">Welcome to FoodShare, ${name}!</h2>
+        <h2 style="color: #059669; margin-top: 0;">Welcome to AnnaSetu, ${name}!</h2>
         <p>Thank you for submitting your legal registration document for the <strong>${role}</strong> role.</p>
         <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
           <p style="margin: 0; font-weight: bold; color: #065f46;">⏳ Status: Verification Pending</p>
@@ -95,7 +95,7 @@ export const sendRegistrationPendingEmail = async (email: string, name: string, 
         </div>
         <p style="font-size: 13px; color: #64748b;">Once verified, you will have full access to create donations, claim food, or take delivery missions.</p>
         <div style="margin-top: 20px;">
-          <a href="${FRONTEND_URL}" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Visit FoodShare Platform</a>
+          <a href="${FRONTEND_URL}" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Visit AnnaSetu Platform</a>
         </div>
       </div>
     `,
@@ -106,12 +106,12 @@ export const sendRegistrationPendingEmail = async (email: string, name: string, 
 export const sendAccountVerifiedEmail = async (email: string, name: string, role: string) => {
   return sendMail({
     to: email,
-    subject: `🎉 Congratulations! Your FoodShare ${role} account is VERIFIED`,
+    subject: `🎉 Congratulations! Your AnnaSetu ${role} account is VERIFIED`,
     html: `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669; margin-top: 0;">🎉 You're Officially Verified!</h2>
         <p>Dear ${name},</p>
-        <p>The FoodShare Platform Administrator has reviewed and approved your legal verification documents for the role of <strong>${role}</strong>.</p>
+        <p>The AnnaSetu Platform Administrator has reviewed and approved your legal verification documents for the role of <strong>${role}</strong>.</p>
         <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; padding: 16px; border-radius: 8px; margin: 20px 0;">
           <h4 style="margin: 0 0 8px; color: #065f46;">Full Platform Access Granted:</h4>
           <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #047857;">
@@ -234,7 +234,7 @@ export const sendVolunteerAssignedEmail = async (
           <p style="margin: 4px 0;"><strong>Status:</strong> Heading to pickup location</p>
         </div>
         <div style="margin-top: 20px;">
-          <a href="${FRONTEND_URL}" style="display:inline-block; padding: 12px 24px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Open FoodShare</a>
+          <a href="${FRONTEND_URL}" style="display:inline-block; padding: 12px 24px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Open AnnaSetu</a>
         </div>
       </div>
     `,
@@ -283,10 +283,10 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   const verifyUrl = `${FRONTEND_URL}/verify-email?token=${token}`;
   return sendMail({
     to: email,
-    subject: 'Verify your FoodShare Account',
+    subject: 'Verify your AnnaSetu Account',
     html: `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b;">
-        <h2 style="color: #059669;">Verify Your FoodShare Account</h2>
+        <h2 style="color: #059669;">Verify Your AnnaSetu Account</h2>
         <p>Please click below to verify your email address:</p>
         <a href="${verifyUrl}" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Verify Email Address</a>
         <p style="font-size: 12px; color: #64748b; margin-top: 16px;">Or visit: <a href="${FRONTEND_URL}">${FRONTEND_URL}</a></p>
@@ -299,7 +299,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
   const resetUrl = `${FRONTEND_URL}/reset-password?token=${token}`;
   return sendMail({
     to: email,
-    subject: 'Reset your FoodShare Password',
+    subject: 'Reset your AnnaSetu Password',
     html: `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b;">
         <h2 style="color: #059669;">Reset Your Password</h2>
@@ -315,12 +315,12 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
 export const sendForgotPasswordEmail = async (email: string, name: string, newPassword: string) => {
   return sendMail({
     to: email,
-    subject: `🔐 Your New FoodShare Login Password: ${newPassword}`,
+    subject: `🔐 Your New AnnaSetu Login Password: ${newPassword}`,
     html: `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669; margin-top: 0;">Password Reset Successful</h2>
         <p>Dear <strong>${name}</strong>,</p>
-        <p>We received a forgot password request for your FoodShare account (<strong>${email}</strong>).</p>
+        <p>We received a forgot password request for your AnnaSetu account (<strong>${email}</strong>).</p>
         <p>Your password has been updated in our system. Here is your new randomly generated 6-character password:</p>
         <div style="background-color: #f8fafc; border: 2px dashed #059669; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
           <span style="font-size: 12px; color: #64748b; display: block; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Your New Login Password</span>
@@ -328,10 +328,10 @@ export const sendForgotPasswordEmail = async (email: string, name: string, newPa
         </div>
         <p style="font-size: 14px; color: #334155;">Please enter this 6-character password on the login screen to access your dashboard.</p>
         <div style="margin-top: 24px;">
-          <a href="${FRONTEND_URL}/login" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">Sign In to FoodShare</a>
+          <a href="${FRONTEND_URL}/login" style="display:inline-block; padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">Sign In to AnnaSetu</a>
         </div>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-        <p style="font-size: 11px; color: #94a3b8; margin: 0;">If you did not initiate this request, please contact FoodShare administration immediately.</p>
+        <p style="font-size: 11px; color: #94a3b8; margin: 0;">If you did not initiate this request, please contact AnnaSetu administration immediately.</p>
       </div>
     `,
   });

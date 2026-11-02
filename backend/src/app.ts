@@ -12,6 +12,7 @@ import adminRouter from './routes/admin';
 import feedbackRouter from './routes/feedback';
 
 import fs from 'fs';
+import { prisma } from './prisma/client';
 
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
@@ -33,8 +34,22 @@ if (fallbackUploads !== uploadsDir && fs.existsSync(fallbackUploads)) {
 }
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'FoodShare API', timestamp: new Date().toISOString() });
+app.get('/api/health', async (req, res) => {
+  let dbStatus = 'ok';
+  let dbError = null;
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+  } catch (err: any) {
+    dbStatus = 'disconnected';
+    dbError = err?.message || 'Database unreachable';
+  }
+  const isHealthy = dbStatus === 'ok';
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'ok' : 'degraded',
+    service: 'AnnaSetu API',
+    database: { status: dbStatus, error: dbError },
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Diagnostic check for email configuration
@@ -55,11 +70,11 @@ app.get('/api/health/email', async (req, res) => {
     const { sendMail } = await import('./utils/mailer');
     const result = await sendMail({
       to: targetEmail,
-      subject: 'FoodShare Email Delivery Confirmed',
+      subject: 'AnnaSetu Email Delivery Confirmed',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2 style="color: #059669;">FoodShare Email Delivery Confirmed!</h2>
-          <p>Your email system on <strong>FoodShare Backend</strong> is working and delivering messages successfully.</p>
+          <h2 style="color: #059669;">AnnaSetu Email Delivery Confirmed!</h2>
+          <p>Your email system on <strong>AnnaSetu Backend</strong> is working and delivering messages successfully.</p>
           <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
         </div>
       `,

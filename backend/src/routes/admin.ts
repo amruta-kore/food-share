@@ -128,12 +128,12 @@ const handleReject = async (req: AuthRequest, res: Response) => {
     // Send rejection email
     await sendMail({
       to: updated.email,
-      subject: `❌ FoodShare Verification Update for your ${updated.role} account`,
+      subject: `❌ AnnaSetu Verification Update for your ${updated.role} account`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 12px;">
           <h2 style="color: #dc2626; margin-top: 0;">Verification Not Approved</h2>
           <p>Dear ${updated.name},</p>
-          <p>Unfortunately, your <strong>${updated.role}</strong> account verification on FoodShare was not approved at this time.</p>
+          <p>Unfortunately, your <strong>${updated.role}</strong> account verification on AnnaSetu was not approved at this time.</p>
           <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
             <p style="margin: 0; font-weight: bold; color: #991b1b;">Reason:</p>
             <p style="margin: 4px 0 0; color: #7f1d1d;">${updated.rejectionReason}</p>

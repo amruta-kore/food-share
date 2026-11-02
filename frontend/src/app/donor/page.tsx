@@ -427,7 +427,7 @@ function DonorDashboardContent() {
 
       const data = await res.json();
       if (res.ok) {
-        alert('✅ Handover Verified! Food safely transferred to FoodShare courier.');
+        alert('✅ Handover Verified! Food safely transferred to AnnaSetu courier.');
         setVerifyingDonation(null);
         setEnteredPickupOtp('');
         loadDonations(false);
@@ -839,7 +839,7 @@ function DonorDashboardContent() {
                   className="w-full text-center tracking-[0.5em] text-3xl font-black font-mono py-3 px-4 border-2 border-blue-400 focus:border-blue-600 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 bg-blue-50/30 text-blue-900"
                 />
                 <p className="text-[11px] text-slate-500 text-center">
-                  Ask the courier: <em>"Please share your 4-digit FoodShare Pickup OTP"</em>
+                  Ask the courier: <em>"Please share your 4-digit AnnaSetu Pickup OTP"</em>
                 </p>
               </div>
 

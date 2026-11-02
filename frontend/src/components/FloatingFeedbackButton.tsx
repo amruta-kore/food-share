@@ -13,7 +13,7 @@ export const FloatingFeedbackButton: React.FC = () => {
           onClick={() => setModalOpen(true)}
           type="button"
           className="flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs rounded-full shadow-lg hover:shadow-xl shadow-emerald-700/20 hover:scale-105 active:scale-95 transition-all duration-200 border border-emerald-400/30"
-          title="Give Rating & Feedback to FoodShare"
+          title="Give Rating & Feedback to AnnaSetu"
         >
           <span className="text-base animate-bounce">⭐</span>
           <span className="hidden sm:inline">Rate Platform / Feedback</span>
@@ -27,6 +27,7 @@ export const FloatingFeedbackButton: React.FC = () => {
         onSuccess={() => {
           // Trigger optional event for pages listening for new reviews
           if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('annasetu:feedback-submitted'));
             window.dispatchEvent(new CustomEvent('foodshare:feedback-submitted'));
           }
         }}

@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FoodShare - Surplus Food Redistribution Platform",
+  title: "AnnaSetu - Surplus Food Redistribution Platform",
   description: "Connect donors, NGOs, and volunteers to save surplus edible food and feed local communities.",
 };
 
@@ -51,7 +51,7 @@ export default function RootLayout({ children }: LayoutProps) {
               <span>•</span>
               <Link href="/register" className="hover:text-emerald-700 transition">Register</Link>
             </div>
-            <p>© {new Date().getFullYear()} FoodShare Platform. Reducing Food Waste • Empowering Communities.</p>
+            <p>© {new Date().getFullYear()} AnnaSetu Platform. Reducing Food Waste • Empowering Communities.</p>
           </footer>
         </AuthProvider>
       </body>

@@ -116,7 +116,15 @@ router.post('/register', documentUpload.single('document'), async (req: Request,
     });
   } catch (error: any) {
     console.error('Registration error:', error);
-    res.status(500).json({ message: error?.message || 'Registration failed' });
+    const isDbOffline =
+      error?.name === 'PrismaClientInitializationError' ||
+      error?.message?.includes("Can't reach database") ||
+      error?.message?.includes('database server');
+    res.status(500).json({
+      message: isDbOffline
+        ? 'Database server is unreachable or offline. Please verify database connection.'
+        : error?.message || 'Registration failed',
+    });
   }
 });
 
@@ -179,7 +187,15 @@ router.post('/login', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Login failed' });
+    const isDbOffline =
+      error?.name === 'PrismaClientInitializationError' ||
+      error?.message?.includes("Can't reach database") ||
+      error?.message?.includes('database server');
+    res.status(500).json({
+      message: isDbOffline
+        ? 'Database server is unreachable or offline. Please verify database connection.'
+        : error?.message || 'Login failed',
+    });
   }
 });
 

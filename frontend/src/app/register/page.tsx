@@ -139,7 +139,7 @@ export default function RegisterPage() {
           <div className="inline-flex w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 items-center justify-center text-2xl mb-3 shadow-inner">
             🌱
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Join FoodShare</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Join AnnaSetu</h1>
           <p className="text-sm text-slate-500 mt-1">
             Choose your role and submit legal documents for administrative verification
           </p>

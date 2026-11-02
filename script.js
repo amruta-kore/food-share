@@ -1,4 +1,4 @@
-// script.js – Simple client‑side logic for FoodShare
+// script.js – Simple client‑side logic for AnnaSetu
 
 // Utility to manage localStorage arrays
 function getArray(key) {
@@ -75,4 +75,5 @@ recipientForm.addEventListener('submit', (e) => {
 });
 
 // Optional: expose data for debugging
+window.AnnaSetu = { getArray, setArray };
 window.FoodShare = { getArray, setArray };

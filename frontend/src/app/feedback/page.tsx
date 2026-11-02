@@ -71,8 +71,12 @@ export default function FeedbackPage() {
     const handleGlobalUpdate = () => {
       fetchFeedbackData();
     };
+    window.addEventListener('annasetu:feedback-submitted', handleGlobalUpdate);
     window.addEventListener('foodshare:feedback-submitted', handleGlobalUpdate);
-    return () => window.removeEventListener('foodshare:feedback-submitted', handleGlobalUpdate);
+    return () => {
+      window.removeEventListener('annasetu:feedback-submitted', handleGlobalUpdate);
+      window.removeEventListener('foodshare:feedback-submitted', handleGlobalUpdate);
+    };
   }, []);
 
   const getRoleBadge = (role: string) => {
@@ -107,7 +111,7 @@ export default function FeedbackPage() {
           <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
             Ratings & Feedback for{' '}
             <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              FoodShare
+              AnnaSetu
             </span>
           </h1>
 
@@ -213,7 +217,7 @@ export default function FeedbackPage() {
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Community Reviews & Suggestions</h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Read real experiences from people using the FoodShare platform
+              Read real experiences from people using the AnnaSetu platform
             </p>
           </div>
 

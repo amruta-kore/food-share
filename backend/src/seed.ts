@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { Role, DonationStatus } from '@prisma/client';
 
 async function main() {
-  console.log('🌱 Seeding demo data for FoodShare platform...');
+  console.log('🌱 Seeding demo data for AnnaSetu platform...');
 
   const passwordHash = await bcrypt.hash('Password@123', 10);
 
@@ -58,7 +58,7 @@ async function main() {
       email: 'admin.demo@foodshare.org',
       passwordHash,
       role: Role.ADMIN,
-      organization: 'FoodShare Foundation',
+      organization: 'AnnaSetu Foundation',
       phone: '+91 98000 11223',
       verified: true,
     },
@@ -156,7 +156,7 @@ async function main() {
         },
         {
           rating: 5,
-          feedback: 'FoodShare has been a blessing for our shelter. We can claim hot, safe nutritious meals and coordinate directly with couriers. Truly revolutionary!',
+          feedback: 'AnnaSetu has been a blessing for our shelter. We can claim hot, safe nutritious meals and coordinate directly with couriers. Truly revolutionary!',
           category: 'NGO Food Claiming',
           userType: 'NGO',
           name: ngo.name,
@@ -188,7 +188,7 @@ async function main() {
         },
         {
           rating: 5,
-          feedback: 'Super inspiring platform. Every city needs FoodShare to bridge the gap between food abundance and food poverty.',
+          feedback: 'Super inspiring platform. Every city needs AnnaSetu to bridge the gap between food abundance and food poverty.',
           category: 'General Suggestion',
           userType: 'VISITOR',
           name: 'Vikram Mehta',

@@ -260,7 +260,7 @@ function AdminContent() {
           <span className="px-3 py-1 bg-white/20 text-xs font-semibold uppercase tracking-wider rounded-full backdrop-blur-xs">
             🛡️ Platform Administration
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold mt-2">FoodShare Control Center</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold mt-2">AnnaSetu Control Center</h1>
           <p className="text-purple-100 text-xs sm:text-sm mt-1">
             System overview, ecosystem metrics, legal document inspection, and user verification workflows
           </p>

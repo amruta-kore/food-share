@@ -43,7 +43,7 @@ export const Navbar: React.FC = () => {
             </div>
             <div>
               <span className="text-xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent">
-                FoodShare
+                AnnaSetu
               </span>
               <span className="block text-[10px] text-gray-500 -mt-1 font-medium tracking-wide">
                 SURPLUS REDISTRIBUTION
@@ -151,7 +151,7 @@ export const Navbar: React.FC = () => {
                   href="/register"
                   className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition"
                 >
-                  Join FoodShare
+                  Join AnnaSetu
                 </Link>
               </div>
             )}
@@ -291,7 +291,7 @@ export const Navbar: React.FC = () => {
                 }}
                 className="w-full py-2.5 px-4 text-center text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition"
               >
-                Sign Out of FoodShare
+                Sign Out of AnnaSetu
               </button>
             ) : (
               <>
@@ -307,7 +307,7 @@ export const Navbar: React.FC = () => {
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full py-2.5 px-4 text-center text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition"
                 >
-                  Join FoodShare (Register)
+                  Join AnnaSetu (Register)
                 </Link>
               </>
             )}

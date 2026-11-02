@@ -135,7 +135,7 @@ export default function LoginPage() {
           <div className="inline-flex w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 items-center justify-center text-2xl mb-3 shadow-inner">
             🔐
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Sign in to FoodShare</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Sign in to AnnaSetu</h1>
           <p className="text-sm text-slate-500 mt-1">
             Enter your account credentials to access your dashboard
           </p>
@@ -336,7 +336,7 @@ export default function LoginPage() {
             ) : (
               <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Enter your registered FoodShare email address below. Our system will generate a fresh, random <strong>6-character password</strong>, update your account, and email it to you right away.
+                  Enter your registered AnnaSetu email address below. Our system will generate a fresh, random <strong>6-character password</strong>, update your account, and email it to you right away.
                 </p>
 
                 <div>

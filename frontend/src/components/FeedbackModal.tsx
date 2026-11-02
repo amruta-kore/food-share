@@ -160,7 +160,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
               </div>
               <h3 className="text-2xl font-black text-slate-900">Thank You for Your Feedback!</h3>
               <p className="text-sm text-slate-600 max-w-xs mx-auto">
-                Your rating helps us improve FoodShare and create a more reliable surplus food distribution network for all.
+                Your rating helps us improve AnnaSetu and create a more reliable surplus food distribution network for all.
               </p>
               <div className="inline-flex items-center space-x-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
                 <span>⭐ Your rating: {rating} / 5 Stars</span>
@@ -170,7 +170,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold tracking-wide mb-2">
-                  <span>💬 FOODSHARE COMMUNITY VOICE</span>
+                  <span>💬 ANNASETU COMMUNITY VOICE</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                   Rate & Share Your Feedback
@@ -299,7 +299,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
                   rows={3}
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
-                  placeholder="What did you like about FoodShare? Any suggestions for improvements, food pickup, or UI?"
+                  placeholder="What did you like about AnnaSetu? Any suggestions for improvements, food pickup, or UI?"
                   className="w-full px-3.5 py-2.5 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
                   required
                 />

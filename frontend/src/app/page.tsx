@@ -93,8 +93,12 @@ export default function HomePage() {
       loadFeedback();
       loadDonations();
     };
+    window.addEventListener('annasetu:feedback-submitted', handleUpdate);
     window.addEventListener('foodshare:feedback-submitted', handleUpdate);
-    return () => window.removeEventListener('foodshare:feedback-submitted', handleUpdate);
+    return () => {
+      window.removeEventListener('annasetu:feedback-submitted', handleUpdate);
+      window.removeEventListener('foodshare:feedback-submitted', handleUpdate);
+    };
   }, []);
 
   // Split donations into Active (Available / In-transit) and Completed Distribution History
@@ -520,7 +524,7 @@ export default function HomePage() {
                 Loved by Donors, NGOs, Couriers & Visitors
               </h2>
               <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-                Any type of user can rate and review FoodShare. See what our community has to say about rescuing food and feeding communities.
+                Any type of user can rate and review AnnaSetu. See what our community has to say about rescuing food and feeding communities.
               </p>
             </div>
 
