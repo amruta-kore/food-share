@@ -58,7 +58,7 @@ export default function HomePage() {
 
   const resolveImageUrl = (url?: string | null) => {
     if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) return url;
     const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
     const cleanPath = url.startsWith('/') ? url : `/${url}`;
     return base ? `${base}${cleanPath}` : cleanPath;

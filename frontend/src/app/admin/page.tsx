@@ -77,10 +77,10 @@ function AdminContent() {
     return endpoint;
   };
 
-  // Helper to ensure URL correctly points to static proxy
+  // Helper to ensure URL correctly points to static proxy or data URI
   const resolveDocUrl = (url?: string | null) => {
     if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) return url;
     const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
     const cleanPath = url.startsWith('/') ? url : `/${url}`;
     return base ? `${base}${cleanPath}` : cleanPath;
@@ -765,16 +765,15 @@ function AdminContent() {
                           if (fallback) (fallback as HTMLElement).style.display = 'block';
                         }}
                       />
-                      <div style={{ display: 'none' }} className="p-8 text-center text-slate-500">
-                        <p className="font-semibold text-slate-700 mb-2">Unable to display preview inline</p>
-                        <a
-                          href={resolveDocUrl(inspectingUserDoc.documentUrl)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold"
-                        >
-                          Click here to open and view the document
-                        </a>
+                      <div style={{ display: 'none' }} className="p-8 text-center space-y-3">
+                        <div className="text-3xl">⚠️</div>
+                        <p className="font-bold text-slate-800">Legacy File Cleared During Cloud Server Restart</p>
+                        <p className="text-xs text-slate-500 max-w-md mx-auto">
+                          This document was uploaded before permanent database storage was active. On Render free tier, server restarts reset temporary local storage.
+                        </p>
+                        <p className="text-xs text-slate-600 font-medium">
+                          You can approve this user directly using their registered details (Name, Role, Organization, Phone), or request them to re-upload. All new uploads are stored permanently in the database and will never expire.
+                        </p>
                       </div>
                     </div>
                   )}

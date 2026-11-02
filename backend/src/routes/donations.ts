@@ -3,6 +3,7 @@ import { prisma } from '../prisma/client';
 import { authenticate, authorize, requireVerified, AuthRequest } from '../middleware/auth';
 import { Role, DonationStatus } from '@prisma/client';
 import { foodImageUpload } from '../utils/uploader';
+import fs from 'fs';
 
 const router = Router();
 
@@ -45,10 +46,15 @@ router.post(
         return res.status(400).json({ error: 'Missing required donation details' });
       }
 
-      // If an image was uploaded via multipart/form-data, use its served URL
+      // If an image was uploaded via multipart/form-data, store as permanent base64 data URL
       let imageUrl = req.body.imageUrl || null;
       if (req.file) {
-        imageUrl = `/uploads/food/${req.file.filename}`;
+        try {
+          const imgBuffer = fs.readFileSync(req.file.path);
+          imageUrl = `data:${req.file.mimetype};base64,${imgBuffer.toString('base64')}`;
+        } catch {
+          imageUrl = `/uploads/food/${req.file.filename}`;
+        }
       }
 
       const isVeg = isVegetarian !== undefined ? (isVegetarian === 'true' || isVegetarian === true || isVegetarian === '1') : true;

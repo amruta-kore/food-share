@@ -12,6 +12,7 @@ import {
 import crypto from 'crypto';
 import { documentUpload } from '../utils/uploader';
 import path from 'path';
+import fs from 'fs';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -64,10 +65,15 @@ router.post('/register', documentUpload.single('document'), async (req: Request,
     let documentName: string | null = null;
 
     if (req.file) {
-      // Build a URL path to serve the uploaded file
-      documentUrl = `/uploads/documents/${req.file.filename}`;
       documentType = req.file.mimetype;
       documentName = req.file.originalname;
+      try {
+        const fileBuffer = fs.readFileSync(req.file.path);
+        // Store as permanent base64 data URL so documents NEVER disappear on ephemeral cloud hosts like Render
+        documentUrl = `data:${req.file.mimetype};base64,${fileBuffer.toString('base64')}`;
+      } catch (readErr) {
+        documentUrl = `/uploads/documents/${req.file.filename}`;
+      }
     }
 
     const parsedLat = latitude !== undefined && latitude !== '' && !isNaN(Number(latitude)) ? Number(latitude) : null;
