@@ -209,7 +209,7 @@ router.post('/login', async (req: Request, res: Response) => {
 router.patch('/profile', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user!.id;
-    const { name, address, latitude, longitude, phone, organization, currentPassword, newPassword } = req.body;
+    const { name, address, latitude, longitude, phone, organization, currentPassword, newPassword, documentUrl, documentType, documentName } = req.body;
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -232,6 +232,15 @@ router.patch('/profile', authenticate, async (req: AuthRequest, res: Response) =
     }
     if (longitude !== undefined) {
       data.longitude = longitude !== '' && !isNaN(Number(longitude)) ? Number(longitude) : null;
+    }
+
+    // Optional document update — resets verified to pending admin re-review
+    if (documentUrl !== undefined && documentUrl !== null && documentUrl !== '') {
+      data.documentUrl = documentUrl;
+      data.documentType = documentType ? String(documentType).trim() : null;
+      data.documentName = documentName ? String(documentName).trim() : null;
+      // Reset verified so admin must re-verify the updated document
+      data.verified = false;
     }
 
     // Optional password update

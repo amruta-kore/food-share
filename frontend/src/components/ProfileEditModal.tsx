@@ -27,6 +27,11 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdated }: Profile
   const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
 
+  // Document Upload State
+  const [newDocFile, setNewDocFile] = useState<File | null>(null);
+  const [newDocPreview, setNewDocPreview] = useState<string | null>(null);
+  const [docError, setDocError] = useState<string | null>(null);
+
   // Status State
   const [saving, setSaving] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
@@ -47,6 +52,9 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdated }: Profile
       setNewPassword('');
       setConfirmPassword('');
       setShowPasswordChange(false);
+      setNewDocFile(null);
+      setNewDocPreview(null);
+      setDocError(null);
       setError(null);
       setSuccessMsg(null);
       setGpsStatus(null);
@@ -119,6 +127,38 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdated }: Profile
     );
   };
 
+  const handleDocFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setDocError(null);
+    if (!file) {
+      setNewDocFile(null);
+      setNewDocPreview(null);
+      return;
+    }
+    // Validate type
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowed.includes(file.type)) {
+      setDocError('Only JPG, PNG, WEBP, or PDF files are accepted.');
+      setNewDocFile(null);
+      setNewDocPreview(null);
+      return;
+    }
+    // Validate size (max 5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setDocError('File must be under 5 MB.');
+      setNewDocFile(null);
+      setNewDocPreview(null);
+      return;
+    }
+    setNewDocFile(file);
+    // Build preview / base64 data URL
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setNewDocPreview(ev.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -168,7 +208,10 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdated }: Profile
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...payload,
+          ...(newDocFile && newDocPreview ? { documentUrl: newDocPreview, documentType: newDocFile.type, documentName: newDocFile.name } : {}),
+        }),
       });
 
       const data = await res.json();
@@ -176,11 +219,18 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdated }: Profile
       if (res.ok && data.user) {
         setUserDirectly(data.user);
         onUpdated?.(data.user);
-        setSuccessMsg('✓ Profile information updated successfully!');
+        const docChanged = !!(newDocFile && newDocPreview);
+        setSuccessMsg(
+          docChanged
+            ? '✅ Profile updated! Your new document is submitted for admin review. Your verification status is now Pending.'
+            : '✅ Profile updated successfully!'
+        );
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
         setShowPasswordChange(false);
+        setNewDocFile(null);
+        setNewDocPreview(null);
         setTimeout(() => {
           onClose();
         }, 1200);
@@ -477,6 +527,93 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdated }: Profile
               </div>
             )}
           </div>
+
+          {/* ── Section 4: Update Legal Document ── */}
+          {user.role !== 'ADMIN' && (
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center space-x-2">
+                <span>📄</span>
+                <span>Legal Verification Document</span>
+              </h3>
+
+              {/* Current document */}
+              {user.documentUrl && !newDocPreview && (
+                <div className="flex items-center justify-between p-3 rounded-xl bg-blue-50 border border-blue-200">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <span className="text-lg flex-shrink-0">{user.documentType?.startsWith('image') ? '🖼️' : '📄'}</span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-blue-900 truncate">{user.documentName || 'Uploaded Document'}</p>
+                      <p className="text-[11px] text-blue-600">
+                        {user.verified ? '✅ Verified by admin' : '⏳ Pending admin verification'}
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href={user.documentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 font-semibold hover:underline flex-shrink-0 ml-2"
+                  >
+                    View
+                  </a>
+                </div>
+              )}
+
+              {/* New document preview */}
+              {newDocPreview && (
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold text-emerald-800">New document ready to upload:</p>
+                    <button
+                      type="button"
+                      onClick={() => { setNewDocFile(null); setNewDocPreview(null); setDocError(null); }}
+                      className="text-xs text-red-500 hover:text-red-700 font-semibold"
+                    >
+                      ✕ Remove
+                    </button>
+                  </div>
+                  {newDocFile?.type.startsWith('image') ? (
+                    <img src={newDocPreview} alt="Preview" className="max-h-32 rounded-lg object-contain border border-emerald-200" />
+                  ) : (
+                    <div className="flex items-center space-x-2 text-emerald-800">
+                      <span className="text-xl">📄</span>
+                      <span className="text-xs font-medium truncate">{newDocFile?.name}</span>
+                    </div>
+                  )}
+                  <p className="text-[11px] text-amber-700 mt-2 font-medium">
+                    ⚠️ Uploading a new document will reset your verification status to "Pending Review".
+                  </p>
+                </div>
+              )}
+
+              {/* Upload button */}
+              <div>
+                <label
+                  htmlFor="doc-upload-input"
+                  className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-semibold text-slate-700 cursor-pointer transition"
+                >
+                  <span>📎</span>
+                  <span>{newDocFile ? 'Change Selected File' : user.documentUrl ? 'Replace Document' : 'Upload Document'}</span>
+                </label>
+                <input
+                  id="doc-upload-input"
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp,.pdf"
+                  onChange={handleDocFileChange}
+                  className="hidden"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Accepted: JPG, PNG, WEBP, PDF · Max 5 MB. Admin will re-verify after upload.
+                </p>
+              </div>
+
+              {docError && (
+                <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl p-2">
+                  {docError}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Footer Actions */}
           <div className="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
