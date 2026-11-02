@@ -16,7 +16,9 @@ import { prisma } from './prisma/client';
 
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+// Increase JSON body limit to 15mb to support base64-encoded document uploads
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 // Ensure uploads folder and subdirectories exist reliably
 const uploadsDir = path.resolve(process.cwd(), 'uploads');
