@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../context/LanguageProvider';
 import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 
@@ -70,6 +71,7 @@ interface NGORequest {
 import { RoleGuard } from '../../components/RoleGuard';
 
 function NGODashboardContent() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -370,7 +372,7 @@ function NGODashboardContent() {
             className="self-start sm:self-auto px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
           >
             <span>👤</span>
-            <span>Edit Profile</span>
+            <span>{t('btn_edit_profile', 'Edit Profile')}</span>
           </button>
           <button
             onClick={() => setShowLocationModal(true)}

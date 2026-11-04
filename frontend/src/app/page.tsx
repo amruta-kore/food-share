@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth, Role } from './context/AuthProvider';
+import { useLanguage } from './context/LanguageProvider';
 import { useRouter } from 'next/navigation';
 import FeedbackModal from '../components/FeedbackModal';
 import CountdownTimer from '../components/CountdownTimer';
@@ -33,6 +34,7 @@ interface Donation {
 
 export default function HomePage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const [donations, setDonations] = useState<Donation[]>([]);
@@ -129,22 +131,26 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
         <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold tracking-wide border border-emerald-200">
           <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-          <span>LIVE SURPLUS FOOD REDISTRIBUTION NETWORK</span>
+          <span>{t('hero_live_badge', 'LIVE SURPLUS FOOD REDISTRIBUTION NETWORK')}</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-black text-slate-900 tracking-tight max-w-4xl mx-auto leading-tight">
-          Safe Surplus Food From <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Kitchens & Banquets</span> To People In Need.
+          {t('hero_title_prefix', 'Safe Surplus Food From')}{' '}
+          <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            {t('hero_title_highlight', 'Kitchens & Banquets')}
+          </span>{' '}
+          {t('hero_title_suffix', 'To People In Need.')}
         </h1>
 
         <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">
-          Restaurants and caterers post excess safe meals. Verified NGOs claim them in minutes. Volunteer couriers handle rapid delivery. Zero food waste.
+          {t('hero_description', 'Restaurants and caterers post excess safe meals. Verified NGOs claim them in minutes. Volunteer couriers handle rapid delivery. Zero food waste.')}
         </p>
 
         {/* Platform Portals & Dashboards Navigation */}
         <div className="pt-4 max-w-3xl mx-auto">
           <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-md space-y-3">
             <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              🚀 Platform Portals & Dashboards:
+              🚀 {t('portals_heading', 'Platform Portals & Dashboards:')}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <Link
@@ -152,7 +158,7 @@ export default function HomePage() {
                 className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-800 text-xs font-bold transition flex flex-col items-center justify-center space-y-1"
               >
                 <span className="text-xl">👨‍🍳</span>
-                <span>Food Donor</span>
+                <span>{t('portal_donor_title', 'Food Donor')}</span>
                 <span className="text-[10px] text-emerald-600 font-normal">Post Surplus</span>
               </Link>
 
@@ -161,7 +167,7 @@ export default function HomePage() {
                 className="p-3 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100/80 text-blue-800 text-xs font-bold transition flex flex-col items-center justify-center space-y-1"
               >
                 <span className="text-xl">🏢</span>
-                <span>NGO / Shelter</span>
+                <span>{t('portal_ngo_title', 'NGO / Shelter')}</span>
                 <span className="text-[10px] text-blue-600 font-normal">Claim Food</span>
               </Link>
 
@@ -170,7 +176,7 @@ export default function HomePage() {
                 className="p-3 rounded-xl border border-amber-200 bg-amber-50/70 hover:bg-amber-100/80 text-amber-800 text-xs font-bold transition flex flex-col items-center justify-center space-y-1"
               >
                 <span className="text-xl">🚴</span>
-                <span>Volunteer</span>
+                <span>{t('portal_volunteer_title', 'Volunteer')}</span>
                 <span className="text-[10px] text-amber-600 font-normal">Delivery Board</span>
               </Link>
 
@@ -179,7 +185,7 @@ export default function HomePage() {
                 className="p-3 rounded-xl border border-purple-200 bg-purple-50/70 hover:bg-purple-100/80 text-purple-800 text-xs font-bold transition flex flex-col items-center justify-center space-y-1"
               >
                 <span className="text-xl">🛡️</span>
-                <span>Admin Panel</span>
+                <span>{t('portal_admin_title', 'Admin Panel')}</span>
                 <span className="text-[10px] text-purple-600 font-normal">Restricted (Admin Only)</span>
               </Link>
             </div>
@@ -192,19 +198,19 @@ export default function HomePage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-slate-900 text-white rounded-3xl shadow-xl">
           <div className="text-center p-3">
             <div className="text-3xl sm:text-4xl font-black text-emerald-400">1,850+</div>
-            <div className="text-xs text-slate-400 font-medium mt-1">Meals Rescued</div>
+            <div className="text-xs text-slate-400 font-medium mt-1">{t('stat_meals_rescued', 'Meals Rescued')}</div>
           </div>
           <div className="text-center p-3">
             <div className="text-3xl sm:text-4xl font-black text-blue-400">42</div>
-            <div className="text-xs text-slate-400 font-medium mt-1">Partner Restaurants</div>
+            <div className="text-xs text-slate-400 font-medium mt-1">{t('stat_partner_restaurants', 'Partner Restaurants')}</div>
           </div>
           <div className="text-center p-3">
             <div className="text-3xl sm:text-4xl font-black text-amber-400">28</div>
-            <div className="text-xs text-slate-400 font-medium mt-1">Shelters & NGOs</div>
+            <div className="text-xs text-slate-400 font-medium mt-1">{t('stat_shelters_ngos', 'Shelters & NGOs')}</div>
           </div>
           <div className="text-center p-3">
             <div className="text-3xl sm:text-4xl font-black text-purple-400">100%</div>
-            <div className="text-xs text-slate-400 font-medium mt-1">Free & Non-Profit</div>
+            <div className="text-xs text-slate-400 font-medium mt-1">{t('stat_free_nonprofit', 'Free & Non-Profit')}</div>
           </div>
         </div>
       </section>
@@ -276,7 +282,7 @@ export default function HomePage() {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none text-slate-700"
             >
-              <option value="ALL">All Categories</option>
+              <option value="ALL">{t('filter_all_categories', 'All Categories')}</option>
               <option value="Cooked Meals">Cooked Meals</option>
               <option value="Bakery & Bread">Bakery & Bread</option>
               <option value="Fresh Produce / Fruits">Fresh Produce</option>

@@ -4,9 +4,11 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth, Role } from '../app/context/AuthProvider';
 import { usePathname } from 'next/navigation';
+import { useLanguage } from '../app/context/LanguageProvider';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -46,7 +48,7 @@ export const Navbar: React.FC = () => {
                 AnnaSetu
               </span>
               <span className="block text-[10px] text-gray-500 -mt-1 font-medium tracking-wide">
-                SURPLUS REDISTRIBUTION
+                {t('brand_tagline', 'SURPLUS REDISTRIBUTION')}
               </span>
             </div>
           </Link>
@@ -58,7 +60,7 @@ export const Navbar: React.FC = () => {
               className={`px-3 py-2 rounded-lg text-sm font-medium transition ${isActive('/') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
             >
-              Surplus Food
+              {t('nav_surplus', 'Surplus Food')}
             </Link>
 
             {user?.role === 'DONOR' && (
@@ -67,7 +69,7 @@ export const Navbar: React.FC = () => {
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition ${isActive('/donor') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
               >
-                Donor Dashboard
+                {t('nav_donor', 'Donor Dashboard')}
               </Link>
             )}
 
@@ -77,7 +79,7 @@ export const Navbar: React.FC = () => {
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition ${isActive('/ngo') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
               >
-                NGO Claim Hub
+                {t('nav_ngo', 'NGO Claim Hub')}
               </Link>
             )}
 
@@ -87,7 +89,7 @@ export const Navbar: React.FC = () => {
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition ${isActive('/volunteer') ? 'bg-amber-50 text-amber-700 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
               >
-                Delivery Board
+                {t('nav_volunteer', 'Delivery Board')}
               </Link>
             )}
 
@@ -97,7 +99,7 @@ export const Navbar: React.FC = () => {
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition ${isActive('/admin') ? 'bg-purple-50 text-purple-700 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
               >
-                Admin Panel
+                {t('nav_admin', 'Admin Panel')}
               </Link>
             )}
 
@@ -107,7 +109,7 @@ export const Navbar: React.FC = () => {
                 }`}
             >
               <span>🌍</span>
-              <span>Impact & Case Study</span>
+              <span>{t('nav_impact', 'Impact & Case Study')}</span>
             </Link>
 
             <Link
@@ -116,7 +118,7 @@ export const Navbar: React.FC = () => {
                 }`}
             >
               <span>⭐</span>
-              <span>Reviews & Rating</span>
+              <span>{t('nav_reviews', 'Reviews & Rating')}</span>
             </Link>
           </nav>
 
@@ -136,7 +138,7 @@ export const Navbar: React.FC = () => {
                   onClick={logout}
                   className="hidden sm:inline-flex px-3 py-1.5 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 rounded-lg transition"
                 >
-                  Sign Out
+                  {t('nav_signout', 'Sign Out')}
                 </button>
               </div>
             ) : (
@@ -145,16 +147,45 @@ export const Navbar: React.FC = () => {
                   href="/login"
                   className="px-3.5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
                 >
-                  Log In
+                  {t('nav_login', 'Log In')}
                 </Link>
                 <Link
                   href="/register"
                   className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition"
                 >
-                  Join AnnaSetu
+                  {t('nav_join', 'Join AnnaSetu')}
                 </Link>
               </div>
             )}
+
+            
+            {/* Language Switcher (EN | मराठी) */}
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-bold shrink-0">
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2.5 py-1 rounded-lg transition-all ${
+                  language === 'en'
+                    ? 'bg-white text-emerald-700 shadow-xs font-black'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+                title="English"
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('mr')}
+                className={`px-2.5 py-1 rounded-lg transition-all ${
+                  language === 'mr'
+                    ? 'bg-emerald-600 text-white shadow-xs font-black'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+                title="मराठी (Marathi)"
+              >
+                मराठी
+              </button>
+            </div>
 
             {/* Mobile Role indicator if logged in */}
             {user && (
@@ -209,7 +240,7 @@ export const Navbar: React.FC = () => {
                 }`}
             >
               <span>🥗</span>
-              <span>Surplus Feed</span>
+              <span>{t('nav_surplus', 'Surplus Feed')}</span>
             </Link>
 
             {user?.role === 'DONOR' && (
@@ -220,7 +251,7 @@ export const Navbar: React.FC = () => {
                   }`}
               >
                 <span>🍲</span>
-                <span>Donor Dashboard</span>
+                <span>{t('nav_donor', 'Donor Dashboard')}</span>
               </Link>
             )}
 
@@ -232,7 +263,7 @@ export const Navbar: React.FC = () => {
                   }`}
               >
                 <span>🏢</span>
-                <span>NGO Claim Hub</span>
+                <span>{t('nav_ngo', 'NGO Claim Hub')}</span>
               </Link>
             )}
 
@@ -244,7 +275,7 @@ export const Navbar: React.FC = () => {
                   }`}
               >
                 <span>🚴</span>
-                <span>Delivery Board</span>
+                <span>{t('nav_volunteer', 'Delivery Board')}</span>
               </Link>
             )}
 
@@ -256,7 +287,7 @@ export const Navbar: React.FC = () => {
                   }`}
               >
                 <span>🛡️</span>
-                <span>Admin Panel</span>
+                <span>{t('nav_admin', 'Admin Panel')}</span>
               </Link>
             )}
 
@@ -291,7 +322,7 @@ export const Navbar: React.FC = () => {
                 }}
                 className="w-full py-2.5 px-4 text-center text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition"
               >
-                Sign Out of AnnaSetu
+                {t('nav_signout_full', 'Sign Out of AnnaSetu')}
               </button>
             ) : (
               <>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
+import { useLanguage } from '../context/LanguageProvider';
 import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { RoleGuard } from '../../components/RoleGuard';
@@ -47,6 +48,7 @@ interface Donation {
 }
 
 function DonorDashboardContent() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -511,7 +513,7 @@ function DonorDashboardContent() {
             title="Edit your profile details, contact number, and kitchen address"
           >
             <span>👤</span>
-            <span>Edit Profile</span>
+            <span>{t('btn_edit_profile', 'Edit Profile')}</span>
           </button>
 
           <button
@@ -530,7 +532,7 @@ function DonorDashboardContent() {
             }`}
           >
             <span>➕</span>
-            <span>Post Surplus Food</span>
+            <span>{t('btn_post_surplus', 'Post Surplus Food')}</span>
           </button>
         </div>
       </div>

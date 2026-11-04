@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useLanguage } from '../context/LanguageProvider';
 import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { RoleGuard } from '../../components/RoleGuard';
@@ -50,6 +51,7 @@ interface DonationItem {
 }
 
 function AdminContent() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -273,14 +275,14 @@ function AdminContent() {
           className="self-start sm:self-auto px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
         >
           <span>👤</span>
-          <span>Edit Profile</span>
+          <span>{t('btn_edit_profile', 'Edit Profile')}</span>
         </button>
         <button
           onClick={() => loadAdminData(false)}
           className="self-start sm:self-auto px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
         >
           <span>🔄</span>
-          <span>Refresh Data</span>
+          <span>{t('btn_refresh_data', 'Refresh Data')}</span>
         </button>
       </div>
 

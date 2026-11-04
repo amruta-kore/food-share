@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../context/LanguageProvider';
 import { useAuth } from '../context/AuthProvider';
 import { useRouter } from 'next/navigation';
 
@@ -50,6 +51,7 @@ import { RoleGuard } from '../../components/RoleGuard';
 import ProfileEditModal from '../../components/ProfileEditModal';
 
 function VolunteerDashboardContent() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -206,14 +208,14 @@ function VolunteerDashboardContent() {
           className="self-start sm:self-auto px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
         >
           <span>👤</span>
-          <span>Edit Profile</span>
+          <span>{t('btn_edit_profile', 'Edit Profile')}</span>
         </button>
         <button
           onClick={() => loadTasks(false)}
           className="self-start sm:self-auto px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition flex items-center space-x-2 border border-white/20"
         >
           <span>🔄</span>
-          <span>Refresh Tasks</span>
+          <span>{t('btn_refresh_tasks', 'Refresh Tasks')}</span>
         </button>
       </div>
 
