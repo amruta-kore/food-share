@@ -34,7 +34,8 @@ interface Donation {
 
 export default function HomePage() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isMarathi = language === 'mr';
   const router = useRouter();
 
   const [donations, setDonations] = useState<Donation[]>([]);
@@ -56,6 +57,33 @@ export default function HomePage() {
       return `${base}${endpoint}`;
     }
     return endpoint;
+  };
+
+  
+  const getHomeCatLabel = (cat: string) => {
+    if (!isMarathi) return cat;
+    const map: Record<string, string> = {
+      'Website & Usability': 'वेबसाइट आणि सुलभता',
+      'Food Redistribution Flow': 'अन्न वितरण प्रक्रिया',
+      'Donation & Listing': 'अन्नदान आणि नोंदणी',
+      'NGO Food Claiming': 'संस्था अन्न मागणी',
+      'Volunteer Delivery': 'स्वयंसेवक डिलिव्हरी',
+      'Platform Reliability': 'प्लॅटफॉर्म विश्वसनीयता',
+      'General Suggestion': 'सामान्य सूचना',
+      'Bug Report': 'तांत्रिक त्रुटी (Bug)',
+    };
+    return map[cat] || cat;
+  };
+
+  const getHomeUserTypeLabel = (role: string) => {
+    if (!isMarathi) return role || 'COMMUNITY';
+    switch ((role || '').toUpperCase()) {
+      case 'DONOR': return 'अन्नदाता';
+      case 'NGO': return 'संस्था / निवारा';
+      case 'VOLUNTEER': return 'स्वयंसेवक';
+      case 'ADMIN': return 'प्रशासक';
+      default: return 'नागरिक';
+    }
   };
 
   const resolveImageUrl = (url?: string | null) => {
@@ -524,13 +552,19 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
-                <span>⭐ COMMUNITY RATINGS & TESTIMONIALS</span>
+                <span>
+                  {isMarathi ? '⭐ नागरिकांचे अभिप्राय आणि अनुभव' : '⭐ COMMUNITY RATINGS & TESTIMONIALS'}
+                </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-white">
-                Loved by Donors, NGOs, Couriers & Visitors
+                {isMarathi
+                  ? 'अन्नदाता, संस्था, स्वयंसेवक आणि नागरिकांचा विश्वास'
+                  : 'Loved by Donors, NGOs, Couriers & Visitors'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-                Any type of user can rate and review AnnaSetu. See what our community has to say about rescuing food and feeding communities.
+                {isMarathi
+                  ? 'कोणताही वापरकर्ता अन्नसेतूला रेटिंग व अभिप्राय देऊ शकतो. अन्न वाचवणे आणि समाज सेवेबाबत नागरिकांचे अनुभव पहा.'
+                  : 'Any type of user can rate and review AnnaSetu. See what our community has to say about rescuing food and feeding communities.'}
               </p>
             </div>
 
@@ -539,7 +573,7 @@ export default function HomePage() {
                 <span className="text-2xl font-black text-emerald-400">{avgRating.toFixed(1)}</span>
                 <div className="text-left">
                   <div className="text-amber-400 text-xs">★★★★★</div>
-                  <div className="text-[10px] text-slate-300">{totalRatingCount} ratings</div>
+                  <div className="text-[10px] text-slate-300">{isMarathi ? `${totalRatingCount} रेटिंग्ज` : `${totalRatingCount} ratings`}</div>
                 </div>
               </div>
 
@@ -547,14 +581,14 @@ export default function HomePage() {
                 onClick={() => setFeedbackModalOpen(true)}
                 className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center space-x-1.5"
               >
-                <span>⭐ Give Feedback</span>
+                <span>{isMarathi ? '⭐ अभिप्राय द्या' : '⭐ Give Feedback'}</span>
               </button>
 
               <Link
                 href="/feedback"
                 className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl transition"
               >
-                View All Reviews →
+                {isMarathi ? 'सर्व अभिप्राय पहा →' : 'View All Reviews →'}
               </Link>
             </div>
           </div>
@@ -572,7 +606,7 @@ export default function HomePage() {
                       {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}
                     </div>
                     <span className="text-[10px] font-medium text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
-                      {item.category}
+                      {getHomeCatLabel(item.category)}
                     </span>
                   </div>
                   <p className="text-xs text-slate-200 italic line-clamp-3 leading-relaxed">
@@ -585,7 +619,7 @@ export default function HomePage() {
                     {item.name}
                   </div>
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-white/10 text-emerald-200 border border-white/10">
-                    {item.userType || 'COMMUNITY'}
+                    {getHomeUserTypeLabel(item.userType || 'COMMUNITY')}
                   </span>
                 </div>
               </div>
@@ -606,10 +640,21 @@ export default function HomePage() {
               </div>
 
               <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
-                Why Donating Surplus Food Matters: <br />
-                <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-200 bg-clip-text text-transparent">
-                  Ending Hunger & Protecting the Environment
-                </span>
+                {isMarathi ? (
+                  <>
+                    अतिरिक्त अन्न दान करणे का महत्त्वाचे आहे: <br />
+                    <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-200 bg-clip-text text-transparent">
+                      भूकमुक्ती आणि पर्यावरणाचे संरक्षण
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Why Donating Surplus Food Matters: <br />
+                    <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-200 bg-clip-text text-transparent">
+                      Ending Hunger & Protecting the Environment
+                    </span>
+                  </>
+                )}
               </h2>
 
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
@@ -637,14 +682,14 @@ export default function HomePage() {
                 href="/food-impact"
                 className="px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition text-center flex items-center justify-center space-x-2"
               >
-                <span>📖 Read Full Impact Case Study</span>
+                <span>{isMarathi ? '📖 संपूर्ण केस स्टडी वाचा' : '📖 Read Full Impact Case Study'}</span>
                 <span>→</span>
               </Link>
               <Link
                 href="/donor"
                 className="px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-sm rounded-xl border border-white/20 transition text-center"
               >
-                Post Surplus Food Now
+                {isMarathi ? 'आता अन्न पोस्ट करा' : 'Post Surplus Food Now'}
               </Link>
             </div>
           </div>
