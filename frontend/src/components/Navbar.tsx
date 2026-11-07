@@ -9,6 +9,7 @@ import { useLanguage } from '../app/context/LanguageProvider';
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
+  const isMarathi = language === 'mr';
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -45,7 +46,7 @@ export const Navbar: React.FC = () => {
             </div>
             <div>
               <span className="text-xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent">
-                AnnaSetu
+                {isMarathi ? 'अन्नसेतू' : 'AnnaSetu'}
               </span>
               <span className="block text-[10px] text-gray-500 -mt-1 font-medium tracking-wide">
                 {t('brand_tagline', 'SURPLUS REDISTRIBUTION')}
@@ -153,7 +154,7 @@ export const Navbar: React.FC = () => {
                   href="/register"
                   className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition"
                 >
-                  {t('nav_join', 'Join AnnaSetu')}
+                  {isMarathi ? 'अन्नसेतूशी जोडा' : 'Join AnnaSetu'}
                 </Link>
               </div>
             )}
@@ -338,7 +339,7 @@ export const Navbar: React.FC = () => {
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full py-2.5 px-4 text-center text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition"
                 >
-                  Join AnnaSetu (Register)
+                  {isMarathi ? 'अन्नसेतूशी जोडा (नोंदणी)' : 'Join AnnaSetu (Register)'}
                 </Link>
               </>
             )}

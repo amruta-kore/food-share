@@ -3,10 +3,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth, Role } from '../context/AuthProvider';
+import { useLanguage } from '../context/LanguageProvider';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
   const { register } = useAuth();
+  const { language } = useLanguage();
+  const isMarathi = language === 'mr';
   const router = useRouter();
 
   const [role, setRole] = useState<Role>('DONOR');
@@ -31,13 +34,19 @@ export default function RegisterPage() {
   // Browser Geolocation API to fetch GPS coordinates with instant IP fallback on timeout
   const handleUseCurrentLocation = () => {
     setGpsLoading(true);
-    setGpsStatus('Detecting your location...');
+    setGpsStatus(
+      isMarathi ? 'तुमचे स्थान शोधत आहे...' : 'Detecting your location...'
+    );
 
     const applyCoordsAndReverseGeocode = async (lat: number, lng: number, source: 'GPS' | 'Network') => {
       setLatitude(lat.toFixed(6));
       setLongitude(lng.toFixed(6));
       setGpsLoading(false);
-      setGpsStatus(`✓ ${source} Location Captured: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`);
+      setGpsStatus(
+        isMarathi
+          ? `✓ ${source === 'GPS' ? 'GPS' : 'नेटवर्क'} स्थान मिळाले: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`
+          : `✓ ${source} Location Captured: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`
+      );
 
       // Reverse geocode via OpenStreetMap Nominatim
       try {
@@ -56,7 +65,7 @@ export default function RegisterPage() {
     };
 
     const fallbackToIpLocation = async () => {
-      setGpsStatus('Fetching network location...');
+      setGpsStatus(isMarathi ? 'नेटवर्क स्थान शोधत आहे...' : 'Fetching network location...');
       try {
         const res = await fetch('https://ipapi.co/json/');
         if (res.ok) {
@@ -73,7 +82,11 @@ export default function RegisterPage() {
 
       // Final fallback if IP lookup also fails
       setGpsLoading(false);
-      setGpsStatus('⚠️ Location could not be detected automatically. Please type your street address below.');
+      setGpsStatus(
+        isMarathi
+          ? '⚠️ स्थान आपोआप शोधता आले नाही. कृपया खाली पत्ता मॅन्युअली टाइप करा.'
+          : '⚠️ Location could not be detected automatically. Please type your street address below.'
+      );
     };
 
     if (!navigator.geolocation) {
@@ -90,9 +103,9 @@ export default function RegisterPage() {
         fallbackToIpLocation();
       },
       {
-        enableHighAccuracy: false, // Prevents satellite hang on PCs/laptops without GPS chip
+        enableHighAccuracy: false,
         timeout: 6000,
-        maximumAge: 60000, // Accepts cached location from last 60 seconds
+        maximumAge: 60000,
       }
     );
   };
@@ -102,12 +115,20 @@ export default function RegisterPage() {
     setError(null);
 
     if (!documentFile) {
-      setError('Please upload an official legal document (ID / FSSAI / NGO Registration Certificate / Driving License) for Admin verification.');
+      setError(
+        isMarathi
+          ? 'प्रशासक पडताळणीसाठी कृपया अधिकृत कायदेशीर कागदपत्र (ID / FSSAI / संस्था नोंदणी प्रमाणपत्र / ड्रायव्हिंग लायसन्स) अपलोड करा.'
+          : 'Please upload an official legal document (ID / FSSAI / NGO Registration Certificate / Driving License) for Admin verification.'
+      );
       return;
     }
 
     if (role === 'NGO' && !address.trim() && !latitude) {
-      setError('Please provide your NGO shelter location (either by clicking "Use My Current Location" or typing an address).');
+      setError(
+        isMarathi
+          ? 'कृपया तुमच्या शेल्टरचे स्थान द्या ("माझे चालू स्थान शोधा" वर क्लिक करा किंवा पत्ता टाइप करा).'
+          : 'Please provide your NGO shelter location (either by clicking "Use My Current Location" or typing an address).'
+      );
       return;
     }
 
@@ -127,7 +148,10 @@ export default function RegisterPage() {
 
     const res = await register(formData);
     if (!res.success) {
-      setError(res.message || 'Registration failed');
+      setError(
+        res.message ||
+          (isMarathi ? 'नोंदणी अयशस्वी झाली. माहिती पुन्हा तपासा.' : 'Registration failed')
+      );
     }
     setLoading(false);
   };
@@ -139,9 +163,13 @@ export default function RegisterPage() {
           <div className="inline-flex w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 items-center justify-center text-2xl mb-3 shadow-inner">
             🌱
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Join AnnaSetu</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {isMarathi ? 'अन्नसेतूशी जोडा' : 'Join AnnaSetu'}
+          </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Choose your role and submit legal documents for administrative verification
+            {isMarathi
+              ? 'तुमची भूमिका निवडा आणि प्रशासकीय पडताळणीसाठी कायदेशीर कागदपत्रे जोडा'
+              : 'Choose your role and submit legal documents for administrative verification'}
           </p>
         </div>
 
@@ -150,35 +178,35 @@ export default function RegisterPage() {
           <button
             type="button"
             onClick={() => setRole('DONOR')}
-            className={`py-2 px-3 text-xs font-semibold rounded-lg transition ${
+            className={`py-2 px-3 text-xs font-semibold rounded-lg transition cursor-pointer ${
               role === 'DONOR'
                 ? 'bg-white text-emerald-700 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            👨‍🍳 Donor
+            {isMarathi ? '🍲 अन्नदाता' : '🍲 Donor'}
           </button>
           <button
             type="button"
             onClick={() => setRole('NGO')}
-            className={`py-2 px-3 text-xs font-semibold rounded-lg transition ${
+            className={`py-2 px-3 text-xs font-semibold rounded-lg transition cursor-pointer ${
               role === 'NGO'
                 ? 'bg-white text-blue-700 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            🏢 NGO / Shelter
+            {isMarathi ? '🏢 संस्था / शेल्टर' : '🏢 NGO / Shelter'}
           </button>
           <button
             type="button"
             onClick={() => setRole('VOLUNTEER')}
-            className={`py-2 px-3 text-xs font-semibold rounded-lg transition ${
+            className={`py-2 px-3 text-xs font-semibold rounded-lg transition cursor-pointer ${
               role === 'VOLUNTEER'
                 ? 'bg-white text-amber-700 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            🚴 Volunteer
+            {isMarathi ? '🚴 स्वयंसेवक' : '🚴 Volunteer'}
           </button>
         </div>
 
@@ -193,27 +221,49 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
-                Contact Person Name *
+                {isMarathi ? 'संपर्क व्यक्तीचे नाव *' : 'Contact Person Name *'}
               </label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
+                placeholder={isMarathi ? 'उदा. राहुल पाटील' : 'John Doe'}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
-                {role === 'DONOR' ? 'Restaurant / Caterer Name' : role === 'NGO' ? 'NGO / Organization Name' : 'Vehicle Type / Handle'}
+                {role === 'DONOR'
+                  ? isMarathi
+                    ? 'हॉटेल / केटररचे नाव'
+                    : 'Restaurant / Caterer Name'
+                  : role === 'NGO'
+                  ? isMarathi
+                    ? 'संस्था / फाउंडेशनचे नाव'
+                    : 'NGO / Organization Name'
+                  : isMarathi
+                  ? 'वाहन प्रकार / ओळख'
+                  : 'Vehicle Type / Handle'}
               </label>
               <input
                 type="text"
                 value={organization}
                 onChange={(e) => setOrganization(e.target.value)}
-                placeholder={role === 'DONOR' ? 'Spice Garden Banquet' : role === 'NGO' ? 'Care For All Foundation' : 'Two-Wheeler / Scooter'}
+                placeholder={
+                  role === 'DONOR'
+                    ? isMarathi
+                      ? 'उदा. स्पाइस गार्डन बँक्वेट'
+                      : 'Spice Garden Banquet'
+                    : role === 'NGO'
+                    ? isMarathi
+                      ? 'उदा. सेवा फाउंडेशन निवारा'
+                      : 'Care For All Foundation'
+                    : isMarathi
+                    ? 'उदा. दुचाकी / स्कूटर'
+                    : 'Two-Wheeler / Scooter'
+                }
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
               />
             </div>
@@ -222,7 +272,7 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
-                Email Address *
+                {isMarathi ? 'ईमेल पत्ता *' : 'Email Address *'}
               </label>
               <input
                 type="email"
@@ -236,7 +286,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
-                Phone Number
+                {isMarathi ? 'फोन नंबर' : 'Phone Number'}
               </label>
               <input
                 type="tel"
@@ -250,16 +300,28 @@ export default function RegisterPage() {
 
           {/* Location Section (Available for DONOR & NGO for pickup and delivery routing) */}
           {(role === 'NGO' || role === 'DONOR') && (
-            <div className={`p-4 rounded-xl border space-y-3 ${
-              role === 'DONOR' ? 'border-emerald-200 bg-emerald-50/40' : 'border-blue-200 bg-blue-50/40'
-            }`}>
+            <div
+              className={`p-4 rounded-xl border space-y-3 ${
+                role === 'DONOR'
+                  ? 'border-emerald-200 bg-emerald-50/40'
+                  : 'border-blue-200 bg-blue-50/40'
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <span className="text-lg">📍</span>
-                  <label className={`block text-xs font-bold uppercase ${
-                    role === 'DONOR' ? 'text-emerald-950' : 'text-blue-950'
-                  }`}>
-                    {role === 'DONOR' ? 'Kitchen / Food Pickup Location' : 'Shelter Location & Delivery Destination *'}
+                  <label
+                    className={`block text-xs font-bold uppercase ${
+                      role === 'DONOR' ? 'text-emerald-950' : 'text-blue-950'
+                    }`}
+                  >
+                    {role === 'DONOR'
+                      ? isMarathi
+                        ? 'स्वयंपाकघर / अन्न पिकअप पत्ता'
+                        : 'Kitchen / Food Pickup Location'
+                      : isMarathi
+                      ? 'शेल्टर पत्ता आणि अन्न पोहोचवण्याचे ठिकाण *'
+                      : 'Shelter Location & Delivery Destination *'}
                   </label>
                 </div>
                 <button
@@ -267,30 +329,54 @@ export default function RegisterPage() {
                   onClick={handleUseCurrentLocation}
                   disabled={gpsLoading}
                   className={`px-3 py-1.5 rounded-lg text-white font-semibold text-xs transition flex items-center space-x-1.5 shadow-xs disabled:opacity-50 cursor-pointer ${
-                    role === 'DONOR' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'
+                    role === 'DONOR'
+                      ? 'bg-emerald-600 hover:bg-emerald-700'
+                      : 'bg-blue-600 hover:bg-blue-700'
                   }`}
                 >
-                  <span>{gpsLoading ? '⏳ Fetching GPS...' : '🎯 Detect My Current Location'}</span>
+                  <span>
+                    {gpsLoading
+                      ? isMarathi
+                        ? 'स्थान शोधत आहे...'
+                        : 'Fetching GPS...'
+                      : isMarathi
+                      ? '🎯 माझे चालू स्थान शोधा'
+                      : '🎯 Detect My Current Location'}
+                  </span>
                 </button>
               </div>
 
               <p className="text-[11px] text-slate-600">
                 {role === 'DONOR'
-                  ? 'Auto-detect or type your food pickup address. Volunteer couriers will use this to navigate to your kitchen/restaurant for food pickup.'
+                  ? isMarathi
+                    ? 'अन्न पिकअप पत्ता प्रविष्ट करा किंवा आपोआप शोधा. स्वयंसेवक अन्न घेण्यासाठी या पत्त्यावर येतील.'
+                    : 'Auto-detect or type your food pickup address. Volunteer couriers will use this to navigate to your kitchen/restaurant for food pickup.'
+                  : isMarathi
+                  ? 'तुमच्या निवाऱ्याचे GPS स्थान निवडा किंवा पत्ता टाका. स्वयंसेवक येथे अन्न पोहोचवतील.'
                   : 'Share your current shelter GPS coordinates or enter the address manually. Volunteer couriers will use this to navigate to your facility.'}
               </p>
 
               {gpsStatus && (
-                <div className={`text-xs p-2 rounded-lg bg-white border font-medium ${
-                  role === 'DONOR' ? 'border-emerald-200 text-emerald-900' : 'border-blue-200 text-blue-900'
-                }`}>
+                <div
+                  className={`text-xs p-2 rounded-lg bg-white border font-medium ${
+                    role === 'DONOR'
+                      ? 'border-emerald-200 text-emerald-900'
+                      : 'border-blue-200 text-blue-900'
+                  }`}
+                >
                   {gpsStatus}
                 </div>
               )}
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  {role === 'DONOR' ? 'Pickup Street Address / Kitchen Location' : 'Shelter Full Street Address *'}
+                  {role === 'DONOR'
+                    ? isMarathi
+                      ? 'पिकअप रस्त्याचा पत्ता / स्वयंपाकघर स्थान'
+                      : 'Pickup Street Address / Kitchen Location'
+                    : isMarathi
+                    ? 'निवारा संपूर्ण पत्ता *'
+                    : 'Shelter Full Street Address *'}
                 </label>
                 <textarea
                   rows={2}
@@ -299,8 +385,12 @@ export default function RegisterPage() {
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder={
                     role === 'DONOR'
-                      ? 'e.g. Spice Garden Restaurant, Main Road, Indiranagar, Bengaluru'
-                      : 'e.g. 124 Hope Foundation Shelter, 5th Cross, Indiranagar, Bengaluru'
+                      ? isMarathi
+                        ? 'उदा. स्पाइस गार्डन रेस्टॉरंट, फर्ग्युसन कॉलेज रोड, पुणे'
+                        : 'e.g. Spice Garden Restaurant, FC Road, Pune'
+                      : isMarathi
+                      ? 'उदा. १२४ सेवा फाऊंडेशन शेल्टर, कर्वे नगर, पुणे'
+                      : 'e.g. 124 Seva Foundation Shelter, Karve Nagar, Pune'
                   }
                   className="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
                 />
@@ -309,27 +399,27 @@ export default function RegisterPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                    Latitude (GPS)
+                    {isMarathi ? 'अक्षांश (Latitude GPS)' : 'Latitude (GPS)'}
                   </label>
                   <input
                     type="number"
                     step="any"
                     value={latitude}
                     onChange={(e) => setLatitude(e.target.value)}
-                    placeholder="e.g. 12.9716"
+                    placeholder="e.g. 18.5204"
                     className="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white"
                   />
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                    Longitude (GPS)
+                    {isMarathi ? 'रेखांश (Longitude GPS)' : 'Longitude (GPS)'}
                   </label>
                   <input
                     type="number"
                     step="any"
                     value={longitude}
                     onChange={(e) => setLongitude(e.target.value)}
-                    placeholder="e.g. 77.5946"
+                    placeholder="e.g. 73.8567"
                     className="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white"
                   />
                 </div>
@@ -339,7 +429,7 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
-              Create Password *
+              {isMarathi ? 'पासवर्ड तयार करा *' : 'Create Password *'}
             </label>
             <div className="relative">
               <input
@@ -348,14 +438,22 @@ export default function RegisterPage() {
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimum 6 characters"
+                placeholder={isMarathi ? 'किमान ६ अक्षरे' : 'Minimum 6 characters'}
                 className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={
+                  isMarathi
+                    ? showPassword
+                      ? 'पासवर्ड लपवा'
+                      : 'पासवर्ड दाखवा'
+                    : showPassword
+                    ? 'Hide password'
+                    : 'Show password'
+                }
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer select-none text-base"
               >
                 {showPassword ? '👁️' : '🙈'}
@@ -368,14 +466,22 @@ export default function RegisterPage() {
             <div className="flex items-center space-x-2">
               <span className="text-lg">📄</span>
               <label className="block text-xs font-bold uppercase text-emerald-900">
-                Verification Legal Document (PDF or Image) *
+                {isMarathi
+                  ? 'पडताळणी कायदेशीर कागदपत्र (PDF किंवा फोटो) *'
+                  : 'Verification Legal Document (PDF or Image) *'}
               </label>
             </div>
             <p className="text-[11px] text-slate-600">
               {role === 'DONOR'
-                ? 'Upload FSSAI License, Food Safety Certificate, or Commercial Tax ID (PDF, JPG, PNG)'
+                ? isMarathi
+                  ? 'FSSAI परवाना, अन्न सुरक्षा प्रमाणपत्र किंवा कर नोंदणी (PDF, JPG, PNG)'
+                  : 'Upload FSSAI License, Food Safety Certificate, or Commercial Tax ID (PDF, JPG, PNG)'
                 : role === 'NGO'
-                ? 'Upload 12A/80G Certificate, Trust Deed, or NGO Darpan Registration (PDF, JPG, PNG)'
+                ? isMarathi
+                  ? '१२A/८०G प्रमाणपत्र, ट्रस्ट डीड किंवा NGO दर्पण नोंदणी (PDF, JPG, PNG)'
+                  : 'Upload 12A/80G Certificate, Trust Deed, or NGO Darpan Registration (PDF, JPG, PNG)'
+                : isMarathi
+                ? 'शासकीय ओळखपत्र, ड्रायव्हिंग लायसन्स किंवा स्वयंसेवक बॅज (PDF, JPG, PNG)'
                 : 'Upload Government Photo ID, Driving License, or Volunteer Badge (PDF, JPG, PNG)'}
             </p>
             <input
@@ -391,28 +497,38 @@ export default function RegisterPage() {
             />
             {documentFile && (
               <div className="text-[11px] text-emerald-700 font-medium">
-                Selected: 📎 {documentFile.name} ({(documentFile.size / 1024).toFixed(1)} KB)
+                {isMarathi ? 'निवडलेली फाईल: ' : 'Selected: '} 📄 {documentFile.name} (
+                {(documentFile.size / 1024).toFixed(1)} KB)
               </div>
             )}
           </div>
 
           <div className="text-[11px] text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
-            🛡️ <strong>Admin Verification Policy:</strong> Your account will be reviewed by the platform administrator before full access to surplus food redistribution is unlocked.
+            🛡️ <strong>{isMarathi ? 'प्रशासक पडताळणी धोरण:' : 'Admin Verification Policy:'}</strong>{' '}
+            {isMarathi
+              ? 'अन्न पुनर्वितरणाचे पूर्ण अधिकार मिळण्यापूर्वी प्लॅटफॉर्म प्रशासकाद्वारे तुमच्या खात्याची व कागदपत्रांची पडताळणी केली जाईल.'
+              : 'Your account will be reviewed by the platform administrator before full access to surplus food redistribution is unlocked.'}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] transition shadow-md shadow-emerald-600/20 disabled:opacity-50 text-sm mt-2"
+            className="w-full py-3 px-4 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] transition shadow-md shadow-emerald-600/20 disabled:opacity-50 text-sm mt-2 cursor-pointer"
           >
-            {loading ? 'Uploading & Registering...' : `Submit Application for ${role}`}
+            {loading
+              ? isMarathi
+                ? 'कागदपत्रे अपलोड आणि नोंदणी होत आहे...'
+                : 'Uploading & Registering...'
+              : isMarathi
+              ? `${role === 'DONOR' ? 'अन्नदाता' : role === 'NGO' ? 'संस्था / निवारा' : 'स्वयंसेवक'} म्हणून अर्ज सादर करा`
+              : `Submit Application for ${role}`}
           </button>
         </form>
 
         <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
-          Already have an account?{' '}
+          {isMarathi ? 'आधीच खाते आहे का? ' : 'Already have an account? '}
           <Link href="/login" className="font-semibold text-emerald-600 hover:text-emerald-700 underline">
-            Sign in
+            {isMarathi ? 'साइन इन करा' : 'Sign in'}
           </Link>
         </div>
       </div>

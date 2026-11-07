@@ -70,8 +70,8 @@ export const translations: Translations = {
 
   // Hero Section
   hero_live_badge: {
-    en: 'LIVE SURPLUS FOOD REDISTRIBUTION NETWORK',
-    mr: 'थेट अतिरिक्त अन्न पुनर्वितरण नेटवर्क',
+    en: 'ANNASETU • LIVE SURPLUS FOOD REDISTRIBUTION NETWORK',
+    mr: 'अन्नसेतू • थेट अतिरिक्त अन्न पुनर्वितरण नेटवर्क',
   },
   hero_title_prefix: {
     en: 'Safe Surplus Food From',

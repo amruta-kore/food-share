@@ -51,7 +51,8 @@ interface DonationItem {
 }
 
 function AdminContent() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isMarathi = language === 'mr';
   const { user } = useAuth();
   const router = useRouter();
 
@@ -264,7 +265,7 @@ function AdminContent() {
           <span className="px-3 py-1 bg-white/20 text-xs font-semibold uppercase tracking-wider rounded-full backdrop-blur-xs">
             🛡️ Platform Administration
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold mt-2">AnnaSetu Control Center</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold mt-2">{isMarathi ? 'अन्नसेतू नियंत्रण केंद्र' : 'AnnaSetu Control Center'}</h1>
           <p className="text-purple-100 text-xs sm:text-sm mt-1">
             System overview, ecosystem metrics, legal document inspection, and user verification workflows
           </p>

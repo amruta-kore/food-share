@@ -3,10 +3,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthProvider';
+import { useLanguage } from '../context/LanguageProvider';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { language } = useLanguage();
+  const isMarathi = language === 'mr';
   const router = useRouter();
 
   const [email, setEmail] = useState('');
@@ -36,12 +39,14 @@ export default function LoginPage() {
 
   const passwordInputRef = useRef<HTMLInputElement | null>(null);
 
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password) {
-      setError('Please enter both your email address and password.');
+      setError(
+        isMarathi
+          ? 'कृपया तुमचा ईमेल पत्ता आणि पासवर्ड दोन्ही प्रविष्ट करा.'
+          : 'Please enter both your email address and password.'
+      );
       return;
     }
     setError(null);
@@ -51,7 +56,12 @@ export default function LoginPage() {
     const cleanPass = password.trim();
     const res = await login(cleanEmail, cleanPass);
     if (!res.success) {
-      setError(res.message || 'Invalid credentials. Please verify your email and password.');
+      setError(
+        res.message ||
+          (isMarathi
+            ? 'चुकीची माहिती. कृपया तुमचा ईमेल आणि पासवर्ड तपासा.'
+            : 'Invalid credentials. Please verify your email and password.')
+      );
     }
     setLoading(false);
   };
@@ -62,7 +72,11 @@ export default function LoginPage() {
     setForgotSuccess(null);
 
     if (!forgotEmail || !forgotEmail.trim()) {
-      setForgotError('Please enter your registered email address.');
+      setForgotError(
+        isMarathi
+          ? 'कृपया तुमचा नोंदणीकृत ईमेल पत्ता प्रविष्ट करा.'
+          : 'Please enter your registered email address.'
+      );
       return;
     }
 
@@ -86,10 +100,10 @@ export default function LoginPage() {
         const text = await res.text();
         setForgotError(
           res.status === 502 || res.status === 503 || res.status === 504
-            ? 'Backend server is waking up. Please try again in 30 seconds.'
+            ? (isMarathi ? 'सर्व्हर सुरू होत आहे. कृपया ३० सेकंदांनंतर पुन्हा प्रयत्न करा.' : 'Backend server is waking up. Please try again in 30 seconds.')
             : text && text.length < 120
             ? text
-            : `Server returned HTTP ${res.status}. Please check your backend connection.`
+            : `Server returned HTTP ${res.status}.`
         );
         return;
       }
@@ -97,16 +111,24 @@ export default function LoginPage() {
       if (res.ok && data.success) {
         setForgotSuccess(
           data.message ||
-            `A new 6-character password has been generated and sent to ${forgotEmail}. Please check your email inbox.`
+            (isMarathi
+              ? `एक नवीन ६-अंकी पासवर्ड तयार करून ${forgotEmail} वर पाठवला आहे. कृपया तुमचा ईमेल तपासा.`
+              : `A new 6-character password has been generated and sent to ${forgotEmail}. Please check your email inbox.`)
         );
         // Automatically sync email with main login input
         setEmail(forgotEmail.trim());
         setPassword('');
       } else {
-        setForgotError(data.message || 'Failed to send new password. Please verify the email address.');
+        setForgotError(
+          data.message ||
+            (isMarathi ? 'नवीन पासवर्ड पाठवण्यात अडचण आली. ईमेल पत्ता तपासा.' : 'Failed to send new password. Please verify the email address.')
+        );
       }
     } catch (err: any) {
-      setForgotError(err?.message || 'Server connection error. Please try again later.');
+      setForgotError(
+        err?.message ||
+          (isMarathi ? 'सर्व्हरशी संपर्क होऊ शकला नाही. कृपया थोड्या वेळाने प्रयत्न करा.' : 'Server connection error. Please try again later.')
+      );
     } finally {
       setForgotLoading(false);
     }
@@ -135,9 +157,13 @@ export default function LoginPage() {
           <div className="inline-flex w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 items-center justify-center text-2xl mb-3 shadow-inner">
             🔐
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Sign in to AnnaSetu</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {isMarathi ? 'अन्नसेतूमध्ये लॉगिन करा' : 'Sign in to AnnaSetu'}
+          </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Enter your account credentials to access your dashboard
+            {isMarathi
+              ? 'तुमच्या डॅशबोर्डवर जाण्यासाठी खात्याची माहिती प्रविष्ट करा'
+              : 'Enter your account credentials to access your dashboard'}
           </p>
         </div>
 
@@ -148,18 +174,19 @@ export default function LoginPage() {
               <div className="flex-1">{error}</div>
             </div>
             <div className="text-xs pt-1 border-t border-red-100 text-red-800">
-              Forgot your password?{' '}
+              {isMarathi ? 'पासवर्ड विसरलात? ' : 'Forgot your password? '}
               <button
                 type="button"
                 onClick={openForgotModal}
-                className="font-bold underline hover:text-red-900"
+                className="font-bold underline hover:text-red-900 cursor-pointer"
               >
-                Send a new 6-character password to your email
+                {isMarathi
+                  ? 'तुमच्या ईमेलवर नवीन ६-अंकी पासवर्ड मिळवा'
+                  : 'Send a new 6-character password to your email'}
               </button>
             </div>
           </div>
         )}
-
 
         <form
           action="javascript:void(0);"
@@ -188,7 +215,7 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
-              Email Address
+              {isMarathi ? 'ईमेल पत्ता' : 'Email Address'}
             </label>
             <input
               type="email"
@@ -205,7 +232,7 @@ export default function LoginPage() {
               onClick={() => setIsReadOnly(false)}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@organization.org"
+              placeholder={isMarathi ? 'उदा. user@organization.org' : 'you@organization.org'}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-slate-50/50"
             />
           </div>
@@ -213,14 +240,14 @@ export default function LoginPage() {
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-xs font-semibold uppercase text-slate-600">
-                Password
+                {isMarathi ? 'पासवर्ड' : 'Password'}
               </label>
               <button
                 type="button"
                 onClick={openForgotModal}
-                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition"
+                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition cursor-pointer"
               >
-                Forgot Password?
+                {isMarathi ? 'पासवर्ड विसरलात?' : 'Forgot Password?'}
               </button>
             </div>
             <div className="relative">
@@ -246,7 +273,15 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={
+                  isMarathi
+                    ? showPassword
+                      ? 'पासवर्ड लपवा'
+                      : 'पासवर्ड दाखवा'
+                    : showPassword
+                    ? 'Hide password'
+                    : 'Show password'
+                }
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer select-none text-base"
               >
                 {showPassword ? '👁️' : '🙈'}
@@ -257,23 +292,27 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] transition shadow-md shadow-emerald-600/20 disabled:opacity-50 text-sm flex items-center justify-center space-x-2"
+            className="w-full py-3 px-4 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] transition shadow-md shadow-emerald-600/20 disabled:opacity-50 text-sm flex items-center justify-center space-x-2 cursor-pointer"
           >
             {loading ? (
               <>
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span>Authenticating & Entering Dashboard...</span>
+                <span>
+                  {isMarathi
+                    ? 'पडताळणी आणि डॅशबोर्डवर जात आहे...'
+                    : 'Authenticating & Entering Dashboard...'}
+                </span>
               </>
             ) : (
-              <span>Sign In</span>
+              <span>{isMarathi ? 'लॉगिन करा' : 'Sign In'}</span>
             )}
           </button>
         </form>
 
         <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
-          Don't have an account yet?{' '}
+          {isMarathi ? 'अजून खाते नाही का? ' : "Don't have an account yet? "}
           <Link href="/register" className="font-semibold text-emerald-600 hover:text-emerald-700 underline">
-            Register here
+            {isMarathi ? 'येथे नोंदणी करा' : 'Register here'}
           </Link>
         </div>
       </div>
@@ -288,16 +327,20 @@ export default function LoginPage() {
                   🔑
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Forgot Your Password?</h3>
+                  <h3 className="text-lg font-bold text-slate-900">
+                    {isMarathi ? 'पासवर्ड विसरलात?' : 'Forgot Your Password?'}
+                  </h3>
                   <p className="text-xs text-slate-500">
-                    Get a new 6-character password sent to your email
+                    {isMarathi
+                      ? 'तुमच्या ईमेलवर नवीन ६-अंकी तात्पुरता पासवर्ड मिळवा'
+                      : 'Get a new 6-character password sent to your email'}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowForgotModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
+                className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1 cursor-pointer"
               >
                 ✕
               </button>
@@ -315,67 +358,69 @@ export default function LoginPage() {
                 <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs space-y-2">
                   <div className="font-bold flex items-center space-x-1.5 text-sm text-emerald-800">
                     <span>✓</span>
-                    <span>New Password Dispatched!</span>
+                    <span>{isMarathi ? 'नवीन पासवर्ड पाठवला!' : 'New Password Dispatched!'}</span>
                   </div>
                   <p className="text-emerald-800 leading-relaxed">
                     {forgotSuccess}
                   </p>
                   <div className="bg-white p-3 rounded-lg border border-emerald-200 text-[11px] text-slate-600">
-                    💡 <strong>Tip:</strong> Open your email, copy the <strong>6-character password</strong>, and paste it on the login form to sign in immediately.
+                    💡 <strong>{isMarathi ? 'टीप:' : 'Tip:'}</strong>{' '}
+                    {isMarathi
+                      ? 'तुमचा ईमेल उघडा, ६-अंकी पासवर्ड कॉपी करा आणि लॉगिन फॉर्ममध्ये टाकून त्वरित साइन इन करा.'
+                      : 'Open your email, copy the 6-character password, and paste it on the login form to sign in immediately.'}
                   </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={closeForgotModalAndFocus}
-                  className="w-full py-2.5 px-4 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow-sm text-sm"
+                  className="w-full py-2.5 px-4 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow-sm text-sm cursor-pointer"
                 >
-                  Enter New Password & Log In
+                  {isMarathi ? 'नवीन पासवर्ड टाकून लॉगिन करा' : 'Enter New Password & Log In'}
                 </button>
               </div>
             ) : (
               <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Enter your registered AnnaSetu email address below. Our system will generate a fresh, random <strong>6-character password</strong>, update your account, and email it to you right away.
+                  {isMarathi
+                    ? 'तुमचा नोंदणीकृत अन्नसेतू ईमेल पत्ता खाली प्रविष्ट करा. आमची प्रणाली नवीन ६-अंकी पासवर्ड तयार करून लगेच तुम्हाला ईमेल करेल.'
+                    : 'Enter your registered AnnaSetu email address below. Our system will generate a fresh, random 6-character password, update your account, and email it to you right away.'}
                 </p>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
-                    Your Registered Email *
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {isMarathi ? 'नोंदणीकृत ईमेल पत्ता' : 'Registered Email Address'}
                   </label>
                   <input
                     type="email"
                     required
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    placeholder="name@organization.org"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
+                    placeholder={isMarathi ? 'उदा. user@organization.org' : 'you@organization.org'}
+                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"
                   />
                 </div>
 
-                <div className="pt-2 flex items-center justify-end space-x-2">
+                <div className="flex items-center justify-end space-x-2 pt-2">
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition"
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
                   >
-                    Cancel
+                    {isMarathi ? 'रद्द करा' : 'Cancel'}
                   </button>
                   <button
                     type="submit"
                     disabled={forgotLoading}
-                    className="px-5 py-2.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow-xs text-xs disabled:opacity-50 flex items-center space-x-1.5"
+                    className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-xs disabled:opacity-50 flex items-center space-x-1.5 cursor-pointer"
                   >
                     {forgotLoading ? (
                       <>
-                        <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        <span>Sending Email...</span>
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>{isMarathi ? 'नवीन पासवर्ड पाठवत आहे...' : 'Generating & Dispatching...'}</span>
                       </>
                     ) : (
-                      <>
-                        <span>✉️</span>
-                        <span>Send New Password</span>
-                      </>
+                      <span>{isMarathi ? 'ईमेलवर नवीन पासवर्ड पाठवा' : 'Dispatch New Password to Email'}</span>
                     )}
                   </button>
                 </div>
