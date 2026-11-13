@@ -5,6 +5,22 @@ import Link from 'next/link';
 import { useAuth, Role } from '../context/AuthProvider';
 import { useLanguage } from '../context/LanguageProvider';
 import { useRouter } from 'next/navigation';
+import {
+  BrandLogoIcon,
+  UtensilsIcon,
+  BuildingIcon,
+  TruckIcon,
+  MapPinIcon,
+  CrosshairIcon,
+  EyeIcon,
+  EyeOffIcon,
+  AlertTriangleIcon,
+  ShieldCheckIcon,
+  FileTextIcon,
+  UploadCloudIcon,
+  CheckCircleIcon,
+  ArrowRightIcon,
+} from '../../components/Icons';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -35,7 +51,7 @@ export default function RegisterPage() {
   const handleUseCurrentLocation = () => {
     setGpsLoading(true);
     setGpsStatus(
-      isMarathi ? 'तुमचे स्थान शोधत आहे...' : 'Detecting your location...'
+      isMarathi ? 'तुमचे स्थान शोधत आहे...' : 'Detecting your coordinates...'
     );
 
     const applyCoordsAndReverseGeocode = async (lat: number, lng: number, source: 'GPS' | 'Network') => {
@@ -45,7 +61,7 @@ export default function RegisterPage() {
       setGpsStatus(
         isMarathi
           ? `✓ ${source === 'GPS' ? 'GPS' : 'नेटवर्क'} स्थान मिळाले: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`
-          : `✓ ${source} Location Captured: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`
+          : `✓ ${source} Location Locked: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`
       );
 
       // Reverse geocode via OpenStreetMap Nominatim
@@ -65,7 +81,7 @@ export default function RegisterPage() {
     };
 
     const fallbackToIpLocation = async () => {
-      setGpsStatus(isMarathi ? 'नेटवर्क स्थान शोधत आहे...' : 'Fetching network location...');
+      setGpsStatus(isMarathi ? 'नेटवर्क स्थान शोधत आहे...' : 'Fetching network coordinates...');
       try {
         const res = await fetch('https://ipapi.co/json/');
         if (res.ok) {
@@ -84,8 +100,8 @@ export default function RegisterPage() {
       setGpsLoading(false);
       setGpsStatus(
         isMarathi
-          ? '⚠️ स्थान आपोआप शोधता आले नाही. कृपया खाली पत्ता मॅन्युअली टाइप करा.'
-          : '⚠️ Location could not be detected automatically. Please type your street address below.'
+          ? 'स्थान आपोआप शोधता आले नाही. कृपया खाली पत्ता मॅन्युअली टाइप करा.'
+          : 'Location could not be auto-detected. Please type your street address below.'
       );
     };
 
@@ -126,8 +142,8 @@ export default function RegisterPage() {
     if (role === 'NGO' && !address.trim() && !latitude) {
       setError(
         isMarathi
-          ? 'कृपया तुमच्या शेल्टरचे स्थान द्या ("माझे चालू स्थान शोधा" वर क्लिक करा किंवा पत्ता टाइप करा).'
-          : 'Please provide your NGO shelter location (either by clicking "Use My Current Location" or typing an address).'
+          ? 'कृपया तुमच्या शेल्टरचे स्थान द्या ("चालू स्थान शोधा" वर क्लिक करा किंवा पत्ता टाइप करा).'
+          : 'Please provide your NGO shelter location (either by clicking "Locate GPS Coordinates" or typing an address).'
       );
       return;
     }
@@ -157,70 +173,73 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6">
-        <div className="text-center">
-          <div className="inline-flex w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 items-center justify-center text-2xl mb-3 shadow-inner">
-            🌱
+    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-grid-subtle">
+      <div className="w-full max-w-xl bg-white rounded-3xl shadow-crafted border border-stone-200/90 p-7 sm:p-10 space-y-6">
+        <div className="text-center space-y-2">
+          <div className="inline-flex w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-800 items-center justify-center border border-emerald-200/70 shadow-xs mb-1">
+            <BrandLogoIcon className="w-7 h-7 text-emerald-700" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {isMarathi ? 'अन्नसेतूशी जोडा' : 'Join AnnaSetu'}
+          <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight font-serif">
+            {isMarathi ? 'अन्नसेतूशी जोडा' : 'Join AnnaSetu Platform'}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 font-normal max-w-md mx-auto">
             {isMarathi
-              ? 'तुमची भूमिका निवडा आणि प्रशासकीय पडताळणीसाठी कायदेशीर कागदपत्रे जोडा'
-              : 'Choose your role and submit legal documents for administrative verification'}
+              ? 'तुमची भूमिका निवडा आणि अधिकृत पडताळणीसाठी कायदेशीर कागदपत्रे सादर करा'
+              : 'Choose your stakeholder role and provide official verification documents'}
           </p>
         </div>
 
-        {/* Role Selector Tabs */}
-        <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-100 rounded-xl">
+        {/* Role Selector Tabs (Handcrafted Segmented Control) */}
+        <div className="grid grid-cols-3 gap-1.5 p-1.5 bg-stone-100/80 rounded-2xl border border-stone-200">
           <button
             type="button"
             onClick={() => setRole('DONOR')}
-            className={`py-2 px-3 text-xs font-semibold rounded-lg transition cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xl transition flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 cursor-pointer ${
               role === 'DONOR'
-                ? 'bg-white text-emerald-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-emerald-900 font-bold shadow-xs border border-stone-200/80'
+                : 'text-stone-600 hover:text-stone-950 font-medium'
             }`}
           >
-            {isMarathi ? '🍲 अन्नदाता' : '🍲 Donor'}
+            <UtensilsIcon className={`w-4 h-4 ${role === 'DONOR' ? 'text-emerald-700' : 'text-stone-400'}`} />
+            <span className="text-xs">{isMarathi ? 'अन्नदाता' : 'Donor'}</span>
           </button>
           <button
             type="button"
             onClick={() => setRole('NGO')}
-            className={`py-2 px-3 text-xs font-semibold rounded-lg transition cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xl transition flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 cursor-pointer ${
               role === 'NGO'
-                ? 'bg-white text-blue-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-cyan-950 font-bold shadow-xs border border-stone-200/80'
+                : 'text-stone-600 hover:text-stone-950 font-medium'
             }`}
           >
-            {isMarathi ? '🏢 संस्था / शेल्टर' : '🏢 NGO / Shelter'}
+            <BuildingIcon className={`w-4 h-4 ${role === 'NGO' ? 'text-cyan-700' : 'text-stone-400'}`} />
+            <span className="text-xs">{isMarathi ? 'संस्था / निवारा' : 'NGO Shelter'}</span>
           </button>
           <button
             type="button"
             onClick={() => setRole('VOLUNTEER')}
-            className={`py-2 px-3 text-xs font-semibold rounded-lg transition cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xl transition flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 cursor-pointer ${
               role === 'VOLUNTEER'
-                ? 'bg-white text-amber-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-amber-950 font-bold shadow-xs border border-stone-200/80'
+                : 'text-stone-600 hover:text-stone-950 font-medium'
             }`}
           >
-            {isMarathi ? '🚴 स्वयंसेवक' : '🚴 Volunteer'}
+            <TruckIcon className={`w-4 h-4 ${role === 'VOLUNTEER' ? 'text-amber-700' : 'text-stone-400'}`} />
+            <span className="text-xs">{isMarathi ? 'स्वयंसेवक' : 'Volunteer'}</span>
           </button>
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-start space-x-2">
-            <span>⚠️</span>
-            <div className="flex-1">{error}</div>
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start space-x-2 shadow-xs">
+            <AlertTriangleIcon className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <div className="flex-1 font-medium leading-relaxed">{error}</div>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
                 {isMarathi ? 'संपर्क व्यक्तीचे नाव *' : 'Contact Person Name *'}
               </label>
               <input
@@ -228,13 +247,13 @@ export default function RegisterPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder={isMarathi ? 'उदा. राहुल पाटील' : 'John Doe'}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
+                placeholder={isMarathi ? 'उदा. राहुल पाटील' : 'e.g. Rahul Patil'}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/30 focus:border-emerald-700 text-sm bg-stone-50/40 text-stone-900 transition font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
                 {role === 'DONOR'
                   ? isMarathi
                     ? 'हॉटेल / केटररचे नाव'
@@ -255,23 +274,23 @@ export default function RegisterPage() {
                   role === 'DONOR'
                     ? isMarathi
                       ? 'उदा. स्पाइस गार्डन बँक्वेट'
-                      : 'Spice Garden Banquet'
+                      : 'e.g. Spice Garden Banquets'
                     : role === 'NGO'
                     ? isMarathi
                       ? 'उदा. सेवा फाउंडेशन निवारा'
-                      : 'Care For All Foundation'
+                      : 'e.g. Seva Foundation Shelter'
                     : isMarathi
                     ? 'उदा. दुचाकी / स्कूटर'
-                    : 'Two-Wheeler / Scooter'
+                    : 'e.g. Two-Wheeler / Courier Van'
                 }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/30 focus:border-emerald-700 text-sm bg-stone-50/40 text-stone-900 transition font-medium"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
                 {isMarathi ? 'ईमेल पत्ता *' : 'Email Address *'}
               </label>
               <input
@@ -279,13 +298,13 @@ export default function RegisterPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="contact@example.com"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
+                placeholder="contact@organization.org"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/30 focus:border-emerald-700 text-sm bg-stone-50/40 text-stone-900 transition font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
                 {isMarathi ? 'फोन नंबर' : 'Phone Number'}
               </label>
               <input
@@ -293,7 +312,7 @@ export default function RegisterPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91 98765 43210"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/30 focus:border-emerald-700 text-sm bg-stone-50/40 text-stone-900 transition font-medium"
               />
             </div>
           </div>
@@ -301,18 +320,18 @@ export default function RegisterPage() {
           {/* Location Section (Available for DONOR & NGO for pickup and delivery routing) */}
           {(role === 'NGO' || role === 'DONOR') && (
             <div
-              className={`p-4 rounded-xl border space-y-3 ${
+              className={`p-4 sm:p-5 rounded-2xl border space-y-3 transition-colors ${
                 role === 'DONOR'
-                  ? 'border-emerald-200 bg-emerald-50/40'
-                  : 'border-blue-200 bg-blue-50/40'
+                  ? 'border-emerald-200/90 bg-emerald-50/30'
+                  : 'border-cyan-200/90 bg-cyan-50/30'
               }`}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center space-x-2">
-                  <span className="text-lg">📍</span>
+                  <MapPinIcon className={`w-4 h-4 ${role === 'DONOR' ? 'text-emerald-700' : 'text-cyan-700'}`} />
                   <label
-                    className={`block text-xs font-bold uppercase ${
-                      role === 'DONOR' ? 'text-emerald-950' : 'text-blue-950'
+                    className={`block text-[11px] font-bold uppercase tracking-wider ${
+                      role === 'DONOR' ? 'text-emerald-950' : 'text-cyan-950'
                     }`}
                   >
                     {role === 'DONOR'
@@ -328,48 +347,50 @@ export default function RegisterPage() {
                   type="button"
                   onClick={handleUseCurrentLocation}
                   disabled={gpsLoading}
-                  className={`px-3 py-1.5 rounded-lg text-white font-semibold text-xs transition flex items-center space-x-1.5 shadow-xs disabled:opacity-50 cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-white font-bold text-xs transition inline-flex items-center justify-center space-x-1.5 shadow-xs disabled:opacity-50 cursor-pointer ${
                     role === 'DONOR'
-                      ? 'bg-emerald-600 hover:bg-emerald-700'
-                      : 'bg-blue-600 hover:bg-blue-700'
+                      ? 'bg-emerald-800 hover:bg-emerald-700'
+                      : 'bg-cyan-800 hover:bg-cyan-700'
                   }`}
                 >
+                  <CrosshairIcon className="w-3.5 h-3.5" />
                   <span>
                     {gpsLoading
                       ? isMarathi
                         ? 'स्थान शोधत आहे...'
-                        : 'Fetching GPS...'
+                        : 'Detecting Coordinates...'
                       : isMarathi
-                      ? '🎯 माझे चालू स्थान शोधा'
-                      : '🎯 Detect My Current Location'}
+                      ? 'चालू GPS स्थान मिळवा'
+                      : 'Locate GPS Coordinates'}
                   </span>
                 </button>
               </div>
 
-              <p className="text-[11px] text-slate-600">
+              <p className="text-[11px] text-stone-600 leading-relaxed">
                 {role === 'DONOR'
                   ? isMarathi
                     ? 'अन्न पिकअप पत्ता प्रविष्ट करा किंवा आपोआप शोधा. स्वयंसेवक अन्न घेण्यासाठी या पत्त्यावर येतील.'
-                    : 'Auto-detect or type your food pickup address. Volunteer couriers will use this to navigate to your kitchen/restaurant for food pickup.'
+                    : 'Auto-detect or type your food pickup address. Volunteer couriers will use this to navigate to your kitchen for pickup.'
                   : isMarathi
                   ? 'तुमच्या निवाऱ्याचे GPS स्थान निवडा किंवा पत्ता टाका. स्वयंसेवक येथे अन्न पोहोचवतील.'
-                  : 'Share your current shelter GPS coordinates or enter the address manually. Volunteer couriers will use this to navigate to your facility.'}
+                  : 'Share your shelter GPS coordinates or enter the address manually. Volunteers will deliver food here.'}
               </p>
 
               {gpsStatus && (
                 <div
-                  className={`text-xs p-2 rounded-lg bg-white border font-medium ${
+                  className={`text-xs p-2.5 rounded-xl bg-white/90 border font-medium flex items-center space-x-2 ${
                     role === 'DONOR'
                       ? 'border-emerald-200 text-emerald-900'
-                      : 'border-blue-200 text-blue-900'
+                      : 'border-cyan-200 text-cyan-900'
                   }`}
                 >
-                  {gpsStatus}
+                  <CheckCircleIcon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{gpsStatus}</span>
                 </div>
               )}
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 mb-1">
                   {role === 'DONOR'
                     ? isMarathi
                       ? 'पिकअप रस्त्याचा पत्ता / स्वयंपाकघर स्थान'
@@ -392,13 +413,13 @@ export default function RegisterPage() {
                       ? 'उदा. १२४ सेवा फाऊंडेशन शेल्टर, कर्वे नगर, पुणे'
                       : 'e.g. 124 Seva Foundation Shelter, Karve Nagar, Pune'
                   }
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
+                  className="w-full px-3.5 py-2 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/30 text-xs bg-white text-stone-900"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1">
                     {isMarathi ? 'अक्षांश (Latitude GPS)' : 'Latitude (GPS)'}
                   </label>
                   <input
@@ -407,11 +428,11 @@ export default function RegisterPage() {
                     value={latitude}
                     onChange={(e) => setLatitude(e.target.value)}
                     placeholder="e.g. 18.5204"
-                    className="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white"
+                    className="w-full px-3 py-1.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/30 text-xs bg-white font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1">
                     {isMarathi ? 'रेखांश (Longitude GPS)' : 'Longitude (GPS)'}
                   </label>
                   <input
@@ -420,7 +441,7 @@ export default function RegisterPage() {
                     value={longitude}
                     onChange={(e) => setLongitude(e.target.value)}
                     placeholder="e.g. 73.8567"
-                    className="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white"
+                    className="w-full px-3 py-1.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/30 text-xs bg-white font-mono"
                   />
                 </div>
               </div>
@@ -428,7 +449,7 @@ export default function RegisterPage() {
           )}
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
               {isMarathi ? 'पासवर्ड तयार करा *' : 'Create Password *'}
             </label>
             <div className="relative">
@@ -439,7 +460,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={isMarathi ? 'किमान ६ अक्षरे' : 'Minimum 6 characters'}
-                className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-slate-50/50"
+                className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/30 focus:border-emerald-700 text-sm bg-stone-50/40 text-stone-900 font-mono tracking-wider transition"
               />
               <button
                 type="button"
@@ -454,24 +475,24 @@ export default function RegisterPage() {
                     ? 'Hide password'
                     : 'Show password'
                 }
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer select-none text-base"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-700 cursor-pointer select-none"
               >
-                {showPassword ? '👁️' : '🙈'}
+                {showPassword ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Legal Document Upload */}
-          <div className="p-4 rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 space-y-2">
+          {/* Legal Document Upload Box (Tactile Border) */}
+          <div className="p-4 sm:p-5 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/30 space-y-2">
             <div className="flex items-center space-x-2">
-              <span className="text-lg">📄</span>
-              <label className="block text-xs font-bold uppercase text-emerald-900">
+              <FileTextIcon className="w-4 h-4 text-emerald-800" />
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-emerald-950">
                 {isMarathi
                   ? 'पडताळणी कायदेशीर कागदपत्र (PDF किंवा फोटो) *'
-                  : 'Verification Legal Document (PDF or Image) *'}
+                  : 'Verification Legal Document (PDF or Photo) *'}
               </label>
             </div>
-            <p className="text-[11px] text-slate-600">
+            <p className="text-[11px] text-stone-600 leading-relaxed font-normal">
               {role === 'DONOR'
                 ? isMarathi
                   ? 'FSSAI परवाना, अन्न सुरक्षा प्रमाणपत्र किंवा कर नोंदणी (PDF, JPG, PNG)'
@@ -493,42 +514,60 @@ export default function RegisterPage() {
                   setDocumentFile(e.target.files[0]);
                 }
               }}
-              className="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer"
+              className="w-full text-xs text-stone-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-800 file:text-white hover:file:bg-emerald-700 cursor-pointer"
             />
             {documentFile && (
-              <div className="text-[11px] text-emerald-700 font-medium">
-                {isMarathi ? 'निवडलेली फाईल: ' : 'Selected: '} 📄 {documentFile.name} (
-                {(documentFile.size / 1024).toFixed(1)} KB)
+              <div className="text-[11px] text-emerald-900 font-semibold flex items-center space-x-1.5 pt-1">
+                <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-700" />
+                <span>
+                  {isMarathi ? 'निवडलेली फाईल: ' : 'Selected: '} {documentFile.name} (
+                  {(documentFile.size / 1024).toFixed(1)} KB)
+                </span>
               </div>
             )}
           </div>
 
-          <div className="text-[11px] text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
-            🛡️ <strong>{isMarathi ? 'प्रशासक पडताळणी धोरण:' : 'Admin Verification Policy:'}</strong>{' '}
-            {isMarathi
-              ? 'अन्न पुनर्वितरणाचे पूर्ण अधिकार मिळण्यापूर्वी प्लॅटफॉर्म प्रशासकाद्वारे तुमच्या खात्याची व कागदपत्रांची पडताळणी केली जाईल.'
-              : 'Your account will be reviewed by the platform administrator before full access to surplus food redistribution is unlocked.'}
+          <div className="text-[11px] text-stone-600 bg-stone-100/70 p-3.5 rounded-xl border border-stone-200/80 flex items-start space-x-2">
+            <ShieldCheckIcon className="w-4 h-4 text-emerald-800 shrink-0 mt-0.5" />
+            <div className="leading-relaxed font-normal">
+              <strong>{isMarathi ? 'प्रशासक पडताळणी धोरण:' : 'Platform Safety Policy:'}</strong>{' '}
+              {isMarathi
+                ? 'अन्न पुनर्वितरणाचे पूर्ण अधिकार मिळण्यापूर्वी प्लॅटफॉर्म प्रशासकाद्वारे तुमच्या खात्याची व कागदपत्रांची पडताळणी केली जाईल.'
+                : 'Your submission will be reviewed and verified by an authorized platform administrator before donations and collections are unlocked.'}
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] transition shadow-md shadow-emerald-600/20 disabled:opacity-50 text-sm mt-2 cursor-pointer"
+            className="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-emerald-800 hover:bg-emerald-700 active:scale-[0.99] transition shadow-xs disabled:opacity-50 text-sm mt-3 flex items-center justify-center space-x-2 cursor-pointer"
           >
-            {loading
-              ? isMarathi
-                ? 'कागदपत्रे अपलोड आणि नोंदणी होत आहे...'
-                : 'Uploading & Registering...'
-              : isMarathi
-              ? `${role === 'DONOR' ? 'अन्नदाता' : role === 'NGO' ? 'संस्था / निवारा' : 'स्वयंसेवक'} म्हणून अर्ज सादर करा`
-              : `Submit Application for ${role}`}
+            {loading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span>
+                  {isMarathi
+                    ? 'कागदपत्रे अपलोड आणि नोंदणी होत आहे...'
+                    : 'Uploading & Registering Account...'}
+                </span>
+              </>
+            ) : (
+              <>
+                <span>
+                  {isMarathi
+                    ? `${role === 'DONOR' ? 'अन्नदाता' : role === 'NGO' ? 'संस्था / निवारा' : 'स्वयंसेवक'} म्हणून अर्ज सादर करा`
+                    : `Submit Verified Application for ${role}`}
+                </span>
+                <ArrowRightIcon className="w-4 h-4" />
+              </>
+            )}
           </button>
         </form>
 
-        <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+        <div className="text-center text-xs text-stone-500 pt-3 border-t border-stone-200/80">
           {isMarathi ? 'आधीच खाते आहे का? ' : 'Already have an account? '}
-          <Link href="/login" className="font-semibold text-emerald-600 hover:text-emerald-700 underline">
-            {isMarathi ? 'साइन इन करा' : 'Sign in'}
+          <Link href="/login" className="font-bold text-emerald-800 hover:text-emerald-900 underline underline-offset-2">
+            {isMarathi ? 'साइन इन करा' : 'Sign in directly'}
           </Link>
         </div>
       </div>

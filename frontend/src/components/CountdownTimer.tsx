@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { ClockIcon, CheckCircleIcon, AlertTriangleIcon } from './Icons';
 
 interface CountdownTimerProps {
-  consumeBefore: string | Date;
+  consumeBefore?: string | Date;
+  targetTime?: string | Date;
   status?: string;
   showIcon?: boolean;
   className?: string;
@@ -11,10 +13,13 @@ interface CountdownTimerProps {
 
 export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   consumeBefore,
+  targetTime: propTargetTime,
   status,
   showIcon = true,
   className = '',
 }) => {
+  const timeInput = consumeBefore || propTargetTime || '';
+
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
     hours: number;
@@ -33,11 +38,11 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
 
   useEffect(() => {
     const calculateTime = () => {
-      const targetTime = new Date(consumeBefore).getTime();
+      const targetTimestamp = new Date(timeInput).getTime();
       const now = Date.now();
-      const diff = targetTime - now;
+      const diff = targetTimestamp - now;
 
-      if (isNaN(targetTime) || diff <= 0) {
+      if (isNaN(targetTimestamp) || diff <= 0) {
         setTimeLeft({
           days: 0,
           hours: 0,
@@ -68,13 +73,13 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
     calculateTime();
     const interval = setInterval(calculateTime, 1000);
     return () => clearInterval(interval);
-  }, [consumeBefore]);
+  }, [timeInput]);
 
   // If already delivered or completed, show delivered badge
   if (status === 'DELIVERED' || status === 'COMPLETED') {
     return (
-      <span className={`inline-flex items-center space-x-1 text-[11px] font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200 ${className}`}>
-        {showIcon && <span>✓</span>}
+      <span className={`inline-flex items-center space-x-1.5 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/80 ${className}`}>
+        {showIcon && <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-700" />}
         <span>Delivered Safely Before Expiry</span>
       </span>
     );
@@ -83,9 +88,9 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   // If expired
   if (timeLeft.isExpired) {
     return (
-      <span className={`inline-flex items-center space-x-1.5 text-[11px] font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 animate-pulse ${className}`}>
-        {showIcon && <span>⛔</span>}
-        <span>Expired / Not for consumption</span>
+      <span className={`inline-flex items-center space-x-1.5 text-[11px] font-semibold text-rose-800 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 ${className}`}>
+        {showIcon && <AlertTriangleIcon className="w-3.5 h-3.5 text-rose-600" />}
+        <span>Expired • Not for consumption</span>
       </span>
     );
   }
@@ -95,23 +100,29 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   const { days, hours, minutes, seconds, totalSeconds } = timeLeft;
 
   // Visual urgency levels:
-  // Under 1 hour: critical red/amber
+  // Under 1 hour: critical red
   // Under 3 hours: warning amber
-  // Over 3 hours: healthy emerald
-  let colorStyles = 'text-emerald-700 bg-emerald-50 border-emerald-200';
-  let icon = '⏰';
+  // Over 3 hours: healthy stone/emerald
+  let badgeStyles = 'text-stone-800 bg-stone-100 border-stone-300';
+  let dotStyles = 'bg-emerald-600';
 
   if (totalSeconds < 3600) {
-    colorStyles = 'text-red-700 bg-red-50 border-red-200 animate-pulse';
-    icon = '🔥';
+    badgeStyles = 'text-rose-900 bg-rose-50 border-rose-300 animate-pulse';
+    dotStyles = 'bg-rose-600 animate-ping';
   } else if (totalSeconds < 3 * 3600) {
-    colorStyles = 'text-amber-700 bg-amber-50 border-amber-200';
-    icon = '⏳';
+    badgeStyles = 'text-amber-900 bg-amber-50 border-amber-300';
+    dotStyles = 'bg-amber-600';
   }
 
   return (
-    <span className={`inline-flex items-center space-x-1.5 text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg border shadow-2xs ${colorStyles} ${className}`}>
-      {showIcon && <span className="font-sans">{icon}</span>}
+    <span className={`inline-flex items-center space-x-1.5 text-[11px] font-mono font-medium px-2.5 py-1 rounded-lg border shadow-xs ${badgeStyles} ${className}`}>
+      {showIcon && (
+        <span className="relative flex h-2 w-2">
+          <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${dotStyles}`}></span>
+          <span className={`relative inline-flex rounded-full h-2 w-2 ${dotStyles.replace(' animate-ping', '')}`}></span>
+        </span>
+      )}
+      <ClockIcon className="w-3.5 h-3.5 shrink-0 opacity-70" />
       <span>
         {days > 0 ? `${days}d ` : ''}
         {pad(hours)}h:{pad(minutes)}m:{pad(seconds)}s left

@@ -5,6 +5,16 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthProvider';
 import { useLanguage } from '../context/LanguageProvider';
 import { useRouter } from 'next/navigation';
+import {
+  BrandLogoIcon,
+  LockIcon,
+  EyeIcon,
+  EyeOffIcon,
+  AlertTriangleIcon,
+  ShieldCheckIcon,
+  ArrowRightIcon,
+  CheckCircleIcon,
+} from '../../components/Icons';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -151,38 +161,38 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-6 sm:p-8 space-y-6">
-        <div className="text-center">
-          <div className="inline-flex w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 items-center justify-center text-2xl mb-3 shadow-inner">
-            🔐
+    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-grid-subtle">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-crafted border border-stone-200/90 p-7 sm:p-9 space-y-6">
+        <div className="text-center space-y-2">
+          <div className="inline-flex w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-800 items-center justify-center border border-emerald-200/70 shadow-xs mb-1">
+            <BrandLogoIcon className="w-7 h-7 text-emerald-700" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-black text-stone-900 tracking-tight font-serif">
             {isMarathi ? 'अन्नसेतूमध्ये लॉगिन करा' : 'Sign in to AnnaSetu'}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs text-stone-500 font-normal">
             {isMarathi
-              ? 'तुमच्या डॅशबोर्डवर जाण्यासाठी खात्याची माहिती प्रविष्ट करा'
-              : 'Enter your account credentials to access your dashboard'}
+              ? 'तुमच्या अधिकृत डॅशबोर्डवर जाण्यासाठी खात्याची माहिती प्रविष्ट करा'
+              : 'Enter your credentials to manage surplus food, claims & pickups'}
           </p>
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm space-y-1.5">
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-1.5 shadow-xs">
             <div className="flex items-start space-x-2">
-              <span className="shrink-0 mt-0.5">⚠️</span>
-              <div className="flex-1">{error}</div>
+              <AlertTriangleIcon className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <div className="flex-1 font-medium leading-relaxed">{error}</div>
             </div>
-            <div className="text-xs pt-1 border-t border-red-100 text-red-800">
+            <div className="text-[11px] pt-1.5 border-t border-rose-200/70 text-rose-900">
               {isMarathi ? 'पासवर्ड विसरलात? ' : 'Forgot your password? '}
               <button
                 type="button"
                 onClick={openForgotModal}
-                className="font-bold underline hover:text-red-900 cursor-pointer"
+                className="font-bold underline hover:text-rose-950 cursor-pointer"
               >
                 {isMarathi
                   ? 'तुमच्या ईमेलवर नवीन ६-अंकी पासवर्ड मिळवा'
-                  : 'Send a new 6-character password to your email'}
+                  : 'Dispatch new temporary password to email'}
               </button>
             </div>
           </div>
@@ -214,7 +224,7 @@ export default function LoginPage() {
           />
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
               {isMarathi ? 'ईमेल पत्ता' : 'Email Address'}
             </label>
             <input
@@ -232,20 +242,20 @@ export default function LoginPage() {
               onClick={() => setIsReadOnly(false)}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={isMarathi ? 'उदा. user@organization.org' : 'you@organization.org'}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-slate-50/50"
+              placeholder={isMarathi ? 'उदा. donor@restaurant.com' : 'you@organization.org'}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/30 focus:border-emerald-700 text-sm bg-stone-50/40 text-stone-900 transition font-medium"
             />
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold uppercase text-slate-600">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600">
                 {isMarathi ? 'पासवर्ड' : 'Password'}
               </label>
               <button
                 type="button"
                 onClick={openForgotModal}
-                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition cursor-pointer"
+                className="text-[11px] font-bold text-emerald-800 hover:text-emerald-900 hover:underline transition cursor-pointer"
               >
                 {isMarathi ? 'पासवर्ड विसरलात?' : 'Forgot Password?'}
               </button>
@@ -267,7 +277,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-slate-50/50 font-mono tracking-wider"
+                className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/30 focus:border-emerald-700 text-sm bg-stone-50/40 text-stone-900 font-mono tracking-wider transition"
               />
               <button
                 type="button"
@@ -282,9 +292,9 @@ export default function LoginPage() {
                     ? 'Hide password'
                     : 'Show password'
                 }
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer select-none text-base"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-700 cursor-pointer select-none"
               >
-                {showPassword ? '👁️' : '🙈'}
+                {showPassword ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
               </button>
             </div>
           </div>
@@ -292,7 +302,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] transition shadow-md shadow-emerald-600/20 disabled:opacity-50 text-sm flex items-center justify-center space-x-2 cursor-pointer"
+            className="w-full py-3 px-4 rounded-xl font-bold text-white bg-emerald-800 hover:bg-emerald-700 active:scale-[0.99] transition shadow-xs disabled:opacity-50 text-sm flex items-center justify-center space-x-2 cursor-pointer mt-2"
           >
             {loading ? (
               <>
@@ -304,51 +314,60 @@ export default function LoginPage() {
                 </span>
               </>
             ) : (
-              <span>{isMarathi ? 'लॉगिन करा' : 'Sign In'}</span>
+              <>
+                <span>{isMarathi ? 'लॉगिन करा' : 'Sign In'}</span>
+                <ArrowRightIcon className="w-4 h-4" />
+              </>
             )}
           </button>
         </form>
 
-        <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
-          {isMarathi ? 'अजून खाते नाही का? ' : "Don't have an account yet? "}
-          <Link href="/register" className="font-semibold text-emerald-600 hover:text-emerald-700 underline">
-            {isMarathi ? 'येथे नोंदणी करा' : 'Register here'}
-          </Link>
+        <div className="pt-4 border-t border-stone-200/80 flex flex-col items-center space-y-3">
+          <div className="text-center text-xs text-stone-500">
+            {isMarathi ? 'अजून खाते नाही का? ' : "Don't have an account yet? "}
+            <Link href="/register" className="font-bold text-emerald-800 hover:text-emerald-900 underline underline-offset-2">
+              {isMarathi ? 'येथे नोंदणी करा' : 'Register as Donor, NGO, or Volunteer'}
+            </Link>
+          </div>
+          <div className="flex items-center space-x-1.5 text-[11px] text-stone-400">
+            <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-700" />
+            <span>{isMarathi ? 'सुरक्षित FSSAI सुसंगत प्लॅटफॉर्म' : 'End-to-End Verified Platform'}</span>
+          </div>
         </div>
       </div>
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-100 animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-stone-200 animate-in fade-in duration-150">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl shrink-0">
-                  🔑
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0">
+                  <LockIcon className="w-5 h-5 text-emerald-700" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 className="text-base font-bold text-stone-900 font-serif">
                     {isMarathi ? 'पासवर्ड विसरलात?' : 'Forgot Your Password?'}
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-stone-500">
                     {isMarathi
                       ? 'तुमच्या ईमेलवर नवीन ६-अंकी तात्पुरता पासवर्ड मिळवा'
-                      : 'Get a new 6-character password sent to your email'}
+                      : 'Receive a fresh 6-character access password'}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowForgotModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1 cursor-pointer"
+                className="text-stone-400 hover:text-stone-700 text-lg font-bold p-1 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {forgotError && (
-              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start space-x-2">
-                <span className="shrink-0 mt-0.5">⚠️</span>
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start space-x-2">
+                <AlertTriangleIcon className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <div>{forgotError}</div>
               </div>
             )}
@@ -357,38 +376,38 @@ export default function LoginPage() {
               <div className="space-y-4">
                 <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs space-y-2">
                   <div className="font-bold flex items-center space-x-1.5 text-sm text-emerald-800">
-                    <span>✓</span>
+                    <CheckCircleIcon className="w-4 h-4 text-emerald-700" />
                     <span>{isMarathi ? 'नवीन पासवर्ड पाठवला!' : 'New Password Dispatched!'}</span>
                   </div>
-                  <p className="text-emerald-800 leading-relaxed">
+                  <p className="text-emerald-800 leading-relaxed font-normal">
                     {forgotSuccess}
                   </p>
-                  <div className="bg-white p-3 rounded-lg border border-emerald-200 text-[11px] text-slate-600">
-                    💡 <strong>{isMarathi ? 'टीप:' : 'Tip:'}</strong>{' '}
+                  <div className="bg-white/80 p-3 rounded-lg border border-emerald-200 text-[11px] text-stone-600">
+                    <strong>{isMarathi ? 'टीप:' : 'Tip:'}</strong>{' '}
                     {isMarathi
                       ? 'तुमचा ईमेल उघडा, ६-अंकी पासवर्ड कॉपी करा आणि लॉगिन फॉर्ममध्ये टाकून त्वरित साइन इन करा.'
-                      : 'Open your email, copy the 6-character password, and paste it on the login form to sign in immediately.'}
+                      : 'Open your inbox, copy the 6-character code, and paste it into the password box.'}
                   </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={closeForgotModalAndFocus}
-                  className="w-full py-2.5 px-4 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow-sm text-sm cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded-xl font-bold text-white bg-emerald-800 hover:bg-emerald-700 transition shadow-xs text-xs cursor-pointer"
                 >
                   {isMarathi ? 'नवीन पासवर्ड टाकून लॉगिन करा' : 'Enter New Password & Log In'}
                 </button>
               </div>
             ) : (
               <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-stone-600 leading-relaxed">
                   {isMarathi
                     ? 'तुमचा नोंदणीकृत अन्नसेतू ईमेल पत्ता खाली प्रविष्ट करा. आमची प्रणाली नवीन ६-अंकी पासवर्ड तयार करून लगेच तुम्हाला ईमेल करेल.'
-                    : 'Enter your registered AnnaSetu email address below. Our system will generate a fresh, random 6-character password, update your account, and email it to you right away.'}
+                    : 'Enter your registered email address. We will generate a secure 6-character key and dispatch it to your inbox.'}
                 </p>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-700 mb-1">
                     {isMarathi ? 'नोंदणीकृत ईमेल पत्ता' : 'Registered Email Address'}
                   </label>
                   <input
@@ -397,7 +416,7 @@ export default function LoginPage() {
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
                     placeholder={isMarathi ? 'उदा. user@organization.org' : 'you@organization.org'}
-                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"
+                    className="w-full px-3.5 py-2 text-xs border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-700/30 focus:border-emerald-700 bg-stone-50/50"
                   />
                 </div>
 
@@ -405,14 +424,14 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
-                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                    className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl transition cursor-pointer"
                   >
                     {isMarathi ? 'रद्द करा' : 'Cancel'}
                   </button>
                   <button
                     type="submit"
                     disabled={forgotLoading}
-                    className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-xs disabled:opacity-50 flex items-center space-x-1.5 cursor-pointer"
+                    className="px-5 py-2 text-xs font-bold text-white bg-emerald-800 hover:bg-emerald-700 rounded-xl transition shadow-xs disabled:opacity-50 flex items-center space-x-1.5 cursor-pointer"
                   >
                     {forgotLoading ? (
                       <>
@@ -420,7 +439,7 @@ export default function LoginPage() {
                         <span>{isMarathi ? 'नवीन पासवर्ड पाठवत आहे...' : 'Generating & Dispatching...'}</span>
                       </>
                     ) : (
-                      <span>{isMarathi ? 'ईमेलवर नवीन पासवर्ड पाठवा' : 'Dispatch New Password to Email'}</span>
+                      <span>{isMarathi ? 'ईमेलवर नवीन पासवर्ड पाठवा' : 'Dispatch New Password'}</span>
                     )}
                   </button>
                 </div>

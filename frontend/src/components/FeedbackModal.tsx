@@ -3,6 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../app/context/AuthProvider';
 import { useLanguage } from '../app/context/LanguageProvider';
+import {
+  StarIcon,
+  CheckCircleIcon,
+  AlertTriangleIcon,
+  BrandLogoIcon,
+  UtensilsIcon,
+  BuildingIcon,
+  TruckIcon,
+  UserIcon,
+} from './Icons';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -10,12 +20,12 @@ interface FeedbackModalProps {
   onSuccess?: () => void;
 }
 
-const RATING_LABELS: Record<number, { en: string; mr: string; emoji: string; color: string }> = {
-  1: { en: 'Needs Improvement', mr: 'सुधारणेची गरज आहे', emoji: '😞', color: 'text-rose-500' },
-  2: { en: 'Fair Experience', mr: 'साधारण अनुभव', emoji: '😐', color: 'text-amber-500' },
-  3: { en: 'Good Platform', mr: 'चांगला प्लॅटफॉर्म', emoji: '🙂', color: 'text-yellow-500' },
-  4: { en: 'Very Good & Helpful', mr: 'खूप चांगला व उपयुक्त', emoji: '😊', color: 'text-emerald-500' },
-  5: { en: 'Excellent! Loved it', mr: 'उत्कृष्ट! खूप आवडले', emoji: '🤩', color: 'text-emerald-600' },
+const RATING_LABELS: Record<number, { en: string; mr: string; color: string }> = {
+  1: { en: 'Needs Improvement', mr: 'सुधारणेची गरज आहे', color: 'text-rose-700' },
+  2: { en: 'Fair Experience', mr: 'साधारण अनुभव', color: 'text-amber-700' },
+  3: { en: 'Good Platform', mr: 'चांगला प्लॅटफॉर्म', color: 'text-yellow-700' },
+  4: { en: 'Very Good & Helpful', mr: 'खूप चांगला व उपयुक्त', color: 'text-emerald-700' },
+  5: { en: 'Excellent & Reliable', mr: 'उत्कृष्ट व अत्यंत उपयुक्त', color: 'text-emerald-800' },
 };
 
 const CATEGORIES = [
@@ -148,19 +158,19 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
   const currentRatingInfo = RATING_LABELS[activeRating] || RATING_LABELS[5];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-xs animate-in fade-in duration-150">
       <div
-        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800 transition-all"
+        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden text-stone-800 transition-all"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header decoration */}
-        <div className="h-2.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-green-500" />
+        {/* Top accent border */}
+        <div className="h-1.5 bg-emerald-800" />
 
         {/* Close Button */}
         <button
           onClick={onClose}
           type="button"
-          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-sm font-bold transition"
+          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-800 flex items-center justify-center text-sm font-bold transition cursor-pointer"
           aria-label="Close modal"
         >
           ✕
@@ -168,48 +178,50 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
 
         <div className="p-6 sm:p-8 space-y-6">
           {submittedSuccess ? (
-            <div className="text-center py-8 space-y-4 animate-in zoom-in-95 duration-300">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto shadow-inner">
-                ✓
+            <div className="text-center py-8 space-y-4 animate-in zoom-in-95 duration-200">
+              <div className="w-14 h-14 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-2xl flex items-center justify-center mx-auto shadow-xs">
+                <CheckCircleIcon className="w-8 h-8 text-emerald-700" />
               </div>
-              <h3 className="text-2xl font-black text-slate-900">
+              <h3 className="text-2xl font-black text-stone-900 font-serif">
                 {isMarathi ? 'तुमच्या अभिप्रायाबद्दल मनापासून धन्यवाद!' : 'Thank You for Your Feedback!'}
               </h3>
-              <p className="text-sm text-slate-600 max-w-xs mx-auto">
+              <p className="text-xs text-stone-600 max-w-xs mx-auto leading-relaxed">
                 {isMarathi
                   ? 'तुमचे रेटिंग अन्नसेतू सुधारण्यासाठी आणि सर्वांसाठी अधिक सक्षम अन्न वितरण नेटवर्क तयार करण्यास मदत करते.'
-                  : 'Your rating helps us improve AnnaSetu and create a more reliable surplus food distribution network for all.'}
+                  : 'Your evaluation directly assists our volunteers, donors, and shelter coordinators in refining community food rescue.'}
               </p>
-              <div className="inline-flex items-center space-x-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+              <div className="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-900 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200">
+                <StarIcon className="w-3.5 h-3.5 text-amber-500" filled />
                 <span>
                   {isMarathi
-                    ? `⭐ तुमचे रेटिंग: ${rating} / ५ स्टार्स`
-                    : `⭐ Your rating: ${rating} / 5 Stars`}
+                    ? `नोंदवलेले रेटिंग: ${rating} / ५ स्टार्स`
+                    : `Verified Rating: ${rating} / 5 Stars`}
                 </span>
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold tracking-wide mb-2">
+                <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-stone-100 text-stone-700 text-[11px] font-bold tracking-wide border border-stone-200 mb-2">
+                  <BrandLogoIcon className="w-3.5 h-3.5 text-emerald-800" />
                   <span>
-                    {isMarathi ? '💬 अन्नसेतू नागरिक संवाद' : '💬 ANNASETU COMMUNITY VOICE'}
+                    {isMarathi ? 'अन्नसेतू नागरिक संवाद' : 'COMMUNITY VOICE'}
                   </span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                  {isMarathi ? 'तुमचे रेटिंग आणि अभिप्राय नोंदवा' : 'Rate & Share Your Feedback'}
+                <h3 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight font-serif">
+                  {isMarathi ? 'तुमचे रेटिंग आणि अभिप्राय नोंदवा' : 'Rate & Share Your Experience'}
                 </h3>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-stone-500 mt-1 font-normal">
                   {isMarathi
                     ? 'सर्व वापरकर्त्यांसाठी खुले — अन्नदाता, संस्था, स्वयंसेवक आणि नागरिक. आमचा प्लॅटफॉर्म वापरण्याचा तुमचा अनुभव कसा होता?'
-                    : 'Open to all users — donors, NGOs, volunteers, and visitors. How was your experience with our platform?'}
+                    : 'Open to all participants — donors, NGOs, volunteer couriers, and conscious citizens.'}
                 </p>
               </div>
 
               {/* Star Rating Selector */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-2">
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  {isMarathi ? 'तुमचे एकंदर रेटिंग निवडा' : 'Select Your Overall Rating'}
+              <div className="p-4 rounded-2xl bg-stone-50/70 border border-stone-200 text-center space-y-2">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  {isMarathi ? 'तुमचे एकंदर रेटिंग निवडा' : 'Select Your Rating'}
                 </div>
                 <div className="flex items-center justify-center space-x-2 py-1">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -219,18 +231,18 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
                       onClick={() => setRating(star)}
                       onMouseEnter={() => setHoverRating(star)}
                       onMouseLeave={() => setHoverRating(null)}
-                      className="text-3xl sm:text-4xl transition-transform hover:scale-125 focus:outline-none focus:scale-125"
+                      className="p-1 transition-transform hover:scale-125 focus:outline-none cursor-pointer"
                     >
-                      <span className={star <= activeRating ? 'text-amber-400 drop-shadow-sm' : 'text-slate-300'}>
-                        ★
-                      </span>
+                      <StarIcon
+                        className="w-8 h-8 text-amber-400"
+                        filled={star <= activeRating}
+                      />
                     </button>
                   ))}
                 </div>
                 <div className={`text-xs font-bold flex items-center justify-center space-x-1.5 ${currentRatingInfo.color}`}>
-                  <span>{currentRatingInfo.emoji}</span>
                   <span>{isMarathi ? currentRatingInfo.mr : currentRatingInfo.en}</span>
-                  <span className="text-slate-400 font-normal">
+                  <span className="text-stone-400 font-normal">
                     {isMarathi ? `(${activeRating} पैकी ५)` : `(${activeRating} of 5)`}
                   </span>
                 </div>
@@ -238,19 +250,17 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
 
               {/* User Identity / Role Info */}
               {user ? (
-                <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-center justify-between text-xs">
+                <div className="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl flex items-center justify-between text-xs">
                   <div className="flex items-center space-x-2">
-                    <span className="text-lg">
-                      {user.role === 'DONOR' ? '🍲' : user.role === 'NGO' ? '🏢' : user.role === 'VOLUNTEER' ? '🚴' : '🛡️'}
-                    </span>
+                    <UserIcon className="w-4 h-4 text-emerald-800" />
                     <div>
-                      <span className="text-slate-500">
+                      <span className="text-stone-500">
                         {isMarathi ? 'नोंदणी करत आहात:' : 'Submitting as:'}
                       </span>{' '}
-                      <strong className="text-slate-900">{user.name}</strong>
+                      <strong className="text-stone-900">{user.name}</strong>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-emerald-600 text-white">
+                  <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-emerald-800 text-white">
                     {isMarathi ? `पडताळणी झालेले ${user.role}` : `VERIFIED ${user.role}`}
                   </span>
                 </div>
@@ -258,61 +268,61 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      <label className="block text-[11px] font-bold text-stone-700 mb-1">
                         {isMarathi ? (
-                          <>तुमचे नाव <span className="text-slate-400 font-normal">(पर्यायी)</span></>
+                          <>तुमचे नाव <span className="text-stone-400 font-normal">(पर्यायी)</span></>
                         ) : (
-                          <>Your Name <span className="text-slate-400 font-normal">(optional)</span></>
+                          <>Your Name <span className="text-stone-400 font-normal">(Optional)</span></>
                         )}
                       </label>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder={isMarathi ? 'उदा. राहुल पाटील किंवा नागरिक' : 'e.g. Rahul Patil or Guest'}
-                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        placeholder={isMarathi ? 'उदा. राहुल पाटील' : 'e.g. Rahul Patil or Guest'}
+                        className="w-full px-3 py-2 text-xs border border-stone-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/30 font-medium"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        {isMarathi ? 'तुमची भूमिका / ओळख' : 'Your User Role / Affiliation'}
+                      <label className="block text-[11px] font-bold text-stone-700 mb-1">
+                        {isMarathi ? 'तुमची भूमिका / ओळख' : 'Role / Affiliation'}
                       </label>
                       <select
                         value={userType}
                         onChange={(e) => setUserType(e.target.value)}
-                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-3 py-2 text-xs border border-stone-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/30 font-medium cursor-pointer"
                       >
                         <option value="VISITOR">
-                          {isMarathi ? '👤 नागरिक / अभ्यागत' : '👤 Community Member / Visitor'}
+                          {isMarathi ? 'नागरिक / अभ्यागत' : 'Community Member / Visitor'}
                         </option>
                         <option value="DONOR">
-                          {isMarathi ? '🍲 अन्नदाता (हॉटेल/केटरर)' : '🍲 Food Donor (Restaurant/Caterer)'}
+                          {isMarathi ? 'अन्नदाता (हॉटेल/केटरर)' : 'Food Donor (Restaurant/Caterer)'}
                         </option>
                         <option value="NGO">
-                          {isMarathi ? '🏢 संस्था / धर्मादाय प्रतिनिधी' : '🏢 NGO / Charity Representative'}
+                          {isMarathi ? 'संस्था / निवारा प्रतिनिधी' : 'NGO / Shelter Coordinator'}
                         </option>
                         <option value="VOLUNTEER">
-                          {isMarathi ? '🚴 स्वयंसेवक / डिलिव्हरी' : '🚴 Volunteer / Courier'}
+                          {isMarathi ? 'स्वयंसेवक / डिलिव्हरी' : 'Volunteer Courier'}
                         </option>
                       </select>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-[11px] font-bold text-stone-700 mb-1">
                       {isMarathi ? (
-                        <>ईमेल पत्ता <span className="text-slate-400 font-normal">(पर्यायी, उत्तरासाठी)</span></>
+                        <>ईमेल पत्ता <span className="text-stone-400 font-normal">(पर्यायी, उत्तरासाठी)</span></>
                       ) : (
-                        <>Email Address <span className="text-slate-400 font-normal">(optional, for replies)</span></>
+                        <>Email Address <span className="text-stone-400 font-normal">(Optional, for updates)</span></>
                       )}
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your.email@example.com"
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="contact@example.com"
+                      className="w-full px-3 py-2 text-xs border border-stone-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/30 font-medium"
                     />
                   </div>
                 </div>
@@ -320,13 +330,13 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
 
               {/* Category */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 mb-1">
                   {isMarathi ? 'विषय / श्रेणी' : 'Topic / Category'}
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 text-xs border border-stone-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/30 font-medium cursor-pointer"
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat.id} value={cat.id}>
@@ -338,11 +348,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
 
               {/* Feedback Message */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 mb-1">
                   {isMarathi ? (
-                    <>तुमचा अभिप्राय / सूचना <span className="text-red-500">*</span></>
+                    <>तुमचा अभिप्राय / सूचना <span className="text-rose-600">*</span></>
                   ) : (
-                    <>Your Review / Suggestions <span className="text-red-500">*</span></>
+                    <>Your Review / Feedback <span className="text-rose-600">*</span></>
                   )}
                 </label>
                 <textarea
@@ -352,32 +362,32 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
                   placeholder={
                     isMarathi
                       ? 'अन्नसेतूबाबत तुम्हाला काय आवडले? अन्न संकलन, डिलिव्हरी किंवा वेबसाइटबाबत काही सूचना आहेत का?'
-                      : 'What did you like about AnnaSetu? Any suggestions for improvements, food pickup, or UI?'
+                      : 'Share your experience with food listing, shelter handovers, or volunteer delivery timing...'
                   }
-                  className="w-full px-3.5 py-2.5 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                  className="w-full px-3.5 py-2.5 text-xs border border-stone-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/30 resize-none font-normal"
                   required
                 />
               </div>
 
               {/* Public Display Checkbox */}
-              <label className="flex items-start space-x-2 text-xs text-slate-600 cursor-pointer select-none">
+              <label className="flex items-start space-x-2 text-xs text-stone-600 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={isPublic}
                   onChange={(e) => setIsPublic(e.target.checked)}
-                  className="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500"
+                  className="mt-0.5 rounded text-emerald-800 focus:ring-emerald-700"
                 />
-                <span>
+                <span className="font-normal text-[11px]">
                   {isMarathi
                     ? 'माझे रेटिंग आणि अभिप्राय प्लॅटफॉर्मवर प्रदर्शित करण्यास परवानगी द्या'
-                    : 'Allow my rating and comments to be displayed on the platform reviews showcase'}
+                    : 'Allow this review to be showcased on public platform transparency metrics'}
                 </span>
               </label>
 
               {/* Error Alert */}
               {errorMsg && (
-                <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs flex items-center space-x-2">
-                  <span>⚠️</span>
+                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs flex items-center space-x-2">
+                  <AlertTriangleIcon className="w-4 h-4 text-rose-600 shrink-0" />
                   <span>{errorMsg}</span>
                 </div>
               )}
@@ -387,7 +397,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 hover:bg-stone-100 transition cursor-pointer"
                   disabled={submitting}
                 >
                   {isMarathi ? 'रद्द करा' : 'Cancel'}
@@ -395,7 +405,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-600/20 hover:shadow-lg transition flex items-center space-x-2 disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-emerald-800 hover:bg-emerald-700 active:scale-95 text-white shadow-xs transition flex items-center space-x-1.5 disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? (
                     <>
@@ -404,8 +414,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
                     </>
                   ) : (
                     <>
-                      <span>{isMarathi ? 'रेटिंग आणि अभिप्राय सादर करा' : 'Submit Rating & Feedback'}</span>
-                      <span>✓</span>
+                      <span>{isMarathi ? 'रेटिंग आणि अभिप्राय सादर करा' : 'Submit Review'}</span>
+                      <CheckCircleIcon className="w-3.5 h-3.5" />
                     </>
                   )}
                 </button>

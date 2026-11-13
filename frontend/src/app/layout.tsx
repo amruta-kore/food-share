@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AnnaSetu - Surplus Food Redistribution Platform",
-  description: "Connect donors, NGOs, and volunteers to save surplus edible food and feed local communities.",
+  title: "AnnaSetu | Surplus Food Redistribution Platform",
+  description: "Connect verified donors, NGOs, and volunteers to save surplus edible food with real-time OTP tracking and FSSAI safety compliance.",
 };
 
 type LayoutProps = {
@@ -29,16 +29,16 @@ type LayoutProps = {
 export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans">
+      <body className="min-h-full flex flex-col bg-[var(--background)] text-neutral-900 font-sans antialiased selection:bg-emerald-100 selection:text-emerald-900">
         <LanguageProvider>
           <AuthProvider>
-          <Navbar />
-          <div className="flex-1">
-            {children}
-          </div>
-          <FloatingFeedbackButton />
-          <Footer />
-        </AuthProvider>
+            <Navbar />
+            <div className="flex-1">
+              {children}
+            </div>
+            <FloatingFeedbackButton />
+            <Footer />
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

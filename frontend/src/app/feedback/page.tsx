@@ -5,6 +5,18 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthProvider';
 import { useLanguage } from '../context/LanguageProvider';
 import FeedbackModal from '../../components/FeedbackModal';
+import {
+  StarIcon,
+  UtensilsIcon,
+  BuildingIcon,
+  TruckIcon,
+  ShieldCheckIcon,
+  UserIcon,
+  FilterIcon,
+  ArrowRightIcon,
+  BrandLogoIcon,
+  SparklesIcon,
+} from '../../components/Icons';
 
 interface ReviewItem {
   id: number;
@@ -97,38 +109,43 @@ export default function FeedbackPage() {
     return map[cat] || cat;
   };
 
-  const getRoleBadge = (role: string) => {
+  const renderRoleBadge = (role: string) => {
     switch (role.toUpperCase()) {
       case 'DONOR':
-        return {
-          label: isMarathi ? 'अन्नदाता' : 'Food Donor',
-          color: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-          emoji: '🍲',
-        };
+        return (
+          <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+            <UtensilsIcon className="w-3 h-3 text-emerald-700" />
+            <span>{isMarathi ? 'अन्नदाता' : 'Food Donor'}</span>
+          </span>
+        );
       case 'NGO':
-        return {
-          label: isMarathi ? 'संस्था / निवारा' : 'NGO / Shelter',
-          color: 'bg-blue-100 text-blue-800 border-blue-300',
-          emoji: '🏢',
-        };
+        return (
+          <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-800 border border-cyan-200">
+            <BuildingIcon className="w-3 h-3 text-cyan-700" />
+            <span>{isMarathi ? 'संस्था / निवारा' : 'NGO / Shelter'}</span>
+          </span>
+        );
       case 'VOLUNTEER':
-        return {
-          label: isMarathi ? 'स्वयंसेवक कुरिअर' : 'Volunteer Courier',
-          color: 'bg-amber-100 text-amber-800 border-amber-300',
-          emoji: '🚴',
-        };
+        return (
+          <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+            <TruckIcon className="w-3 h-3 text-amber-700" />
+            <span>{isMarathi ? 'स्वयंसेवक' : 'Volunteer Courier'}</span>
+          </span>
+        );
       case 'ADMIN':
-        return {
-          label: isMarathi ? 'प्लॅटफॉर्म प्रशासक' : 'Platform Admin',
-          color: 'bg-purple-100 text-purple-800 border-purple-300',
-          emoji: '🛡️',
-        };
+        return (
+          <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200">
+            <ShieldCheckIcon className="w-3 h-3 text-purple-700" />
+            <span>{isMarathi ? 'प्रशासक' : 'Admin'}</span>
+          </span>
+        );
       default:
-        return {
-          label: isMarathi ? 'नागरिक / अभ्यागत' : 'Community Visitor',
-          color: 'bg-slate-100 text-slate-800 border-slate-300',
-          emoji: '👤',
-        };
+        return (
+          <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200">
+            <UserIcon className="w-3 h-3 text-stone-500" />
+            <span>{isMarathi ? 'नागरिक / अभ्यागत' : 'Community Visitor'}</span>
+          </span>
+        );
     }
   };
 
@@ -138,56 +155,59 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/60 py-10 sm:py-14 space-y-12">
+    <div className="min-h-screen py-10 sm:py-16 space-y-12 bg-grid-subtle">
       {/* Hero Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold tracking-wide border border-emerald-200">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-stone-900 text-stone-200 text-xs font-bold tracking-wide border border-stone-700">
+            <StarIcon className="w-3.5 h-3.5 text-amber-400" filled />
             <span>
               {isMarathi
-                ? '⭐ नागरिकांचे अभिप्राय आणि पारदर्शकता'
-                : '⭐ COMMUNITY VOICES & TRANSPARENCY'}
+                ? 'नागरिकांचे अभिप्राय आणि पारदर्शकता'
+                : 'COMMUNITY VOICES & TRANSPARENCY'}
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-stone-900 tracking-tight leading-tight font-serif">
             {isMarathi ? (
               <>
                 अन्नसेतूसाठी{' '}
-                <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                <span className="text-emerald-800 underline decoration-emerald-700/40 decoration-4 underline-offset-4">
                   अभिप्राय आणि रेटिंग्ज
                 </span>
               </>
             ) : (
               <>
-                Ratings & Feedback for{' '}
-                <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                Verified Ratings & Feedback for{' '}
+                <span className="text-emerald-800 underline decoration-emerald-700/40 decoration-4 underline-offset-4">
                   AnnaSetu
                 </span>
               </>
             )}
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-600">
+          <p className="text-sm sm:text-base text-stone-600 font-normal leading-relaxed">
             {isMarathi
               ? 'प्रत्येक वापरकर्ता महत्त्वाचा आहे! अन्नदाता, स्वयंसेवी संस्था, स्वयंसेवक आणि नागरिक सर्वजण अभिप्राय व सूचना देऊन अन्न पुनर्वितरण अधिक सक्षम करण्यास मदत करू शकतात.'
-              : 'Every user matters! Donors, NGOs, volunteers, and visitors can all share ratings and suggestions to help us improve surplus food distribution across the city.'}
+              : 'Real feedback from chefs, volunteers, NGO coordinators, and citizens helping eliminate surplus food waste with transparency.'}
           </p>
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm shadow-md shadow-emerald-700/20 hover:shadow-lg transition flex items-center space-x-2 hover:scale-[1.02] active:scale-[0.98]"
+              className="px-6 py-3.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm shadow-crafted transition flex items-center space-x-2 cursor-pointer active:scale-95"
             >
+              <StarIcon className="w-4 h-4 text-amber-400" filled />
               <span>
-                {isMarathi ? '⭐ अभिप्राय नोंदवा / रेटिंग द्या' : '⭐ Write a Review / Give Rating'}
+                {isMarathi ? 'अभिप्राय नोंदवा / रेटिंग द्या' : 'Write a Review / Give Rating'}
               </span>
             </button>
             <Link
               href="/"
-              className="px-5 py-3 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm transition shadow-xs"
+              className="px-5 py-3.5 rounded-xl bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 font-bold text-xs sm:text-sm transition shadow-xs flex items-center space-x-1.5"
             >
-              {isMarathi ? 'अतिरिक्त अन्न पहा →' : 'Browse Surplus Food →'}
+              <span>{isMarathi ? 'अतिरिक्त अन्न पहा' : 'Browse Surplus Food'}</span>
+              <ArrowRightIcon className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -195,33 +215,33 @@ export default function FeedbackPage() {
 
       {/* Rating Scorecard Overview */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-md p-6 sm:p-8">
+        <div className="bg-white rounded-3xl border border-stone-200/90 shadow-crafted p-6 sm:p-9">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
             {/* Big Rating Number */}
-            <div className="text-center lg:text-left lg:border-r border-slate-200 lg:pr-8 space-y-3">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                {isMarathi ? 'नागरिक समाधान गुण (Score)' : 'Community Satisfaction Score'}
+            <div className="text-center lg:text-left lg:border-r border-stone-200 lg:pr-8 space-y-3">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                {isMarathi ? 'नागरिक समाधान गुण (Score)' : 'Community Satisfaction Index'}
               </div>
               <div className="flex items-baseline justify-center lg:justify-start space-x-3">
-                <span className="text-5xl sm:text-6xl font-black text-slate-900">
+                <span className="text-5xl sm:text-6xl font-black text-stone-900 font-serif">
                   {metrics.averageRating.toFixed(1)}
                 </span>
-                <span className="text-slate-400 font-medium text-xl">/ 5.0</span>
+                <span className="text-stone-400 font-medium text-xl">/ 5.0</span>
               </div>
-              <div className="flex items-center justify-center lg:justify-start space-x-1 text-2xl text-amber-400">
+              <div className="flex items-center justify-center lg:justify-start space-x-1 text-amber-400">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <span key={star}>★</span>
+                  <StarIcon key={star} className="w-5 h-5 text-amber-400" filled />
                 ))}
               </div>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-stone-500 font-normal leading-relaxed">
                 {isMarathi ? (
                   <>
                     अन्नदाता, संस्था, स्वयंसेवक आणि नागरिकांच्या{' '}
-                    <strong className="text-slate-800">{metrics.totalCount}</strong> अभिप्रायांवर आधारित
+                    <strong className="text-stone-800">{metrics.totalCount}</strong> अधिकृत अभिप्रायांवर आधारित
                   </>
                 ) : (
                   <>
-                    Based on <strong className="text-slate-800">{metrics.totalCount}</strong> community reviews from donors, NGOs, volunteers, and visitors
+                    Synthesized from <strong className="text-stone-800">{metrics.totalCount}</strong> verified community reviews across all stakeholder roles
                   </>
                 )}
               </p>
@@ -234,58 +254,66 @@ export default function FeedbackPage() {
                 const pct = getPercentage(count);
                 return (
                   <div key={star} className="flex items-center space-x-3 text-xs">
-                    <span className="w-12 text-slate-600 font-bold flex items-center justify-end space-x-1">
+                    <span className="w-12 text-stone-600 font-bold flex items-center justify-end space-x-1">
                       <span>{star}</span>
-                      <span className="text-amber-400 text-sm">★</span>
+                      <StarIcon className="w-3.5 h-3.5 text-amber-400" filled />
                     </span>
-                    <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
+                    <div className="flex-1 h-2.5 bg-stone-100 rounded-full overflow-hidden border border-stone-200">
                       <div
-                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
+                        className="h-full bg-emerald-800 rounded-full transition-all duration-500"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="w-10 text-right text-slate-400 font-medium">{pct}%</span>
+                    <span className="w-10 text-right text-stone-400 font-mono text-[11px]">{pct}%</span>
                   </div>
                 );
               })}
             </div>
 
             {/* Impact Highlights */}
-            <div className="grid grid-cols-2 gap-3 text-center bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
-              <div className="p-3 bg-white rounded-xl shadow-xs border border-slate-100">
-                <div className="text-2xl mb-1">👥</div>
-                <div className="text-xs font-bold text-slate-800">
-                  {isMarathi ? 'सर्व वापरकर्त्यांचे स्वागत' : 'All Users Welcome'}
+            <div className="grid grid-cols-2 gap-3 text-center bg-stone-50/70 p-4 rounded-2xl border border-stone-200">
+              <div className="p-3 bg-white rounded-xl shadow-xs border border-stone-200/70">
+                <div className="w-8 h-8 mx-auto rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center mb-1">
+                  <UserIcon className="w-4 h-4 text-emerald-700" />
                 </div>
-                <div className="text-[10px] text-slate-500">
-                  {isMarathi ? 'अन्नदाता, संस्था, स्वयंसेवक, नागरिक' : 'Donors, NGOs, Couriers, Visitors'}
+                <div className="text-xs font-bold text-stone-800">
+                  {isMarathi ? 'सर्व भूमिकांचे स्वागत' : 'All Roles Covered'}
                 </div>
-              </div>
-              <div className="p-3 bg-white rounded-xl shadow-xs border border-slate-100">
-                <div className="text-2xl mb-1">⚡</div>
-                <div className="text-xs font-bold text-slate-800">
-                  {isMarathi ? 'त्वरित अपडेट्स' : 'Instant Updates'}
-                </div>
-                <div className="text-[10px] text-slate-500">
-                  {isMarathi ? 'थेट नागरिकांचा अभिप्राय' : 'Real-time community feedback'}
+                <div className="text-[10px] text-stone-500 font-normal">
+                  {isMarathi ? 'अन्नदाता, संस्था, स्वयंसेवक' : 'Donors, NGOs, Volunteers'}
                 </div>
               </div>
-              <div className="p-3 bg-white rounded-xl shadow-xs border border-slate-100">
-                <div className="text-2xl mb-1">🌍</div>
-                <div className="text-xs font-bold text-slate-800">
-                  {isMarathi ? '१००% विनामूल्य व सामाजिक' : '100% Non-Profit'}
+              <div className="p-3 bg-white rounded-xl shadow-xs border border-stone-200/70">
+                <div className="w-8 h-8 mx-auto rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center mb-1">
+                  <SparklesIcon className="w-4 h-4 text-amber-700" />
                 </div>
-                <div className="text-[10px] text-slate-500">
-                  {isMarathi ? 'शून्य अन्न नासाडीसाठी समर्पित' : 'Dedicated to zero food waste'}
+                <div className="text-xs font-bold text-stone-800">
+                  {isMarathi ? 'थेट पारदर्शकता' : 'Live Verification'}
+                </div>
+                <div className="text-[10px] text-stone-500 font-normal">
+                  {isMarathi ? 'डिलिव्हरीनंतर अभिप्राय' : 'Verified handovers'}
                 </div>
               </div>
-              <div className="p-3 bg-white rounded-xl shadow-xs border border-slate-100">
-                <div className="text-2xl mb-1">🛡️</div>
-                <div className="text-xs font-bold text-slate-800">
-                  {isMarathi ? 'प्रशासक देखरेख' : 'Admin Monitored'}
+              <div className="p-3 bg-white rounded-xl shadow-xs border border-stone-200/70">
+                <div className="w-8 h-8 mx-auto rounded-lg bg-cyan-50 text-cyan-800 flex items-center justify-center mb-1">
+                  <BrandLogoIcon className="w-4 h-4 text-cyan-700" />
                 </div>
-                <div className="text-[10px] text-slate-500">
-                  {isMarathi ? 'सुरक्षित आणि विश्वसनीय प्लॅटफॉर्म' : 'Safe, respectful platform'}
+                <div className="text-xs font-bold text-stone-800">
+                  {isMarathi ? '१००% मोफत व सामाजिक' : 'Zero Commercial Fee'}
+                </div>
+                <div className="text-[10px] text-stone-500 font-normal">
+                  {isMarathi ? 'शून्य अन्न नासाडी ध्येय' : 'Food to people, not waste'}
+                </div>
+              </div>
+              <div className="p-3 bg-white rounded-xl shadow-xs border border-stone-200/70">
+                <div className="w-8 h-8 mx-auto rounded-lg bg-stone-100 text-stone-800 flex items-center justify-center mb-1">
+                  <ShieldCheckIcon className="w-4 h-4 text-emerald-800" />
+                </div>
+                <div className="text-xs font-bold text-stone-800">
+                  {isMarathi ? 'FSSAI मानके' : 'FSSAI Compliant'}
+                </div>
+                <div className="text-[10px] text-stone-500 font-normal">
+                  {isMarathi ? 'सुरक्षित अन्न प्रक्रिया' : 'Safe consumption limits'}
                 </div>
               </div>
             </div>
@@ -297,58 +325,56 @@ export default function FeedbackPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">
-              {isMarathi ? 'नागरिकांचे अभिप्राय आणि सूचना' : 'Community Reviews & Suggestions'}
+            <h2 className="text-2xl font-black text-stone-900 font-serif">
+              {isMarathi ? 'नागरिकांचे अभिप्राय आणि सूचना' : 'Community Reviews & Operational Notes'}
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-stone-500 mt-0.5">
               {isMarathi
                 ? 'अन्नसेतू प्लॅटफॉर्म वापरणाऱ्या नागरिकांचे प्रत्यक्ष अनुभव वाचा'
-                : 'Read real experiences from people using the AnnaSetu platform'}
+                : 'Read authentic operational feedback from on-ground redistribution teams'}
             </p>
           </div>
 
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* Role Filter */}
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+              className="px-3.5 py-2 text-xs border border-stone-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/30 font-medium text-stone-700 shadow-xs cursor-pointer"
             >
               <option value="ALL">
-                {isMarathi ? 'सर्व वापरकर्ते प्रकार' : 'All User Types'}
+                {isMarathi ? 'सर्व वापरकर्ते प्रकार' : 'All Stakeholders'}
               </option>
               <option value="DONOR">
-                {isMarathi ? '🍲 फक्त अन्नदाता' : '🍲 Food Donors Only'}
+                {isMarathi ? 'अन्नदाता' : 'Food Donors Only'}
               </option>
               <option value="NGO">
-                {isMarathi ? '🏢 फक्त संस्था / निवारे' : '🏢 NGOs / Shelters Only'}
+                {isMarathi ? 'संस्था / निवारे' : 'NGOs / Shelters Only'}
               </option>
               <option value="VOLUNTEER">
-                {isMarathi ? '🚴 फक्त स्वयंसेवक' : '🚴 Volunteers Only'}
+                {isMarathi ? 'स्वयंसेवक' : 'Volunteers Only'}
               </option>
               <option value="VISITOR">
-                {isMarathi ? '👤 फक्त नागरिक / अभ्यागत' : '👤 Community Visitors Only'}
+                {isMarathi ? 'नागरिक / अभ्यागत' : 'Community Visitors Only'}
               </option>
             </select>
 
-            {/* Rating Filter */}
             <select
               value={filterRating}
               onChange={(e) => setFilterRating(e.target.value)}
-              className="px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+              className="px-3.5 py-2 text-xs border border-stone-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/30 font-medium text-stone-700 shadow-xs cursor-pointer"
             >
               <option value="ALL">{isMarathi ? 'सर्व रेटिंग्ज' : 'All Ratings'}</option>
-              <option value="5">{isMarathi ? '५ स्टार्स ★★★★★' : '5 Stars ★★★★★'}</option>
-              <option value="4">{isMarathi ? '४ स्टार्स ★★★★☆' : '4 Stars ★★★★☆'}</option>
-              <option value="3">{isMarathi ? '३ स्टार्स ★★★☆☆' : '3 Stars ★★★☆☆'}</option>
-              <option value="2">{isMarathi ? '२ स्टार्स ★★☆☆☆' : '2 Stars ★★☆☆☆'}</option>
-              <option value="1">{isMarathi ? '१ स्टार ★☆☆☆☆' : '1 Star ★☆☆☆☆'}</option>
+              <option value="5">{isMarathi ? '५ स्टार्स ★★★★★' : '5 Stars'}</option>
+              <option value="4">{isMarathi ? '४ स्टार्स ★★★★☆' : '4 Stars'}</option>
+              <option value="3">{isMarathi ? '३ स्टार्स ★★★☆☆' : '3 Stars'}</option>
+              <option value="2">{isMarathi ? '२ स्टार्स ★★☆☆☆' : '2 Stars'}</option>
+              <option value="1">{isMarathi ? '१ स्टार ★☆☆☆☆' : '1 Star'}</option>
             </select>
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-3.5 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition flex items-center space-x-1"
+              className="px-4 py-2 text-xs font-bold bg-emerald-800 hover:bg-emerald-700 text-white rounded-xl transition flex items-center space-x-1.5 shadow-xs cursor-pointer"
             >
               <span>{isMarathi ? '+ अभिप्राय जोडा' : '+ Add Feedback'}</span>
             </button>
@@ -358,114 +384,117 @@ export default function FeedbackPage() {
         {/* Content State: Loading, Empty, or Reviews Grid */}
         {loading ? (
           <div className="py-20 text-center">
-            <div className="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-            <p className="text-xs text-slate-500">
-              {isMarathi ? 'अभिप्राय लोड होत आहेत...' : 'Loading community reviews...'}
+            <div className="inline-block w-8 h-8 border-3 border-emerald-800 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p className="text-xs text-stone-500 font-medium">
+              {isMarathi ? 'अभिप्राय लोड होत आहेत...' : 'Loading verified feedback...'}
             </p>
           </div>
         ) : reviews.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3">
-            <div className="text-4xl">💬</div>
-            <h3 className="font-bold text-slate-800 text-base">
+          <div className="bg-white rounded-3xl border border-stone-200/90 p-12 text-center space-y-3 shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-stone-100 text-stone-500 flex items-center justify-center mx-auto">
+              <StarIcon className="w-6 h-6 text-stone-400" />
+            </div>
+            <h3 className="font-bold text-stone-800 text-sm">
               {isMarathi
                 ? 'निवडलेल्या फिल्टरनुसार कोणतेही अभिप्राय आढळले नाहीत'
                 : 'No reviews match the selected filter'}
             </h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <p className="text-xs text-stone-500 max-w-sm mx-auto font-normal">
               {isMarathi
                 ? 'या श्रेणीसाठी पहिले रेटिंग व अभिप्राय देणारे बना!'
                 : 'Be the first to share your rating and review for this category!'}
             </p>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition"
+              className="px-5 py-2.5 bg-emerald-800 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition cursor-pointer"
             >
-              {isMarathi ? 'आता तुमचा अभिप्राय नोंदवा' : 'Submit Your Review Now'}
+              {isMarathi ? 'आता तुमचा अभिप्राय नोंदवा' : 'Submit Review Now'}
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {reviews.map((rev) => {
-              const roleInfo = getRoleBadge(rev.userType || rev.user?.role || 'VISITOR');
-              return (
-                <div
-                  key={rev.id}
-                  className="bg-white rounded-2xl border border-slate-200 hover:border-emerald-400 hover:shadow-lg transition p-6 flex flex-col justify-between space-y-4"
-                >
-                  <div className="space-y-3">
-                    {/* Top Row: Stars and Category */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center text-amber-400 text-base">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <span key={star} className={star <= rev.rating ? 'text-amber-400' : 'text-slate-200'}>
-                            ★
-                          </span>
-                        ))}
-                      </div>
-
-                      <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
-                        {getCategoryLabel(rev.category)}
-                      </span>
+            {reviews.map((rev) => (
+              <div
+                key={rev.id}
+                className="bg-white rounded-3xl border border-stone-200/90 hover:border-emerald-700/40 hover:shadow-crafted transition p-6 flex flex-col justify-between space-y-4 shadow-xs"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1 text-amber-400">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <StarIcon
+                          key={star}
+                          className="w-4 h-4"
+                          filled={star <= rev.rating}
+                        />
+                      ))}
                     </div>
 
-                    {/* Feedback Comment (User's typed message untouched) */}
-                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed italic">
-                      "{rev.feedback}"
-                    </p>
+                    <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-2.5 py-0.5 rounded-full border border-stone-200">
+                      {getCategoryLabel(rev.category)}
+                    </span>
                   </div>
 
-                  {/* Bottom Row: Author details */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center space-x-2.5">
-                      <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center shrink-0 border border-emerald-200">
-                        {rev.name ? rev.name.charAt(0).toUpperCase() : 'U'}
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-slate-900 leading-tight">
-                          {rev.name}
-                        </div>
-                        <div className="flex items-center space-x-1 mt-0.5">
-                          <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${roleInfo.color}`}>
-                            {roleInfo.emoji} {roleInfo.label}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                  <p className="text-xs sm:text-sm text-stone-700 leading-relaxed italic font-normal">
+                    "{rev.feedback}"
+                  </p>
+                </div>
 
-                    <div className="text-[10px] text-slate-400 font-medium">
-                      {new Date(rev.createdAt).toLocaleDateString([], {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
+                <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-8 h-8 rounded-full bg-stone-100 text-stone-800 font-bold text-xs flex items-center justify-center shrink-0 border border-stone-200">
+                      {rev.name ? rev.name.charAt(0).toUpperCase() : 'U'}
                     </div>
+                    <div>
+                      <div className="text-xs font-bold text-stone-900 leading-tight">
+                        {rev.name}
+                      </div>
+                      <div className="mt-0.5">
+                        {renderRoleBadge(rev.userType || rev.user?.role || 'VISITOR')}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-[10px] text-stone-400 font-medium">
+                    {new Date(rev.createdAt).toLocaleDateString([], {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Call to action at bottom */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="p-8 rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white text-center space-y-4 shadow-xl">
-          <h3 className="text-2xl font-black">
+      {/* Call to action banner at bottom */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="p-8 sm:p-10 rounded-3xl bg-stone-900 text-white text-center space-y-4 shadow-crafted border border-stone-800">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 text-xs font-bold border border-emerald-800">
+            <BrandLogoIcon className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{isMarathi ? 'एकत्र येऊन अन्न वाचवूया' : 'CIVIC MISSION'}</span>
+          </div>
+          <h3 className="text-2xl sm:text-3xl font-black font-serif">
             {isMarathi
               ? 'अन्नाची नासाडी संपवण्यासाठी आम्हाला मदत करा'
-              : 'Help Us Make Food Waste History'}
+              : 'Help Us Make Food Waste History in Every City'}
           </h3>
-          <p className="text-xs sm:text-sm text-emerald-100 max-w-lg mx-auto">
+          <p className="text-xs sm:text-sm text-stone-300 max-w-xl mx-auto leading-relaxed font-normal">
             {isMarathi
               ? 'तुम्ही शेफ, हॉटेल व्यवस्थापक, निवारा समन्वयक, स्वयंसेवक किंवा जागरूक नागरिक असा, तुमचे विचार आमच्या कार्याला दिशा देतात.'
-              : 'Whether you are a chef, restaurant manager, shelter coordinator, volunteer rider, or caring citizen, your thoughts guide our mission.'}
+              : 'Whether you are a commercial banquet chef, shelter director, volunteer courier, or conscious citizen, your input drives our delivery network.'}
           </p>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-6 py-3 bg-white text-emerald-800 font-bold text-xs rounded-xl hover:bg-emerald-50 transition shadow-md hover:scale-105"
-          >
-            {isMarathi ? '⭐ तुमचा अभिप्राय व रेटिंग शेअर करा' : '⭐ Share Your Rating & Feedback'}
-          </button>
+          <div className="pt-2">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-6 py-3.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-xs cursor-pointer active:scale-95 inline-flex items-center space-x-2"
+            >
+              <StarIcon className="w-4 h-4 text-amber-300" filled />
+              <span>{isMarathi ? 'तुमचा अभिप्राय व रेटिंग शेअर करा' : 'Share Your Rating & Feedback'}</span>
+            </button>
+          </div>
         </div>
       </div>
 
