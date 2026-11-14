@@ -446,10 +446,28 @@ export default function HomePage() {
       {/* Live Surplus Food Exchange Feed & Distribution History */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-neutral-200/80 pb-4">
-          <div className="space-y-2">
+          <div className="space-y-3">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-900 text-xs font-semibold">
+              <i className="fa-solid fa-wheat-awn text-emerald-700"></i>
+              <span>{isMarathi ? 'अन्न रक्षण संकल्प' : 'Food Rescue Pledge'}</span>
+            </div>
             <h2 className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
               {isMarathi ? 'थेट अतिरिक्त अन्न फीड' : 'Surplus Food Redistribution Feed'}
             </h2>
+            <p className="text-sm sm:text-base text-neutral-700 font-medium italic border-l-2 border-emerald-700 pl-3 py-0.5 max-w-2xl">
+              {isMarathi ? (
+                <>
+                  <span className="block text-stone-900 font-semibold">
+                    &ldquo;जेव्हा भूक अजूनही एक कटू सत्य आहे, तेव्हा कोणत्याही पिकाची किंवा अन्नाची केवळ आठवण उरू नये.&rdquo;
+                  </span>
+                  <span className="block text-xs text-neutral-500 not-italic font-normal mt-0.5">
+                    &ldquo;Let No Harvest Become a Memory When Hunger Is Still a Reality.&rdquo;
+                  </span>
+                </>
+              ) : (
+                <span>&ldquo;Let No Harvest Become a Memory When Hunger Is Still a Reality.&rdquo;</span>
+              )}
+            </p>
             <div className="flex items-center space-x-2 pt-1">
               <button
                 type="button"
