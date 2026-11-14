@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ClockIcon, CheckCircleIcon, AlertTriangleIcon } from './Icons';
 
 interface CountdownTimerProps {
   consumeBefore?: string | Date;
@@ -75,21 +74,21 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
     return () => clearInterval(interval);
   }, [timeInput]);
 
-  // If already delivered or completed, show delivered badge
+  // If already delivered or completed, show delivered badge with Font Awesome circle-check
   if (status === 'DELIVERED' || status === 'COMPLETED') {
     return (
       <span className={`inline-flex items-center space-x-1.5 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/80 ${className}`}>
-        {showIcon && <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-700" />}
+        {showIcon && <i className="fa-solid fa-circle-check text-emerald-700" />}
         <span>Delivered Safely Before Expiry</span>
       </span>
     );
   }
 
-  // If expired
+  // If expired: show Font Awesome warning with fa-fade animation
   if (timeLeft.isExpired) {
     return (
       <span className={`inline-flex items-center space-x-1.5 text-[11px] font-semibold text-rose-800 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 ${className}`}>
-        {showIcon && <AlertTriangleIcon className="w-3.5 h-3.5 text-rose-600" />}
+        {showIcon && <i className="fa-solid fa-triangle-exclamation fa-fade text-rose-600" />}
         <span>Expired • Not for consumption</span>
       </span>
     );
@@ -99,30 +98,23 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   const pad = (n: number) => n.toString().padStart(2, '0');
   const { days, hours, minutes, seconds, totalSeconds } = timeLeft;
 
-  // Visual urgency levels:
-  // Under 1 hour: critical red
-  // Under 3 hours: warning amber
-  // Over 3 hours: healthy stone/emerald
+  // Font Awesome icon and styles based on urgency
   let badgeStyles = 'text-stone-800 bg-stone-100 border-stone-300';
-  let dotStyles = 'bg-emerald-600';
+  let faIcon = 'fa-solid fa-clock text-stone-500';
 
   if (totalSeconds < 3600) {
-    badgeStyles = 'text-rose-900 bg-rose-50 border-rose-300 animate-pulse';
-    dotStyles = 'bg-rose-600 animate-ping';
+    // Under 1 hour: Font Awesome fa-beat pulsating alarm
+    badgeStyles = 'text-rose-900 bg-rose-50 border-rose-300';
+    faIcon = 'fa-solid fa-clock fa-beat text-rose-600';
   } else if (totalSeconds < 3 * 3600) {
+    // Under 3 hours: Font Awesome hourglass warning
     badgeStyles = 'text-amber-900 bg-amber-50 border-amber-300';
-    dotStyles = 'bg-amber-600';
+    faIcon = 'fa-solid fa-hourglass-half text-amber-600';
   }
 
   return (
     <span className={`inline-flex items-center space-x-1.5 text-[11px] font-mono font-medium px-2.5 py-1 rounded-lg border shadow-xs ${badgeStyles} ${className}`}>
-      {showIcon && (
-        <span className="relative flex h-2 w-2">
-          <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${dotStyles}`}></span>
-          <span className={`relative inline-flex rounded-full h-2 w-2 ${dotStyles.replace(' animate-ping', '')}`}></span>
-        </span>
-      )}
-      <ClockIcon className="w-3.5 h-3.5 shrink-0 opacity-70" />
+      {showIcon && <i className={`${faIcon} text-xs`} />}
       <span>
         {days > 0 ? `${days}d ` : ''}
         {pad(hours)}h:{pad(minutes)}m:{pad(seconds)}s left

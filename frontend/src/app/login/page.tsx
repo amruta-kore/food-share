@@ -5,16 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthProvider';
 import { useLanguage } from '../context/LanguageProvider';
 import { useRouter } from 'next/navigation';
-import {
-  BrandLogoIcon,
-  LockIcon,
-  EyeIcon,
-  EyeOffIcon,
-  AlertTriangleIcon,
-  ShieldCheckIcon,
-  ArrowRightIcon,
-  CheckCircleIcon,
-} from '../../components/Icons';
+import { BrandLogoIcon } from '../../components/Icons';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -164,8 +155,12 @@ export default function LoginPage() {
     <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-grid-subtle">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-crafted border border-stone-200/90 p-7 sm:p-9 space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-flex w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-800 items-center justify-center border border-emerald-200/70 shadow-xs mb-1">
-            <BrandLogoIcon className="w-7 h-7 text-emerald-700" />
+          {/* Font Awesome Stack: Circle Background with Lock */}
+          <div className="inline-flex items-center justify-center mb-1">
+            <span className="fa-stack fa-2x">
+              <i className="fa-solid fa-circle fa-stack-2x text-emerald-50" />
+              <i className="fa-solid fa-lock fa-stack-1x text-emerald-800" />
+            </span>
           </div>
           <h1 className="text-2xl font-black text-stone-900 tracking-tight font-serif">
             {isMarathi ? 'अन्नसेतूमध्ये लॉगिन करा' : 'Sign in to AnnaSetu'}
@@ -180,7 +175,7 @@ export default function LoginPage() {
         {error && (
           <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-1.5 shadow-xs">
             <div className="flex items-start space-x-2">
-              <AlertTriangleIcon className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <i className="fa-solid fa-triangle-exclamation fa-beat text-rose-600 text-sm mt-0.5 shrink-0" />
               <div className="flex-1 font-medium leading-relaxed">{error}</div>
             </div>
             <div className="text-[11px] pt-1.5 border-t border-rose-200/70 text-rose-900">
@@ -205,7 +200,7 @@ export default function LoginPage() {
           autoComplete="off"
           className="space-y-4"
         >
-          {/* Invisible trap inputs to prevent browser autofill engines from populating user fields */}
+          {/* Invisible trap inputs */}
           <input
             type="text"
             name="prevent_autofill_user"
@@ -225,7 +220,8 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
-              {isMarathi ? 'ईमेल पत्ता' : 'Email Address'}
+              <i className="fa-solid fa-envelope mr-1.5 text-stone-400" />
+              <span>{isMarathi ? 'ईमेल पत्ता' : 'Email Address'}</span>
             </label>
             <input
               type="email"
@@ -250,7 +246,8 @@ export default function LoginPage() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600">
-                {isMarathi ? 'पासवर्ड' : 'Password'}
+                <i className="fa-solid fa-key mr-1.5 text-stone-400" />
+                <span>{isMarathi ? 'पासवर्ड' : 'Password'}</span>
               </label>
               <button
                 type="button"
@@ -292,9 +289,9 @@ export default function LoginPage() {
                     ? 'Hide password'
                     : 'Show password'
                 }
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-700 cursor-pointer select-none"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-stone-400 hover:text-stone-700 cursor-pointer select-none text-sm"
               >
-                {showPassword ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                <i className={showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'} />
               </button>
             </div>
           </div>
@@ -306,7 +303,7 @@ export default function LoginPage() {
           >
             {loading ? (
               <>
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <i className="fa-solid fa-circle-notch fa-spin text-sm" />
                 <span>
                   {isMarathi
                     ? 'पडताळणी आणि डॅशबोर्डवर जात आहे...'
@@ -316,7 +313,7 @@ export default function LoginPage() {
             ) : (
               <>
                 <span>{isMarathi ? 'लॉगिन करा' : 'Sign In'}</span>
-                <ArrowRightIcon className="w-4 h-4" />
+                <i className="fa-solid fa-arrow-right text-xs" />
               </>
             )}
           </button>
@@ -330,7 +327,7 @@ export default function LoginPage() {
             </Link>
           </div>
           <div className="flex items-center space-x-1.5 text-[11px] text-stone-400">
-            <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-700" />
+            <i className="fa-solid fa-shield-halved text-emerald-700 text-xs" />
             <span>{isMarathi ? 'सुरक्षित FSSAI सुसंगत प्लॅटफॉर्म' : 'End-to-End Verified Platform'}</span>
           </div>
         </div>
@@ -343,7 +340,7 @@ export default function LoginPage() {
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0">
-                  <LockIcon className="w-5 h-5 text-emerald-700" />
+                  <i className="fa-solid fa-key text-emerald-700 text-sm" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-stone-900 font-serif">
@@ -359,15 +356,15 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowForgotModal(false)}
-                className="text-stone-400 hover:text-stone-700 text-lg font-bold p-1 cursor-pointer"
+                className="text-stone-400 hover:text-stone-700 text-base font-bold p-1 cursor-pointer"
               >
-                ✕
+                <i className="fa-solid fa-xmark" />
               </button>
             </div>
 
             {forgotError && (
               <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start space-x-2">
-                <AlertTriangleIcon className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <i className="fa-solid fa-triangle-exclamation text-rose-600 text-sm mt-0.5 shrink-0" />
                 <div>{forgotError}</div>
               </div>
             )}
@@ -376,13 +373,14 @@ export default function LoginPage() {
               <div className="space-y-4">
                 <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs space-y-2">
                   <div className="font-bold flex items-center space-x-1.5 text-sm text-emerald-800">
-                    <CheckCircleIcon className="w-4 h-4 text-emerald-700" />
+                    <i className="fa-solid fa-circle-check text-emerald-700" />
                     <span>{isMarathi ? 'नवीन पासवर्ड पाठवला!' : 'New Password Dispatched!'}</span>
                   </div>
                   <p className="text-emerald-800 leading-relaxed font-normal">
                     {forgotSuccess}
                   </p>
                   <div className="bg-white/80 p-3 rounded-lg border border-emerald-200 text-[11px] text-stone-600">
+                    <i className="fa-solid fa-lightbulb text-amber-500 mr-1" />
                     <strong>{isMarathi ? 'टीप:' : 'Tip:'}</strong>{' '}
                     {isMarathi
                       ? 'तुमचा ईमेल उघडा, ६-अंकी पासवर्ड कॉपी करा आणि लॉगिन फॉर्ममध्ये टाकून त्वरित साइन इन करा.'
@@ -393,9 +391,10 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={closeForgotModalAndFocus}
-                  className="w-full py-2.5 px-4 rounded-xl font-bold text-white bg-emerald-800 hover:bg-emerald-700 transition shadow-xs text-xs cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded-xl font-bold text-white bg-emerald-800 hover:bg-emerald-700 transition shadow-xs text-xs cursor-pointer flex items-center justify-center space-x-1.5"
                 >
-                  {isMarathi ? 'नवीन पासवर्ड टाकून लॉगिन करा' : 'Enter New Password & Log In'}
+                  <span>{isMarathi ? 'नवीन पासवर्ड टाकून लॉगिन करा' : 'Enter New Password & Log In'}</span>
+                  <i className="fa-solid fa-arrow-right text-xs" />
                 </button>
               </div>
             ) : (
@@ -408,7 +407,8 @@ export default function LoginPage() {
 
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-700 mb-1">
-                    {isMarathi ? 'नोंदणीकृत ईमेल पत्ता' : 'Registered Email Address'}
+                    <i className="fa-solid fa-envelope mr-1.5 text-stone-400" />
+                    <span>{isMarathi ? 'नोंदणीकृत ईमेल पत्ता' : 'Registered Email Address'}</span>
                   </label>
                   <input
                     type="email"
@@ -435,11 +435,14 @@ export default function LoginPage() {
                   >
                     {forgotLoading ? (
                       <>
-                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <i className="fa-solid fa-circle-notch fa-spin text-xs" />
                         <span>{isMarathi ? 'नवीन पासवर्ड पाठवत आहे...' : 'Generating & Dispatching...'}</span>
                       </>
                     ) : (
-                      <span>{isMarathi ? 'ईमेलवर नवीन पासवर्ड पाठवा' : 'Dispatch New Password'}</span>
+                      <>
+                        <span>{isMarathi ? 'ईमेलवर नवीन पासवर्ड पाठवा' : 'Dispatch New Password'}</span>
+                        <i className="fa-solid fa-paper-plane text-xs" />
+                      </>
                     )}
                   </button>
                 </div>

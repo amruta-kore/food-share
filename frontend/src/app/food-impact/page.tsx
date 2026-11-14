@@ -3,18 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '../context/LanguageProvider';
-import {
-  BrandLogoIcon,
-  GlobeIcon,
-  UtensilsIcon,
-  BuildingIcon,
-  TruckIcon,
-  ShieldCheckIcon,
-  ClockIcon,
-  ArrowRightIcon,
-  CheckCircleIcon,
-  SparklesIcon,
-} from '../../components/Icons';
 
 export default function FoodImpactPage() {
   const { language } = useLanguage();
@@ -35,7 +23,7 @@ export default function FoodImpactPage() {
         <div className="relative overflow-hidden rounded-3xl bg-stone-900 text-white p-8 sm:p-14 shadow-crafted border border-stone-800">
           <div className="relative z-10 max-w-3xl space-y-6">
             <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-950 text-emerald-400 text-xs font-bold tracking-wide border border-emerald-800">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <i className="fa-solid fa-earth-americas text-emerald-400 text-xs" />
               <span>
                 {isMarathi
                   ? 'विशेष केस स्टडी आणि जागतिक अन्न अहवाल'
@@ -72,14 +60,14 @@ export default function FoodImpactPage() {
                 href="/donor"
                 className="px-6 py-3.5 bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition flex items-center space-x-2 cursor-pointer"
               >
-                <UtensilsIcon className="w-4 h-4 text-emerald-200" />
+                <i className="fa-solid fa-utensils text-emerald-200" />
                 <span>{isMarathi ? 'आता अतिरिक्त अन्न दान करा' : 'Donate Surplus Food Now'}</span>
               </Link>
               <Link
                 href="/"
-                className="px-5 py-3.5 bg-white/10 hover:bg-white/20 text-stone-200 font-semibold text-xs sm:text-sm rounded-xl border border-white/15 transition flex items-center space-x-1.5 cursor-pointer"
+                className="px-5 py-3.5 bg-white/10 hover:bg-white/20 text-stone-200 font-semibold text-xs sm:text-sm rounded-xl border border-white/15 transition flex items-center space-x-2 cursor-pointer"
               >
-                <span>←</span>
+                <i className="fa-solid fa-arrow-left text-xs" />
                 <span>{isMarathi ? 'थेट अतिरिक्त अन्नाकडे परत जा' : 'Back to Live Food Feed'}</span>
               </Link>
             </div>
@@ -87,29 +75,34 @@ export default function FoodImpactPage() {
         </div>
       </section>
 
-      {/* Navigation Tabs (Handcrafted Segmented Bar) */}
+      {/* Navigation Tabs (Font Awesome Icons) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-center gap-1.5 p-2 bg-stone-100/90 rounded-2xl border border-stone-200 shadow-xs">
           {[
             {
               id: 'overview',
               label: isMarathi ? 'महत्त्वाची आकडेवारी आणि वास्तव' : 'Key Statistics & Facts',
+              icon: 'fa-solid fa-chart-pie',
             },
             {
               id: 'india',
               label: isMarathi ? 'भारतातील स्थिती आणि विरोधाभास' : 'India Context & Paradox',
+              icon: 'fa-solid fa-building-columns',
             },
             {
               id: 'global',
               label: isMarathi ? 'पर्यावरणीय परिणाम' : 'Environmental Footprint',
+              icon: 'fa-solid fa-earth-americas',
             },
             {
               id: 'casestudy',
               label: isMarathi ? 'पुणे प्रत्यक्ष केस स्टडी' : 'Pune Banquet Case Study',
+              icon: 'fa-solid fa-book-bookmark',
             },
             {
               id: 'action',
               label: isMarathi ? 'प्रभाव कॅल्क्युलेटर आणि कृती' : 'Impact Calculator & Action',
+              icon: 'fa-solid fa-calculator',
             },
           ].map((tab) => (
             <button
@@ -121,6 +114,7 @@ export default function FoodImpactPage() {
                   : 'text-stone-600 hover:text-stone-950 hover:bg-white/60'
               }`}
             >
+              <i className={`${tab.icon} text-xs`} />
               <span>{tab.label}</span>
             </button>
           ))}
@@ -146,7 +140,7 @@ export default function FoodImpactPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white p-6 rounded-3xl border border-stone-200/90 shadow-crafted space-y-3">
               <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-800 flex items-center justify-center text-sm font-bold border border-rose-200">
-                UNEP
+                <i className="fa-solid fa-trash-can text-rose-700" />
               </div>
               <div className="text-3xl font-black text-stone-900 font-serif">78.2M</div>
               <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
@@ -161,7 +155,7 @@ export default function FoodImpactPage() {
 
             <div className="bg-white p-6 rounded-3xl border border-stone-200/90 shadow-crafted space-y-3">
               <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center text-sm font-bold border border-amber-200">
-                GHI
+                <i className="fa-solid fa-users text-amber-700" />
               </div>
               <div className="text-3xl font-black text-stone-900 font-serif">190M+</div>
               <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
@@ -176,7 +170,7 @@ export default function FoodImpactPage() {
 
             <div className="bg-white p-6 rounded-3xl border border-stone-200/90 shadow-crafted space-y-3">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center text-sm font-bold border border-emerald-200">
-                INR
+                <i className="fa-solid fa-indian-rupee-sign text-emerald-700" />
               </div>
               <div className="text-3xl font-black text-stone-900 font-serif">
                 {isMarathi ? '₹११.५ लाख कोटी' : '₹11.5L Cr'}
@@ -193,7 +187,7 @@ export default function FoodImpactPage() {
 
             <div className="bg-white p-6 rounded-3xl border border-stone-200/90 shadow-crafted space-y-3">
               <div className="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-800 flex items-center justify-center text-sm font-bold border border-cyan-200">
-                CO2
+                <i className="fa-solid fa-cloud-arrow-down text-cyan-700" />
               </div>
               <div className="text-3xl font-black text-stone-900 font-serif">8 - 10%</div>
               <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
@@ -241,7 +235,7 @@ export default function FoodImpactPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-6 rounded-2xl bg-stone-50/70 border border-stone-200 space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-900 flex items-center justify-center font-bold text-sm">
-                  01
+                  <i className="fa-solid fa-utensils text-cyan-800" />
                 </div>
                 <h4 className="font-bold text-base text-stone-900">
                   {isMarathi ? '१. मूळ स्त्रोतावरच अन्न संकलन' : '1. Interception at Source'}
@@ -252,13 +246,14 @@ export default function FoodImpactPage() {
                     : 'Hotels, wedding banquets, corporate cafeterias, and caterers generate daily surplus. Donors log food categories, quantities, and strict expiry timestamps instead of disposing of it.'}
                 </p>
                 <div className="text-[11px] font-semibold text-cyan-800 bg-cyan-50 px-2.5 py-1 rounded-lg border border-cyan-200 inline-block">
-                  {isMarathi ? 'कचरा डेपोत जाण्यापासून संरक्षण' : 'Prevents Municipal Dump Disposal'}
+                  <i className="fa-solid fa-ban text-[10px] mr-1" />
+                  <span>{isMarathi ? 'कचरा डेपोत जाण्यापासून संरक्षण' : 'Prevents Municipal Dump Disposal'}</span>
                 </div>
               </div>
 
               <div className="p-6 rounded-2xl bg-stone-50/70 border border-stone-200 space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center font-bold text-sm">
-                  02
+                  <i className="fa-solid fa-truck-fast text-emerald-800" />
                 </div>
                 <h4 className="font-bold text-base text-stone-900">
                   {isMarathi ? '२. सुरक्षित व जलद वाहतूक' : '2. Rapid Hygiene Transit'}
@@ -269,13 +264,14 @@ export default function FoodImpactPage() {
                     : 'Verified volunteer riders within the geofence receive automated dispatch alerts. Food is collected in insulated thermal boxes adhering strictly to FSSAI handling guidelines.'}
                 </p>
                 <div className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 inline-block">
-                  {isMarathi ? 'थेट कालबाह्यता ट्रॅकिंग' : 'Active Expiry Countdown'}
+                  <i className="fa-solid fa-clock text-[10px] mr-1" />
+                  <span>{isMarathi ? 'थेट कालबाह्यता ट्रॅकिंग' : 'Active Expiry Countdown'}</span>
                 </div>
               </div>
 
               <div className="p-6 rounded-2xl bg-stone-50/70 border border-stone-200 space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold text-sm">
-                  03
+                  <i className="fa-solid fa-hand-holding-heart text-amber-800" />
                 </div>
                 <h4 className="font-bold text-base text-stone-900">
                   {isMarathi ? '३. सन्मानपूर्वक थेट वाटप' : '3. Dignified Distribution'}
@@ -286,7 +282,8 @@ export default function FoodImpactPage() {
                     : 'Dispatches arrive directly at verified community shelters, orphanages, day-laborer centres, and community kitchens, serving fresh, warm meals with total dignity.'}
                 </p>
                 <div className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 inline-block">
-                  {isMarathi ? 'थेट पोषण सुरक्षा' : 'Direct Food Security'}
+                  <i className="fa-solid fa-shield-heart text-[10px] mr-1" />
+                  <span>{isMarathi ? 'थेट पोषण सुरक्षा' : 'Direct Food Security'}</span>
                 </div>
               </div>
             </div>
@@ -300,7 +297,8 @@ export default function FoodImpactPage() {
           <div className="bg-stone-900 rounded-3xl p-8 sm:p-12 text-white border border-stone-800 shadow-crafted space-y-8">
             <div className="max-w-2xl space-y-2">
               <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">
-                {isMarathi ? 'पर्यावरणीय प्रभाव आणि शाश्वतता' : 'Ecological Sustainability'}
+                <i className="fa-solid fa-leaf text-xs mr-1.5" />
+                <span>{isMarathi ? 'पर्यावरणीय प्रभाव आणि शाश्वतता' : 'Ecological Sustainability'}</span>
               </span>
               <h3 className="text-2xl sm:text-3xl font-black font-serif">
                 {isMarathi
@@ -316,7 +314,9 @@ export default function FoodImpactPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-                <div className="text-xs font-bold text-cyan-400 uppercase tracking-widest">WATER FOOTPRINT</div>
+                <div className="w-10 h-10 rounded-xl bg-cyan-950/80 text-cyan-400 border border-cyan-800 flex items-center justify-center">
+                  <i className="fa-solid fa-droplet text-cyan-400 text-lg" />
+                </div>
                 <h4 className="font-bold text-base text-white">
                   {isMarathi ? 'पाण्याचा प्रचंड अपव्यय' : 'Massive Water Depletion'}
                 </h4>
@@ -328,7 +328,9 @@ export default function FoodImpactPage() {
               </div>
 
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-                <div className="text-xs font-bold text-rose-400 uppercase tracking-widest">METHANE CRISIS</div>
+                <div className="w-10 h-10 rounded-xl bg-rose-950/80 text-rose-400 border border-rose-800 flex items-center justify-center">
+                  <i className="fa-solid fa-smog text-rose-400 text-lg" />
+                </div>
                 <h4 className="font-bold text-base text-white">
                   {isMarathi ? 'कचरा डेपोतील विषारी मिथेन' : 'Anaerobic Methane Formation'}
                 </h4>
@@ -346,7 +348,9 @@ export default function FoodImpactPage() {
               </div>
 
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-                <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest">GLOBAL GOALS</div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-800 flex items-center justify-center">
+                  <i className="fa-solid fa-seedling text-emerald-400 text-lg" />
+                </div>
                 <h4 className="font-bold text-base text-white">
                   {isMarathi ? 'संयुक्त राष्ट्र SDG उद्दिष्टे' : 'UN SDG 2 & 12.3 Alignment'}
                 </h4>
@@ -372,8 +376,9 @@ export default function FoodImpactPage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-3xl border border-stone-200/90 p-8 sm:p-12 shadow-crafted space-y-8">
             <div className="flex items-center space-x-3">
-              <span className="px-3 py-1 bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold uppercase rounded-full">
-                {isMarathi ? 'पुणे केस स्टडी' : 'Featured Urban Case Study'}
+              <span className="px-3 py-1 bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold uppercase rounded-full inline-flex items-center space-x-1.5">
+                <i className="fa-solid fa-award text-amber-700 text-xs" />
+                <span>{isMarathi ? 'पुणे केस स्टडी' : 'Featured Urban Case Study'}</span>
               </span>
               <span className="text-xs text-stone-400">
                 {isMarathi
@@ -466,9 +471,10 @@ export default function FoodImpactPage() {
               </div>
               <Link
                 href="/donor"
-                className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer"
+                className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer inline-flex items-center space-x-1.5"
               >
-                {isMarathi ? 'अन्न दान करण्यास सुरुवात करा →' : 'Start Donating →'}
+                <span>{isMarathi ? 'अन्न दान करण्यास सुरुवात करा' : 'Start Donating'}</span>
+                <i className="fa-solid fa-arrow-right text-xs" />
               </Link>
             </div>
           </div>
@@ -480,7 +486,8 @@ export default function FoodImpactPage() {
         <div className="bg-white rounded-3xl border border-stone-200/90 p-8 sm:p-12 shadow-crafted space-y-8">
           <div className="max-w-xl space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-              {isMarathi ? 'परस्परसंवादी प्रभाव कॅल्क्युलेटर' : 'Interactive Impact Calculator'}
+              <i className="fa-solid fa-calculator text-xs mr-1" />
+              <span>{isMarathi ? 'परस्परसंवादी प्रभाव कॅल्क्युलेटर' : 'Interactive Impact Calculator'}</span>
             </span>
             <h3 className="text-2xl sm:text-3xl font-black text-stone-900 font-serif">
               {isMarathi ? 'तुमच्या अन्न दानाचा प्रत्यक्ष प्रभाव पहा' : 'Compute Your Ecological & Social Impact'}
@@ -523,7 +530,7 @@ export default function FoodImpactPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
             <div className="p-6 rounded-2xl bg-stone-50/70 border border-stone-200 space-y-2 text-center">
               <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center mx-auto">
-                <UtensilsIcon className="w-5 h-5 text-emerald-800" />
+                <i className="fa-solid fa-bowl-food text-emerald-800 text-lg" />
               </div>
               <div className="text-3xl font-black text-stone-900 font-serif">{foodSavedKg} kg</div>
               <div className="text-xs font-bold uppercase tracking-wider text-stone-600">
@@ -538,7 +545,7 @@ export default function FoodImpactPage() {
 
             <div className="p-6 rounded-2xl bg-stone-50/70 border border-stone-200 space-y-2 text-center">
               <div className="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-900 flex items-center justify-center mx-auto">
-                <GlobeIcon className="w-5 h-5 text-cyan-800" />
+                <i className="fa-solid fa-cloud-arrow-down text-cyan-800 text-lg" />
               </div>
               <div className="text-3xl font-black text-stone-900 font-serif">{co2PreventedKg} kg</div>
               <div className="text-xs font-bold uppercase tracking-wider text-stone-600">
@@ -553,7 +560,7 @@ export default function FoodImpactPage() {
 
             <div className="p-6 rounded-2xl bg-stone-50/70 border border-stone-200 space-y-2 text-center">
               <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center mx-auto">
-                <SparklesIcon className="w-5 h-5 text-amber-800" />
+                <i className="fa-solid fa-droplet text-amber-800 text-lg" />
               </div>
               <div className="text-3xl font-black text-stone-900 font-serif">{waterSavedLiters} L</div>
               <div className="text-xs font-bold uppercase tracking-wider text-stone-600">
@@ -584,9 +591,10 @@ export default function FoodImpactPage() {
             <div className="flex items-center space-x-3 shrink-0">
               <Link
                 href="/register"
-                className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
+                className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer inline-flex items-center space-x-1.5"
               >
-                {isMarathi ? 'नेटवर्कमध्ये सामील व्हा →' : 'Join Network →'}
+                <span>{isMarathi ? 'नेटवर्कमध्ये सामील व्हा' : 'Join Network'}</span>
+                <i className="fa-solid fa-arrow-right text-xs" />
               </Link>
               <Link
                 href="/donor"

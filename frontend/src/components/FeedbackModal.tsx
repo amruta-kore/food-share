@@ -173,7 +173,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
           className="absolute top-5 right-5 w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-800 flex items-center justify-center text-sm font-bold transition cursor-pointer"
           aria-label="Close modal"
         >
-          ✕
+          <i className="fa-solid fa-xmark" />
         </button>
 
         <div className="p-6 sm:p-8 space-y-6">

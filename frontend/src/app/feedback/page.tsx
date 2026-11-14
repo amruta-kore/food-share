@@ -5,18 +5,6 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthProvider';
 import { useLanguage } from '../context/LanguageProvider';
 import FeedbackModal from '../../components/FeedbackModal';
-import {
-  StarIcon,
-  UtensilsIcon,
-  BuildingIcon,
-  TruckIcon,
-  ShieldCheckIcon,
-  UserIcon,
-  FilterIcon,
-  ArrowRightIcon,
-  BrandLogoIcon,
-  SparklesIcon,
-} from '../../components/Icons';
 
 interface ReviewItem {
   id: number;
@@ -114,35 +102,35 @@ export default function FeedbackPage() {
       case 'DONOR':
         return (
           <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
-            <UtensilsIcon className="w-3 h-3 text-emerald-700" />
+            <i className="fa-solid fa-utensils text-emerald-700 text-xs" />
             <span>{isMarathi ? 'अन्नदाता' : 'Food Donor'}</span>
           </span>
         );
       case 'NGO':
         return (
           <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-800 border border-cyan-200">
-            <BuildingIcon className="w-3 h-3 text-cyan-700" />
+            <i className="fa-solid fa-hand-holding-heart text-cyan-700 text-xs" />
             <span>{isMarathi ? 'संस्था / निवारा' : 'NGO / Shelter'}</span>
           </span>
         );
       case 'VOLUNTEER':
         return (
           <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
-            <TruckIcon className="w-3 h-3 text-amber-700" />
+            <i className="fa-solid fa-truck-fast text-amber-700 text-xs" />
             <span>{isMarathi ? 'स्वयंसेवक' : 'Volunteer Courier'}</span>
           </span>
         );
       case 'ADMIN':
         return (
           <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200">
-            <ShieldCheckIcon className="w-3 h-3 text-purple-700" />
+            <i className="fa-solid fa-shield-halved text-purple-700 text-xs" />
             <span>{isMarathi ? 'प्रशासक' : 'Admin'}</span>
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200">
-            <UserIcon className="w-3 h-3 text-stone-500" />
+            <i className="fa-solid fa-circle-user text-stone-500 text-xs" />
             <span>{isMarathi ? 'नागरिक / अभ्यागत' : 'Community Visitor'}</span>
           </span>
         );
@@ -160,7 +148,7 @@ export default function FeedbackPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-stone-900 text-stone-200 text-xs font-bold tracking-wide border border-stone-700">
-            <StarIcon className="w-3.5 h-3.5 text-amber-400" filled />
+            <i className="fa-solid fa-star text-amber-400 text-xs" />
             <span>
               {isMarathi
                 ? 'नागरिकांचे अभिप्राय आणि पारदर्शकता'
@@ -197,17 +185,17 @@ export default function FeedbackPage() {
               onClick={() => setIsModalOpen(true)}
               className="px-6 py-3.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm shadow-crafted transition flex items-center space-x-2 cursor-pointer active:scale-95"
             >
-              <StarIcon className="w-4 h-4 text-amber-400" filled />
+              <i className="fa-solid fa-star text-amber-400" />
               <span>
                 {isMarathi ? 'अभिप्राय नोंदवा / रेटिंग द्या' : 'Write a Review / Give Rating'}
               </span>
             </button>
             <Link
               href="/"
-              className="px-5 py-3.5 rounded-xl bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 font-bold text-xs sm:text-sm transition shadow-xs flex items-center space-x-1.5"
+              className="px-5 py-3.5 rounded-xl bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 font-bold text-xs sm:text-sm transition shadow-xs flex items-center space-x-2"
             >
               <span>{isMarathi ? 'अतिरिक्त अन्न पहा' : 'Browse Surplus Food'}</span>
-              <ArrowRightIcon className="w-4 h-4" />
+              <i className="fa-solid fa-arrow-right text-xs" />
             </Link>
           </div>
         </div>
@@ -228,9 +216,9 @@ export default function FeedbackPage() {
                 </span>
                 <span className="text-stone-400 font-medium text-xl">/ 5.0</span>
               </div>
-              <div className="flex items-center justify-center lg:justify-start space-x-1 text-amber-400">
+              <div className="flex items-center justify-center lg:justify-start space-x-1.5 text-amber-400 text-lg">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <StarIcon key={star} className="w-5 h-5 text-amber-400" filled />
+                  <i key={star} className="fa-solid fa-star text-amber-400" />
                 ))}
               </div>
               <p className="text-xs text-stone-500 font-normal leading-relaxed">
@@ -247,7 +235,7 @@ export default function FeedbackPage() {
               </p>
             </div>
 
-            {/* Star Distribution Bars */}
+            {/* Star Distribution Bars with Font Awesome Stars */}
             <div className="space-y-2 lg:px-4">
               {[5, 4, 3, 2, 1].map((star) => {
                 const count = metrics.ratingDistribution[star] || 0;
@@ -256,7 +244,7 @@ export default function FeedbackPage() {
                   <div key={star} className="flex items-center space-x-3 text-xs">
                     <span className="w-12 text-stone-600 font-bold flex items-center justify-end space-x-1">
                       <span>{star}</span>
-                      <StarIcon className="w-3.5 h-3.5 text-amber-400" filled />
+                      <i className="fa-solid fa-star text-amber-400 text-xs" />
                     </span>
                     <div className="flex-1 h-2.5 bg-stone-100 rounded-full overflow-hidden border border-stone-200">
                       <div
@@ -274,7 +262,7 @@ export default function FeedbackPage() {
             <div className="grid grid-cols-2 gap-3 text-center bg-stone-50/70 p-4 rounded-2xl border border-stone-200">
               <div className="p-3 bg-white rounded-xl shadow-xs border border-stone-200/70">
                 <div className="w-8 h-8 mx-auto rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center mb-1">
-                  <UserIcon className="w-4 h-4 text-emerald-700" />
+                  <i className="fa-solid fa-users text-emerald-700 text-xs" />
                 </div>
                 <div className="text-xs font-bold text-stone-800">
                   {isMarathi ? 'सर्व भूमिकांचे स्वागत' : 'All Roles Covered'}
@@ -285,7 +273,7 @@ export default function FeedbackPage() {
               </div>
               <div className="p-3 bg-white rounded-xl shadow-xs border border-stone-200/70">
                 <div className="w-8 h-8 mx-auto rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center mb-1">
-                  <SparklesIcon className="w-4 h-4 text-amber-700" />
+                  <i className="fa-solid fa-bolt text-amber-700 text-xs" />
                 </div>
                 <div className="text-xs font-bold text-stone-800">
                   {isMarathi ? 'थेट पारदर्शकता' : 'Live Verification'}
@@ -296,7 +284,7 @@ export default function FeedbackPage() {
               </div>
               <div className="p-3 bg-white rounded-xl shadow-xs border border-stone-200/70">
                 <div className="w-8 h-8 mx-auto rounded-lg bg-cyan-50 text-cyan-800 flex items-center justify-center mb-1">
-                  <BrandLogoIcon className="w-4 h-4 text-cyan-700" />
+                  <i className="fa-solid fa-hand-holding-heart text-cyan-700 text-xs" />
                 </div>
                 <div className="text-xs font-bold text-stone-800">
                   {isMarathi ? '१००% मोफत व सामाजिक' : 'Zero Commercial Fee'}
@@ -307,7 +295,7 @@ export default function FeedbackPage() {
               </div>
               <div className="p-3 bg-white rounded-xl shadow-xs border border-stone-200/70">
                 <div className="w-8 h-8 mx-auto rounded-lg bg-stone-100 text-stone-800 flex items-center justify-center mb-1">
-                  <ShieldCheckIcon className="w-4 h-4 text-emerald-800" />
+                  <i className="fa-solid fa-shield-halved text-emerald-800 text-xs" />
                 </div>
                 <div className="text-xs font-bold text-stone-800">
                   {isMarathi ? 'FSSAI मानके' : 'FSSAI Compliant'}
@@ -376,7 +364,8 @@ export default function FeedbackPage() {
               onClick={() => setIsModalOpen(true)}
               className="px-4 py-2 text-xs font-bold bg-emerald-800 hover:bg-emerald-700 text-white rounded-xl transition flex items-center space-x-1.5 shadow-xs cursor-pointer"
             >
-              <span>{isMarathi ? '+ अभिप्राय जोडा' : '+ Add Feedback'}</span>
+              <i className="fa-solid fa-plus text-xs" />
+              <span>{isMarathi ? 'अभिप्राय जोडा' : 'Add Feedback'}</span>
             </button>
           </div>
         </div>
@@ -384,7 +373,7 @@ export default function FeedbackPage() {
         {/* Content State: Loading, Empty, or Reviews Grid */}
         {loading ? (
           <div className="py-20 text-center">
-            <div className="inline-block w-8 h-8 border-3 border-emerald-800 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <i className="fa-solid fa-circle-notch fa-spin text-2xl text-emerald-800 mb-3" />
             <p className="text-xs text-stone-500 font-medium">
               {isMarathi ? 'अभिप्राय लोड होत आहेत...' : 'Loading verified feedback...'}
             </p>
@@ -392,7 +381,7 @@ export default function FeedbackPage() {
         ) : reviews.length === 0 ? (
           <div className="bg-white rounded-3xl border border-stone-200/90 p-12 text-center space-y-3 shadow-xs">
             <div className="w-12 h-12 rounded-2xl bg-stone-100 text-stone-500 flex items-center justify-center mx-auto">
-              <StarIcon className="w-6 h-6 text-stone-400" />
+              <i className="fa-regular fa-comments text-xl text-stone-400" />
             </div>
             <h3 className="font-bold text-stone-800 text-sm">
               {isMarathi
@@ -406,9 +395,10 @@ export default function FeedbackPage() {
             </p>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-5 py-2.5 bg-emerald-800 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition cursor-pointer"
+              className="px-5 py-2.5 bg-emerald-800 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition cursor-pointer inline-flex items-center space-x-1.5"
             >
-              {isMarathi ? 'आता तुमचा अभिप्राय नोंदवा' : 'Submit Review Now'}
+              <i className="fa-solid fa-pen-to-square text-xs" />
+              <span>{isMarathi ? 'आता तुमचा अभिप्राय नोंदवा' : 'Submit Review Now'}</span>
             </button>
           </div>
         ) : (
@@ -420,12 +410,15 @@ export default function FeedbackPage() {
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-1 text-amber-400">
+                    <div className="flex items-center space-x-1">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <StarIcon
+                        <i
                           key={star}
-                          className="w-4 h-4"
-                          filled={star <= rev.rating}
+                          className={
+                            star <= rev.rating
+                              ? 'fa-solid fa-star text-amber-400 text-xs'
+                              : 'fa-regular fa-star text-stone-300 text-xs'
+                          }
                         />
                       ))}
                     </div>
@@ -473,7 +466,7 @@ export default function FeedbackPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="p-8 sm:p-10 rounded-3xl bg-stone-900 text-white text-center space-y-4 shadow-crafted border border-stone-800">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 text-xs font-bold border border-emerald-800">
-            <BrandLogoIcon className="w-3.5 h-3.5 text-emerald-400" />
+            <i className="fa-solid fa-heart text-emerald-400 text-xs" />
             <span>{isMarathi ? 'एकत्र येऊन अन्न वाचवूया' : 'CIVIC MISSION'}</span>
           </div>
           <h3 className="text-2xl sm:text-3xl font-black font-serif">
@@ -491,7 +484,7 @@ export default function FeedbackPage() {
               onClick={() => setIsModalOpen(true)}
               className="px-6 py-3.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-xs cursor-pointer active:scale-95 inline-flex items-center space-x-2"
             >
-              <StarIcon className="w-4 h-4 text-amber-300" filled />
+              <i className="fa-solid fa-star text-amber-300 text-xs" />
               <span>{isMarathi ? 'तुमचा अभिप्राय व रेटिंग शेअर करा' : 'Share Your Rating & Feedback'}</span>
             </button>
           </div>

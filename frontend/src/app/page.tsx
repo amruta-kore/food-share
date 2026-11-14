@@ -769,7 +769,8 @@ export default function HomePage() {
                 onClick={() => setFeedbackModalOpen(true)}
                 className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5 cursor-pointer"
               >
-                <span>{isMarathi ? '⭐ अभिप्राय द्या' : '⭐ Give Feedback'}</span>
+                <i className="fa-solid fa-star text-amber-300" />
+                <span>{isMarathi ? 'अभिप्राय द्या' : 'Give Feedback'}</span>
               </button>
 
               <Link
@@ -822,7 +823,8 @@ export default function HomePage() {
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="space-y-4 max-w-2xl">
               <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950 text-emerald-300 text-xs font-bold border border-emerald-800">
-                <span>{isMarathi ? '🌍 भारत व जागतिक अन्न प्रभाव अहवाल' : '🌍 GLOBAL & INDIA IMPACT STUDY'}</span>
+                <i className="fa-solid fa-earth-americas text-emerald-400" />
+                <span>{isMarathi ? 'भारत व जागतिक अन्न प्रभाव अहवाल' : 'GLOBAL & INDIA IMPACT STUDY'}</span>
               </div>
 
               <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
@@ -876,8 +878,9 @@ export default function HomePage() {
                 href="/food-impact"
                 className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition text-center flex items-center justify-center space-x-2"
               >
-                <span>{isMarathi ? '📖 संपूर्ण केस स्टडी वाचा' : '📖 Read Full Impact Case Study'}</span>
-                <span>→</span>
+                <i className="fa-solid fa-book-open" />
+                <span>{isMarathi ? 'संपूर्ण केस स्टडी वाचा' : 'Read Full Impact Case Study'}</span>
+                <i className="fa-solid fa-arrow-right text-xs" />
               </Link>
               <Link
                 href="/donor"

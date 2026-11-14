@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthProvider";
 import { LanguageProvider } from "./context/LanguageProvider";
@@ -29,6 +30,14 @@ type LayoutProps = {
 export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-[var(--background)] text-neutral-900 font-sans antialiased selection:bg-emerald-100 selection:text-emerald-900">
         <LanguageProvider>
           <AuthProvider>

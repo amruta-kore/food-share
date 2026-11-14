@@ -17,7 +17,6 @@ import {
   AlertTriangleIcon,
   ShieldCheckIcon,
   FileTextIcon,
-  UploadCloudIcon,
   CheckCircleIcon,
   ArrowRightIcon,
 } from '../../components/Icons';
@@ -177,7 +176,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-xl bg-white rounded-3xl shadow-crafted border border-stone-200/90 p-7 sm:p-10 space-y-6">
         <div className="text-center space-y-2">
           <div className="inline-flex w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-800 items-center justify-center border border-emerald-200/70 shadow-xs mb-1">
-            <BrandLogoIcon className="w-7 h-7 text-emerald-700" />
+            <BrandLogoIcon className="text-2xl" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight font-serif">
             {isMarathi ? 'अन्नसेतूशी जोडा' : 'Join AnnaSetu Platform'}
@@ -189,7 +188,7 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Role Selector Tabs (Handcrafted Segmented Control) */}
+        {/* Role Selector Tabs (Font Awesome Icons) */}
         <div className="grid grid-cols-3 gap-1.5 p-1.5 bg-stone-100/80 rounded-2xl border border-stone-200">
           <button
             type="button"
@@ -200,7 +199,7 @@ export default function RegisterPage() {
                 : 'text-stone-600 hover:text-stone-950 font-medium'
             }`}
           >
-            <UtensilsIcon className={`w-4 h-4 ${role === 'DONOR' ? 'text-emerald-700' : 'text-stone-400'}`} />
+            <i className={`fa-solid fa-utensils ${role === 'DONOR' ? 'text-emerald-700' : 'text-stone-400'}`} />
             <span className="text-xs">{isMarathi ? 'अन्नदाता' : 'Donor'}</span>
           </button>
           <button
@@ -212,7 +211,7 @@ export default function RegisterPage() {
                 : 'text-stone-600 hover:text-stone-950 font-medium'
             }`}
           >
-            <BuildingIcon className={`w-4 h-4 ${role === 'NGO' ? 'text-cyan-700' : 'text-stone-400'}`} />
+            <i className={`fa-solid fa-hand-holding-heart ${role === 'NGO' ? 'text-cyan-700' : 'text-stone-400'}`} />
             <span className="text-xs">{isMarathi ? 'संस्था / निवारा' : 'NGO Shelter'}</span>
           </button>
           <button
@@ -224,14 +223,14 @@ export default function RegisterPage() {
                 : 'text-stone-600 hover:text-stone-950 font-medium'
             }`}
           >
-            <TruckIcon className={`w-4 h-4 ${role === 'VOLUNTEER' ? 'text-amber-700' : 'text-stone-400'}`} />
+            <i className={`fa-solid fa-truck-fast ${role === 'VOLUNTEER' ? 'text-amber-700' : 'text-stone-400'}`} />
             <span className="text-xs">{isMarathi ? 'स्वयंसेवक' : 'Volunteer'}</span>
           </button>
         </div>
 
         {error && (
           <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start space-x-2 shadow-xs">
-            <AlertTriangleIcon className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <i className="fa-solid fa-triangle-exclamation fa-beat text-rose-600 text-sm mt-0.5 shrink-0" />
             <div className="flex-1 font-medium leading-relaxed">{error}</div>
           </div>
         )}
@@ -240,7 +239,8 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
-                {isMarathi ? 'संपर्क व्यक्तीचे नाव *' : 'Contact Person Name *'}
+                <i className="fa-solid fa-user mr-1.5 text-stone-400" />
+                <span>{isMarathi ? 'संपर्क व्यक्तीचे नाव *' : 'Contact Person Name *'}</span>
               </label>
               <input
                 type="text"
@@ -254,17 +254,20 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
-                {role === 'DONOR'
-                  ? isMarathi
-                    ? 'हॉटेल / केटररचे नाव'
-                    : 'Restaurant / Caterer Name'
-                  : role === 'NGO'
-                  ? isMarathi
-                    ? 'संस्था / फाउंडेशनचे नाव'
-                    : 'NGO / Organization Name'
-                  : isMarathi
-                  ? 'वाहन प्रकार / ओळख'
-                  : 'Vehicle Type / Handle'}
+                <i className="fa-solid fa-building mr-1.5 text-stone-400" />
+                <span>
+                  {role === 'DONOR'
+                    ? isMarathi
+                      ? 'हॉटेल / केटररचे नाव'
+                      : 'Restaurant / Caterer Name'
+                    : role === 'NGO'
+                    ? isMarathi
+                      ? 'संस्था / फाउंडेशनचे नाव'
+                      : 'NGO / Organization Name'
+                    : isMarathi
+                    ? 'वाहन प्रकार / ओळख'
+                    : 'Vehicle Type / Handle'}
+                </span>
               </label>
               <input
                 type="text"
@@ -291,7 +294,8 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
-                {isMarathi ? 'ईमेल पत्ता *' : 'Email Address *'}
+                <i className="fa-solid fa-envelope mr-1.5 text-stone-400" />
+                <span>{isMarathi ? 'ईमेल पत्ता *' : 'Email Address *'}</span>
               </label>
               <input
                 type="email"
@@ -305,7 +309,8 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
-                {isMarathi ? 'फोन नंबर' : 'Phone Number'}
+                <i className="fa-solid fa-phone mr-1.5 text-stone-400" />
+                <span>{isMarathi ? 'फोन नंबर' : 'Phone Number'}</span>
               </label>
               <input
                 type="tel"
@@ -317,7 +322,7 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Location Section (Available for DONOR & NGO for pickup and delivery routing) */}
+          {/* Location Section */}
           {(role === 'NGO' || role === 'DONOR') && (
             <div
               className={`p-4 sm:p-5 rounded-2xl border space-y-3 transition-colors ${
@@ -328,7 +333,7 @@ export default function RegisterPage() {
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center space-x-2">
-                  <MapPinIcon className={`w-4 h-4 ${role === 'DONOR' ? 'text-emerald-700' : 'text-cyan-700'}`} />
+                  <i className={`fa-solid fa-location-dot ${role === 'DONOR' ? 'text-emerald-700' : 'text-cyan-700'}`} />
                   <label
                     className={`block text-[11px] font-bold uppercase tracking-wider ${
                       role === 'DONOR' ? 'text-emerald-950' : 'text-cyan-950'
@@ -353,7 +358,7 @@ export default function RegisterPage() {
                       : 'bg-cyan-800 hover:bg-cyan-700'
                   }`}
                 >
-                  <CrosshairIcon className="w-3.5 h-3.5" />
+                  <i className={gpsLoading ? 'fa-solid fa-circle-notch fa-spin text-xs' : 'fa-solid fa-crosshairs text-xs'} />
                   <span>
                     {gpsLoading
                       ? isMarathi
@@ -384,7 +389,7 @@ export default function RegisterPage() {
                       : 'border-cyan-200 text-cyan-900'
                   }`}
                 >
-                  <CheckCircleIcon className="w-3.5 h-3.5 shrink-0" />
+                  <i className="fa-solid fa-circle-check text-emerald-700 text-xs shrink-0" />
                   <span>{gpsStatus}</span>
                 </div>
               )}
@@ -450,7 +455,8 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1.5">
-              {isMarathi ? 'पासवर्ड तयार करा *' : 'Create Password *'}
+              <i className="fa-solid fa-key mr-1.5 text-stone-400" />
+              <span>{isMarathi ? 'पासवर्ड तयार करा *' : 'Create Password *'}</span>
             </label>
             <div className="relative">
               <input
@@ -475,17 +481,17 @@ export default function RegisterPage() {
                     ? 'Hide password'
                     : 'Show password'
                 }
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-700 cursor-pointer select-none"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-stone-400 hover:text-stone-700 cursor-pointer select-none text-sm"
               >
-                {showPassword ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                <i className={showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'} />
               </button>
             </div>
           </div>
 
-          {/* Legal Document Upload Box (Tactile Border) */}
+          {/* Legal Document Upload Box (Font Awesome File & Upload Icons) */}
           <div className="p-4 sm:p-5 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/30 space-y-2">
             <div className="flex items-center space-x-2">
-              <FileTextIcon className="w-4 h-4 text-emerald-800" />
+              <i className="fa-solid fa-file-shield text-emerald-800 text-sm" />
               <label className="block text-[11px] font-bold uppercase tracking-wider text-emerald-950">
                 {isMarathi
                   ? 'पडताळणी कायदेशीर कागदपत्र (PDF किंवा फोटो) *'
@@ -518,7 +524,7 @@ export default function RegisterPage() {
             />
             {documentFile && (
               <div className="text-[11px] text-emerald-900 font-semibold flex items-center space-x-1.5 pt-1">
-                <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-700" />
+                <i className="fa-solid fa-circle-check text-emerald-700 text-xs" />
                 <span>
                   {isMarathi ? 'निवडलेली फाईल: ' : 'Selected: '} {documentFile.name} (
                   {(documentFile.size / 1024).toFixed(1)} KB)
@@ -528,7 +534,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="text-[11px] text-stone-600 bg-stone-100/70 p-3.5 rounded-xl border border-stone-200/80 flex items-start space-x-2">
-            <ShieldCheckIcon className="w-4 h-4 text-emerald-800 shrink-0 mt-0.5" />
+            <i className="fa-solid fa-shield-halved text-emerald-800 text-sm mt-0.5 shrink-0" />
             <div className="leading-relaxed font-normal">
               <strong>{isMarathi ? 'प्रशासक पडताळणी धोरण:' : 'Platform Safety Policy:'}</strong>{' '}
               {isMarathi
@@ -544,7 +550,7 @@ export default function RegisterPage() {
           >
             {loading ? (
               <>
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <i className="fa-solid fa-circle-notch fa-spin text-sm" />
                 <span>
                   {isMarathi
                     ? 'कागदपत्रे अपलोड आणि नोंदणी होत आहे...'
@@ -558,7 +564,7 @@ export default function RegisterPage() {
                     ? `${role === 'DONOR' ? 'अन्नदाता' : role === 'NGO' ? 'संस्था / निवारा' : 'स्वयंसेवक'} म्हणून अर्ज सादर करा`
                     : `Submit Verified Application for ${role}`}
                 </span>
-                <ArrowRightIcon className="w-4 h-4" />
+                <i className="fa-solid fa-arrow-right text-xs" />
               </>
             )}
           </button>

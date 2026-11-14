@@ -16,19 +16,20 @@ export const HandoverQRCode: React.FC<HandoverQRCodeProps> = ({
 }) => {
   return (
     <div className="flex flex-col items-center bg-white p-4 rounded-2xl border-2 border-emerald-200 shadow-sm text-center space-y-2 inline-block min-w-[160px]">
-      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-lg shadow-inner">
-        🔐
+      <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-800 shadow-xs">
+        <i className="fa-solid fa-shield-halved text-emerald-700 text-base" />
       </div>
 
       <div className="space-y-1">
-        <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+        <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
           {label}
         </div>
         <div className="text-3xl font-black tracking-[0.3em] text-emerald-800 font-mono bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-300 select-all shadow-xs">
           {value}
         </div>
-        <div className="text-[10px] text-slate-400 font-medium">
-          Share this 4-digit OTP
+        <div className="text-[10px] text-stone-400 font-medium flex items-center justify-center space-x-1">
+          <i className="fa-solid fa-lock text-[9px] text-stone-400" />
+          <span>Share this 4-digit OTP</span>
         </div>
       </div>
     </div>
