@@ -210,16 +210,16 @@ export default function HomePage() {
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.12]">
               {isMarathi ? (
                 <>
-                  हॉटेल्स व केटरर्सचे अतिरिक्त अन्न, <br />
+                  जेव्हा भूक अजूनही एक कटू सत्य आहे, <br />
                   <span className="text-emerald-900 underline decoration-emerald-300/80 decoration-4 underline-offset-4">
-                    स्थानिक गरजवंतांपर्यंत सुरक्षितपणे.
+                    तेव्हा कोणत्याही अन्नाची केवळ आठवण उरू नये.
                   </span>
                 </>
               ) : (
                 <>
-                  Connecting commercial kitchens with verified shelters <br />
+                  Let No Harvest Become a Memory <br />
                   <span className="text-emerald-900 underline decoration-emerald-300/80 decoration-4 underline-offset-4">
-                    before good food turns into waste.
+                    When Hunger Is Still a Reality.
                   </span>
                 </>
               )}
