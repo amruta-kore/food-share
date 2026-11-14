@@ -210,9 +210,9 @@ export default function HomePage() {
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.12]">
               {isMarathi ? (
                 <>
-                  जेव्हा भूक अजूनही एक कटू सत्य आहे, <br />
+                  अन्नदान ही केवळ कृती नाही, <br />
                   <span className="text-emerald-900 underline decoration-emerald-300/80 decoration-4 underline-offset-4">
-                    तेव्हा कोणत्याही अन्नाची केवळ आठवण उरू नये.
+                    ती माणुसकीची खरी अभिव्यक्ती आहे.
                   </span>
                 </>
               ) : (
@@ -458,7 +458,7 @@ export default function HomePage() {
               {isMarathi ? (
                 <>
                   <span className="block text-stone-900 font-semibold">
-                    &ldquo;जेव्हा भूक अजूनही एक कटू सत्य आहे, तेव्हा कोणत्याही पिकाची किंवा अन्नाची केवळ आठवण उरू नये.&rdquo;
+                    &ldquo;अन्नदान ही केवळ कृती नाही, ती माणुसकीची खरी अभिव्यक्ती आहे.&rdquo;
                   </span>
                   <span className="block text-xs text-neutral-500 not-italic font-normal mt-0.5">
                     &ldquo;Let No Harvest Become a Memory When Hunger Is Still a Reality.&rdquo;
